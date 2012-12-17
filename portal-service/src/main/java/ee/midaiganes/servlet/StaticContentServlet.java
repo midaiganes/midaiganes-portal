@@ -76,7 +76,8 @@ public class StaticContentServlet extends HttpServlet {
 	}
 
 	private InputStream getResourceAsStream(Theme theme, String requestURI) {
-		return getContext(theme.getThemeName().getContext()).getResourceAsStream(requestURI.substring(theme.getThemeName().getContext().length()));
+		return getContext(theme.getThemeName().getContextWithSlash()).getResourceAsStream(
+				requestURI.substring(theme.getThemeName().getContextWithSlash().length()));
 	}
 
 	private ServletContext getContext(String contextPath) {
@@ -87,7 +88,7 @@ public class StaticContentServlet extends HttpServlet {
 		Map<String, Theme> files = new HashMap<String, Theme>();
 		ServletContext context = getServletContext();
 		for (Theme theme : themeRepository.getThemes()) {
-			ServletContext ctx = context.getContext(theme.getThemeName().getContext());
+			ServletContext ctx = context.getContext(theme.getThemeName().getContextWithSlash());
 			files.putAll(getStaticContents(ctx, theme, theme.getThemePath() + StringPool.SLASH + theme.getJavascriptPath()));
 			files.putAll(getStaticContents(ctx, theme, theme.getThemePath() + StringPool.SLASH + theme.getCssPath()));
 		}
@@ -101,7 +102,7 @@ public class StaticContentServlet extends HttpServlet {
 		Map<String, Theme> files = new HashMap<String, Theme>();
 		if (list != null) {
 			for (String path : list) {
-				files.put(theme.getThemeName().getContext() + path, theme);
+				files.put(theme.getThemeName().getContextWithSlash() + path, theme);
 			}
 		}
 		return files;

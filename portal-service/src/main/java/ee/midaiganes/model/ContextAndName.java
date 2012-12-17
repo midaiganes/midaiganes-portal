@@ -2,21 +2,25 @@ package ee.midaiganes.model;
 
 import java.io.Serializable;
 
+import ee.midaiganes.util.StringPool;
+
 public class ContextAndName implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private static final String SEPARATOR = "_w_";
 	private final String context;
+	private final String contextWithSlash;
 	private final String name;
 
 	public ContextAndName(String context, String name) {
 		if (context == null || name == null) {
 			throw new IllegalArgumentException("contex=" + context + "; name=" + name);
 		}
-		if (context.startsWith("/")) {
+		if (context.startsWith(StringPool.SLASH)) {
 			throw new IllegalArgumentException("context must not start with '/'; context = " + context);
 		}
 		this.context = context;
 		this.name = name;
+		this.contextWithSlash = StringPool.SLASH + context;
 	}
 
 	public ContextAndName(String fullName) {
@@ -29,6 +33,10 @@ public class ContextAndName implements Serializable {
 
 	public String getContext() {
 		return context;
+	}
+
+	public String getContextWithSlash() {
+		return contextWithSlash;
 	}
 
 	public String getName() {

@@ -70,7 +70,7 @@ public class ThemeRepository {
 			MidaiganesTheme theme = (MidaiganesTheme) unmarshaller.unmarshal(themeXmlInputStream);
 			log.info("contextPath = {}, theme = {}", contextPath, theme);
 			if (theme != null) {
-				themes.put(contextPath, theme);
+				themes.put(contextPath.startsWith("/") ? contextPath.substring(1) : contextPath, theme);
 			}
 
 		} catch (JAXBException e) {

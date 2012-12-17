@@ -16,10 +16,10 @@ import org.slf4j.LoggerFactory;
 import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.beans.RootApplicationContext;
 import ee.midaiganes.model.LayoutPortlet;
+import ee.midaiganes.model.MidaiganesWindowState;
 import ee.midaiganes.model.PageDisplay;
 import ee.midaiganes.model.PortletLifecycle;
 import ee.midaiganes.model.RequestInfo;
-import ee.midaiganes.model.MidaiganesWindowState;
 import ee.midaiganes.model.Theme;
 import ee.midaiganes.portlet.app.PortletApp;
 import ee.midaiganes.services.DbInstallService;
@@ -130,7 +130,7 @@ public class PortalServlet extends HttpServlet {
 	}
 
 	private void includeTheme(HttpServletRequest request, HttpServletResponse response, Theme theme) throws ServletException, IOException {
-		ServletContext servletContext = ContextUtil.getServletContext(request, theme.getThemeName().getContext());
+		ServletContext servletContext = ContextUtil.getServletContext(request, theme.getThemeName().getContextWithSlash());
 		if (servletContext == null) {
 			log.error("servletContext = null; theme = " + theme);
 		} else {

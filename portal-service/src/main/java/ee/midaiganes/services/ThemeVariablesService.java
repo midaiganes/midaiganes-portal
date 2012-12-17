@@ -36,14 +36,14 @@ public class ThemeVariablesService {
 		PageDisplay pageDisplay = RequestUtil.getPageDisplay(request);
 		List<ThemeVariable> variables = new ArrayList<ThemeVariable>();
 		variables.add(new ThemeVariable(LOG_IN_URL, getLogInUrl()));
-		variables.add(new ThemeVariable(THEME_JAVASCRIPT_DIR, pageDisplay.getTheme().getThemeName().getContext() + pageDisplay.getTheme().getThemePath()
-				+ StringPool.SLASH + pageDisplay.getTheme().getJavascriptPath()));
+		variables.add(new ThemeVariable(THEME_JAVASCRIPT_DIR, pageDisplay.getTheme().getThemeName().getContextWithSlash()
+				+ pageDisplay.getTheme().getThemePath() + StringPool.SLASH + pageDisplay.getTheme().getJavascriptPath()));
 		variables.add(new ThemeVariable(NAV_ITEMS, getNavItems(pageDisplay)));
 		try {
 			variables.add(new ThemeVariable(ADD_LAYOUT_URL, portletURLFactory.makeRenderURL(request, MidaiganesPortlets.LAYOUT_PORTLET.getPortletName(),
 					MidaiganesWindowState.EXCLUSIVE)));
-			variables.add(new ThemeVariable(ADD_REMOVE_PORTLET_URL, portletURLFactory.makeRenderURL(request, MidaiganesPortlets.ADD_REMOVE_PORTLET.getPortletName(),
-					MidaiganesWindowState.EXCLUSIVE)));
+			variables.add(new ThemeVariable(ADD_REMOVE_PORTLET_URL, portletURLFactory.makeRenderURL(request,
+					MidaiganesPortlets.ADD_REMOVE_PORTLET.getPortletName(), MidaiganesWindowState.EXCLUSIVE)));
 			variables.add(new ThemeVariable(CHANGE_PAGE_LAYOUT_URL, portletURLFactory.makeRenderURL(request,
 					MidaiganesPortlets.CHANGE_PAGE_LAYOUT.getPortletName(), MidaiganesWindowState.EXCLUSIVE)));
 		} catch (WindowStateException e) {
