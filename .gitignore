@@ -1,2 +1,3 @@
 bin
 build
+portal-gen/src/main/java/*
