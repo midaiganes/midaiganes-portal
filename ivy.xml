@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivy-module
+	version="2.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
+	
+	<info module="portal" organisation="ee.midaiganes" />
+	
+	<configurations>
+		<conf name="gen" />
+		<conf name="runtime"/>
+		<conf name="compile" extends="runtime"/>
+		<conf name="test" />
+		<conf name="dbupdate"/>
+	</configurations>
+	
+	<!-- http://ant.apache.org/ivy/history/2.1.0/ivyfile/dependency.html -->
+	<dependencies>
+		<dependency org="javax.servlet" name="javax.servlet-api" rev="3.0.1" conf="compile->default" />
+		<dependency org="commons-dbcp" name="commons-dbcp" rev="1.4" conf="runtime->default" />
+		<dependency org="mysql" name="mysql-connector-java" rev="5.1.18" conf="runtime->default;dbupdate->default" />
+		<dependency org="org.slf4j" name="slf4j-log4j12" rev="1.6.4" conf="runtime->default" />
+		<dependency org="org.springframework" name="spring-jdbc" rev="3.1.2.RELEASE" conf="runtime->default" />
+		<dependency org="org.springframework" name="spring-web" rev="3.1.2.RELEASE" conf="runtime->default" />
+		<dependency org="org.springframework" name="spring-webmvc" rev="3.1.2.RELEASE" conf="runtime->default" />
+		<dependency org="org.springframework" name="spring-instrument-tomcat" rev="3.1.2.RELEASE" conf="runtime->default" />
+		<dependency org="cglib" name="cglib" rev="2.2.2" conf="runtime->default" />
+		<dependency org="com.sun.xml.bind" name="jaxb-xjc" rev="2.2.5" conf="gen->default"/>
+		<dependency org="javax.xml.bind" name="jaxb-api" rev="2.2.6" conf="gen->default"/>
+		<dependency org="com.sun.xml.bind" name="jaxb-impl" rev="2.2.5" conf="gen->default"/>
+		<dependency org="javax.servlet" name="jsp-api" rev="2.0" conf="compile->default"/>
+		
+		<!-- http://download.java.net/maven/1/jstl/jars/ -->
+		<dependency org="javax.servlet" name="jstl" rev="1.2" conf="runtime->default"/>
+		
+		<dependency org="javax.portlet" name="portlet-api" rev="2.0" conf="runtime->default"/>
+		<dependency org="org.springframework" name="spring-webmvc-portlet" rev="3.1.1.RELEASE" conf="runtime->default"/>
+		
+		<dependency org="org.testng" name="testng" rev="6.5.1" conf="test->default"/>
+		<dependency org="org.springframework" name="spring-test" rev="3.1.1.RELEASE" conf="test->default"/>
+		<dependency org="org.mockito" name="mockito-all" rev="1.9.5-rc1" conf="test->default"/>
+		<dependency org="org.aspectj" name="aspectjweaver" rev="1.7.0" conf="runtime->default"/>
+		
+		<dependency org="org.thymeleaf" name="thymeleaf" rev="2.0.13" conf="runtime->default"/>
+		
+		<dependency org="org.liquibase" name="liquibase-core" rev="latest.release" conf="dbupdate->default"/>
+	</dependencies>
+</ivy-module>
