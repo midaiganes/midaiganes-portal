@@ -1,0 +1,36 @@
+package ee.midaiganes.portlet.impl;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.Collections;
+
+import javax.portlet.PortletMode;
+import javax.portlet.WindowState;
+import javax.servlet.http.HttpServletRequest;
+
+import org.junit.Test;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.testng.Assert;
+
+import ee.midaiganes.model.PortletLifecycle;
+import ee.midaiganes.model.PortletName;
+
+public class PortletURLImplTest {
+	private final String URL = "http://localhost";
+
+	@Test
+	public void toStringTest() {
+		HttpServletRequest request = new MockHttpServletRequest();
+		Assert.assertEquals(new PortletURLImpl(request, "0000", Collections.<WindowState> emptyList(), Collections.<PortletMode> emptyList(),
+				PortletLifecycle.ACTION, new PortletName("test", "fafa")).toString(), URL + "?p_l=1&p_pn=test_w_fafa&p_id=0000");
+	}
+
+	@Test
+	public void toStringWitPortletRequestAndWithoutPortletName() {
+		PortletRequestImpl req = mock(PortletRequestImpl.class);
+		when(req.getWindowID()).thenReturn("fafafa_w_daaaa_1234");
+		when(req.getHttpServletRequest()).thenReturn(new MockHttpServletRequest());
+		Assert.assertEquals(new PortletURLImpl(req, PortletLifecycle.RENDER).toString(), URL + "?p_l=0&p_id=1234");
+	}
+}
