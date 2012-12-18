@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+	
+	<appender name="console" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{dd.MM.yyyy HH:mm:ss} %-5p %X{sessionId} %X{requestId} %c{3}:%M:%L - %m%n"/>
+		</layout>
+	</appender>
+
+	<appender name="async_console" class="org.apache.log4j.AsyncAppender">
+		<!--  param name="bufferSize" value="8192" / -->
+		<param name="bufferSize" value="50000" />
+		<appender-ref ref="console" />
+	</appender>
+	
+	<logger name="ee.midaiganes.servlet.http.GZIPResponse">
+		<level value="warn" />
+	</logger>
+
+	<root>
+		<level value="info" />
+		<appender-ref ref="async_console" />
+	</root>
+</log4j:configuration>

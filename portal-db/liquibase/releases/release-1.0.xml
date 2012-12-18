@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+	
+	<changeSet id="1" author="-" runOnChange="false" runAlways="false" dbms="mysql" failOnError="true">
+		<sql>
+			<![CDATA[
+				CREATE TABLE IF NOT EXISTS Language (
+					id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
+					languageId VARCHAR(5) NOT NULL UNIQUE)
+					ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
+				
+				CREATE TABLE IF NOT EXISTS User (
+					id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
+					username VARCHAR(100) NOT NULL UNIQUE,
+					password VARCHAR(100) NOT NULL)
+					ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
+				
+				CREATE TABLE IF NOT EXISTS Theme (
+					id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
+					name VARCHAR(100) NOT NULL,
+					context VARCHAR(100) NOT NULL,
+					CONSTRAINT uq_THEME_name_context 
+						UNIQUE uq_THEME_name_context (name, context))
+					ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
+
+				CREATE TABLE IF NOT EXISTS LayoutSet (
+					id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
+					virtualHost VARCHAR(100) NOT NULL UNIQUE,
+					themeId INTEGER UNSIGNED,
+					CONSTRAINT fk_LAYOUTSET_themeId_theme_id
+						FOREIGN KEY fk_LAYOUTSET_themeId_theme_id (themeId)
+							REFERENCES Theme(id)
+								ON DELETE SET NULL
+								ON UPDATE SET NULL)
+					ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
+				
+				CREATE TABLE IF NOT EXISTS Layout (
+					id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
+					layoutSetId INTEGER UNSIGNED NOT NULL,
+					friendlyUrl VARCHAR(100) NOT NULL,
+					themeId INTEGER UNSIGNED,
+					pageLayoutId VARCHAR(100) NOT NULL,
+					nr INTEGER UNSIGNED NOT NULL DEFAULT 1,
+					parentId INTEGER UNSIGNED DEFAULT NULL,
+					defaultLayoutTitleLanguageId VARCHAR(5) NOT NULL,
+					CONSTRAINT fk_LAYOUT_parentId_layout_id 
+						FOREIGN KEY fk_LAYOUT_parentId_layout_id (parentId) 
+							REFERENCES Layout (id) 
+								ON DELETE CASCADE
+								ON UPDATE CASCADE,
+					CONSTRAINT fk_LAYOUT_layoutSetId_layoutSet_id 
+						FOREIGN KEY fk_LAYOUT_layoutSetId_layoutSet_id (layoutSetId) 
+							REFERENCES LayoutSet(id) 
+								ON DELETE CASCADE 
+								ON UPDATE CASCADE,
+					CONSTRAINT fk_LAYOUT_themeId_theme_id
+						FOREIGN KEY fk_LAYOUT_themeId_theme_id (themeId)
+							REFERENCES Theme(id)
+								ON DELETE SET NULL
+								ON UPDATE SET NULL,
+					CONSTRAINT uq_LAYOUT_parentId_nr 
+						UNIQUE uq_LAYOUT_parentId_nr (parentId, nr),
+					CONSTRAINT uq_LAYOUT_layoutSetId_friendlyUrl 
+						UNIQUE uq_LAYOUT_layoutSetId_friendlyUrl (layoutSetId, friendlyUrl))
+					ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
+				
+				CREATE TABLE IF NOT EXISTS LayoutTitle (
+					id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
+					languageId INTEGER UNSIGNED NOT NULL,
+					layoutId INTEGER UNSIGNED NOT NULL,
+					title VARCHAR(100) NOT NULL,
+					CONSTRAINT fk_lt_lid_language_id
+						FOREIGN KEY fk_lt_lid_language_id (languageId)
+							REFERENCES Language (id)
+								ON DELETE RESTRICT
+								ON UPDATE CASCADE,
+					CONSTRAINT fk_lt_layoutId_l_id
+						FOREIGN KEY fk_lt_layoutId_l_id (layoutId)
+							REFERENCES Layout (id)
+								ON DELETE CASCADE
+								ON UPDATE CASCADE,
+					CONSTRAINT uq_lt_layoutId_languageId
+						UNIQUE uq_lt_layoutId_languageId (layoutId, languageId))
+					ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
+				
+				CREATE TABLE IF NOT EXISTS PortletInstance (
+					id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
+					portletContext VARCHAR(100) NOT NULL,
+					portletName VARCHAR(100) NOT NULL,
+					windowID VARCHAR(10) NOT NULL,
+					CONSTRAINT uq_PI_portletContext_portletName_windowID
+						UNIQUE uq_PI_portletContext_portletName_windowID (windowID, portletName, portletContext))
+					ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
+				
+				CREATE TABLE IF NOT EXISTS LayoutPortlet (
+					id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
+					layoutId INTEGER UNSIGNED NOT NULL,
+					rowId INTEGER NOT NULL,
+					portletInstanceId INTEGER UNSIGNED NOT NULL,
+					CONSTRAINT uq_LP_layoutId_rowId
+						UNIQUE uq_LP_layoutId_rowId (layoutId, rowId),
+					CONSTRAINT fk_LP_layoutId_layout_id
+						FOREIGN KEY fk_LP_layoutId_layout_id (layoutId) 
+							REFERENCES Layout (id) 
+								ON DELETE CASCADE 
+								ON UPDATE CASCADE, 
+					CONSTRAINT fk_LP_portletInstanceId_portletInstance_id
+						FOREIGN KEY fk_LP_portletInstanceId_portletInstance_id (portletInstanceId) 
+							REFERENCES PortletInstance (id) 
+								ON DELETE CASCADE 
+								ON UPDATE CASCADE) 
+					ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
+				
+				CREATE TABLE IF NOT EXISTS PortletPreference (
+					id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
+					preferenceName VARCHAR(100) NOT NULL,
+					portletInstanceId INTEGER UNSIGNED NOT NULL,
+					CONSTRAINT uq_pp_portlet_instanceId_preferenceName
+						UNIQUE uq_pp_portlet_instanceId_preferenceName (portletInstanceId, preferenceName),
+					CONSTRAINT fk_PP_portletInstanceId_portletInstance_id
+						FOREIGN KEY fk_PP_portletInstanceId_portletInstance_id (portletInstanceId) 
+							REFERENCES PortletInstance (id)
+								ON DELETE CASCADE
+								ON UPDATE CASCADE)
+					ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
+				
+				CREATE TABLE IF NOT EXISTS PortletPreferenceValue (
+					id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
+					portletPreferenceId INTEGER UNSIGNED NOT NULL,
+					preferenceValue VARCHAR(1024) NOT NULL,
+					CONSTRAINT fk_PPV_portletPreferenceId_portletPreference_id
+						FOREIGN KEY fk_PPV_portletPreferenceId_portletPreference_id (portletPreferenceId) 
+							REFERENCES PortletPreference (id)
+								ON DELETE CASCADE
+								ON UPDATE CASCADE)
+					ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
+			]]>
+		</sql>
+	</changeSet>
+	<changeSet id="2" author="-" runOnChange="false" runAlways="false" dbms="mysql" failOnError="true">
+		<sql>
+			<![CDATA[
+				CREATE TABLE IF NOT EXISTS WebContentStructure (
+					id INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
+					name VARCHAR(100) NOT NULL UNIQUE)
+					ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
+					
+				CREATE  TABLE IF NOT EXISTS WebContentStructureField (
+					id INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
+					structureId INT UNSIGNED NOT NULL ,
+					fieldName VARCHAR(100) NOT NULL ,
+					fieldType VARCHAR(16) NOT NULL ,
+					CONSTRAINT fk_wcsf_sid_wcs_id
+						FOREIGN KEY (structureId)
+							REFERENCES WebContentStructure (id )
+								ON DELETE CASCADE
+								ON UPDATE CASCADE,
+					INDEX ix_wcsf_id_sid (id, structureId))
+					ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
+					
+				CREATE  TABLE IF NOT EXISTS WebContentTemplate (
+					`id` INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY ,
+					`name` VARCHAR(100) NOT NULL UNIQUE,
+					`structureId` INT UNSIGNED NOT NULL ,
+					`templateContent` LONGTEXT NOT NULL ,
+					CONSTRAINT `fk_wct_sid_wcs_id`
+				    	FOREIGN KEY (`structureId` )
+				    		REFERENCES `WebContentStructure` (`id` )
+				    			ON DELETE CASCADE
+				    			ON UPDATE CASCADE,
+				    INDEX ix_wct_id_wcsid (id, structureId))
+				    ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
+				
+				CREATE TABLE IF NOT EXISTS WebContent (
+					id INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
+					defaultLanguageId VARCHAR(5) NOT NULL ,
+					title VARCHAR(100) NOT NULL UNIQUE,
+					templateId INT UNSIGNED NOT NULL,
+					structureId INT UNSIGNED NOT NULL,
+					createDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+					CONSTRAINT fk_wc_tid_wct_id
+						FOREIGN KEY (templateId , structureId)
+							REFERENCES WebContentTemplate (id , structureId)
+								ON DELETE RESTRICT
+								ON UPDATE CASCADE,
+					CONSTRAINT fk_wc_sid_wcs_id
+						FOREIGN KEY (structureId)
+							REFERENCES WebContentStructure (id)
+								ON DELETE RESTRICT
+								ON UPDATE CASCADE,
+					INDEX ix_wc_id_structureId (id, structureId))
+					ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
+				
+				CREATE TABLE IF NOT EXISTS WebContentField (
+					id INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
+					webContentId INT UNSIGNED NOT NULL,
+					languageId VARCHAR(5) NOT NULL,
+					structureId INT UNSIGNED NOT NULL,
+					structureFieldId INT UNSIGNED NOT NULL,
+					fieldValue VARCHAR(4000) NOT NULL,
+					CONSTRAINT fk_wcf_wcid_wc_id
+						FOREIGN KEY (webContentId)
+							REFERENCES WebContent (id)
+								ON DELETE CASCADE
+								ON UPDATE CASCADE,
+					CONSTRAINT fk_wcf_wcid_sid_wc_id_sid
+						FOREIGN KEY (webContentId, structureId)
+							REFERENCES WebContent (id, structureId)
+								ON DELETE CASCADE
+								ON UPDATE CASCADE,
+					CONSTRAINT fk_wcf_sid_wcs_id
+						FOREIGN KEY (structureId)
+							REFERENCES WebContentStructure (id)
+								ON DELETE RESTRICT
+								ON UPDATE CASCADE,
+					CONSTRAINT fk_wcf_sfid_wcsf_id
+						FOREIGN KEY (structureFieldId)
+							REFERENCES WebContentStructureField (id)
+								ON DELETE RESTRICT
+								ON UPDATE CASCADE,
+					CONSTRAINT fk_wcf_sfid_sid_wcsf_id_sid
+						FOREIGN KEY (structureFieldId, structureId)
+							REFERENCES WebContentStructureField (id, structureId)
+								ON DELETE RESTRICT
+								ON UPDATE CASCADE)
+				ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
+			]]>
+		</sql>
+	</changeSet>
+</databaseChangeLog>

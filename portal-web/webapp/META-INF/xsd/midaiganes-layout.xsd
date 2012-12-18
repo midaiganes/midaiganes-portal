@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+		targetNamespace="http://www.example.org/midaiganes-layout"
+		xmlns:tns="http://www.example.org/midaiganes-layout"
+
+		xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+		xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+		jaxb:extensionBindingPrefixes="xjc"
+  		jaxb:version="1.0"
+
+		elementFormDefault="qualified"
+		version="1.0">
+	
+	<!-- 
+	add java.io.Serializable interface
+	http://stackoverflow.com/questions/3677088/how-to-generate-classes-from-xsd-that-implements-serializable
+	 -->
+	<annotation>
+		<appinfo>
+			<jaxb:globalBindings>
+				<xjc:serializable uid="1" />
+			</jaxb:globalBindings>
+		</appinfo>
+	</annotation>
+	<element name="midaiganes-layout">
+		<complexType>
+			<sequence>
+				<element name="layout" minOccurs="0" maxOccurs="unbounded">
+					<complexType>
+						<sequence>
+							<element name="name" minOccurs="1" maxOccurs="1" type="string">
+								<annotation>
+									<documentation>
+										Layout name
+									</documentation>
+								</annotation>
+							</element>
+							<element name="path" minOccurs="1" maxOccurs="1" type="string" />
+						</sequence>
+						<attribute name="id" type="string" use="required" />
+					</complexType>
+				</element>
+			</sequence>
+		</complexType>
+	</element>
+</schema>

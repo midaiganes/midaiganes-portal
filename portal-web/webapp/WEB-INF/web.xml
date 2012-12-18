@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app
+		xmlns="http://java.sun.com/xml/ns/javaee"
+  		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+		version="3.0"
+		metadata-complete="true">
+	
+	<display-name>portal</display-name>
+	<description>portal</description>
+	<distributable/>
+	
+	<context-param>
+		<param-name>log4jConfigLocation</param-name>
+		<param-value>file:@project.basedir@/portal-web/webapp/WEB-INF/log4j.xml</param-value>
+	</context-param>
+	
+	<context-param>
+		<param-name>log4jRefreshInterval</param-name>
+		<param-value>5000</param-value>
+	</context-param>
+	
+	<context-param>
+		<param-name>parentContextKey</param-name>
+		<param-value>portal</param-value>
+	</context-param>
+	
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>ee.midaiganes.beans.RootApplicationContext</param-value>
+	</context-param>
+	
+	<context-param>
+		<param-name>locatorFactorySelector</param-name>
+		<param-value>classpath:/META-INF/context/portal-context.xml</param-value>
+	</context-param>
+	
+	<context-param>
+		<param-name>contextClass</param-name>
+		<param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
+	</context-param>
+	
+	<listener>
+		<listener-class>ee.midaiganes.servlet.listener.Log4jConfigListener</listener-class>
+	</listener>
+	
+	<listener>
+		<listener-class>ee.midaiganes.servlet.listener.LoggingListener</listener-class>
+	</listener>
+	
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
+	<listener>
+		<listener-class>ee.midaiganes.javax.servlet.PortalServletContextAttributeListener</listener-class>
+	</listener>
+	
+	<listener>
+		<listener-class>ee.midaiganes.javax.servlet.PortalServletContextListener</listener-class>
+	</listener>
+	
+	<listener>
+		<listener-class>ee.midaiganes.javax.servlet.PortalServletRequestAttributeListener</listener-class>
+	</listener>
+	
+	<listener>
+		<listener-class>ee.midaiganes.javax.servlet.PortalServletRequestListener</listener-class>
+	</listener>
+	
+	<listener>
+		<listener-class>ee.midaiganes.javax.servlet.http.PortalHttpSessionActivationListener</listener-class>
+	</listener>
+	
+	<listener>
+		<listener-class>ee.midaiganes.javax.servlet.http.PortalHttpSessionAttributeListener</listener-class>
+	</listener>
+	
+	<listener>
+		<listener-class>ee.midaiganes.javax.servlet.http.PortalHttpSessionBindingListener</listener-class>
+	</listener>
+	
+	<listener>
+		<listener-class>ee.midaiganes.javax.servlet.http.PortalHttpSessionListener</listener-class>
+	</listener>
+	
+	<listener>
+		<listener-class>ee.midaiganes.javax.servlet.PortalPluginListener</listener-class>
+	</listener>
+	
+	<listener>
+		<listener-class>ee.midaiganes.servlet.listener.SessionCounter</listener-class>
+	</listener>
+	
+	<filter>
+		<filter-name>ee.midaiganes.filter.GZIPFilter</filter-name>
+		<filter-class>ee.midaiganes.filter.GZIPFilter</filter-class>
+		<async-supported>true</async-supported>
+	</filter>
+	
+	<filter>
+		<filter-name>ee.midaiganes.filter.PortalFilter</filter-name>
+		<filter-class>ee.midaiganes.filter.PortalFilter</filter-class>
+		<async-supported>true</async-supported>
+	</filter>
+	
+	<filter>
+		<filter-name>ee.midaiganes.filter.ContentTypeFilter</filter-name>
+		<filter-class>ee.midaiganes.filter.ContentTypeFilter</filter-class>
+		<async-supported>true</async-supported>
+	</filter>
+	
+	<filter>
+		<filter-name>ee.midaiganes.filter.LoginFilter</filter-name>
+		<filter-class>ee.midaiganes.filter.LoginFilter</filter-class>
+		<async-supported>true</async-supported>
+	</filter>
+	
+	<filter>
+		<filter-name>ee.midaiganes.filter.StaticContentFilter</filter-name>
+		<filter-class>ee.midaiganes.filter.StaticContentFilter</filter-class>
+		<async-supported>true</async-supported>
+	</filter>
+	
+	<filter-mapping>
+		<filter-name>ee.midaiganes.filter.GZIPFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	
+	<filter-mapping>
+		<filter-name>ee.midaiganes.filter.PortalFilter</filter-name>
+		<servlet-name>ee.midaiganes.servlet.PortalServlet</servlet-name>
+	</filter-mapping>
+	
+	<filter-mapping>
+		<filter-name>ee.midaiganes.filter.LoginFilter</filter-name>
+		<servlet-name>ee.midaiganes.servlet.PortalServlet</servlet-name>
+	</filter-mapping>
+
+	<filter-mapping>
+		<filter-name>ee.midaiganes.filter.ContentTypeFilter</filter-name>
+		<servlet-name>ee.midaiganes.servlet.PortalServlet</servlet-name>
+	</filter-mapping>	
+	
+	<filter-mapping>
+		<filter-name>ee.midaiganes.filter.StaticContentFilter</filter-name>
+		<servlet-name>ee.midaiganes.servlet.StaticContentServlet</servlet-name>
+	</filter-mapping>
+
+	<servlet>
+		<description>ee.midaiganes.servlet.PortalServlet</description>
+		<display-name>ee.midaiganes.servlet.PortalServlet</display-name>
+		<servlet-name>ee.midaiganes.servlet.PortalServlet</servlet-name>
+		<servlet-class>ee.midaiganes.servlet.PortalServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+		<async-supported>true</async-supported>
+	</servlet>
+	
+	<servlet>
+		<description>ee.midaiganes.servlet.ThemeServlet</description>
+		<display-name>ee.midaiganes.servlet.ThemeServlet</display-name>
+		<servlet-name>ee.midaiganes.servlet.ThemeServlet</servlet-name>
+		<servlet-class>ee.midaiganes.servlet.ThemeServlet</servlet-class>
+		<load-on-startup>10</load-on-startup>
+		<async-supported>true</async-supported>
+	</servlet>
+	
+	<servlet>
+		<description>ee.midaiganes.servlet.PageLayoutServlet</description>
+		<display-name>ee.midaiganes.servlet.PageLayoutServlet</display-name>
+		<servlet-name>ee.midaiganes.servlet.PageLayoutServlet</servlet-name>
+		<servlet-class>ee.midaiganes.servlet.PageLayoutServlet</servlet-class>
+		<load-on-startup>20</load-on-startup>
+		<async-supported>true</async-supported>
+	</servlet>
+	
+	<servlet>
+		<description>ee.midaiganes.servlet.PortletServlet</description>
+		<display-name>ee.midaiganes.servlet.PortletServlet</display-name>
+		<servlet-name>ee.midaiganes.servlet.PortletServlet</servlet-name>
+		<servlet-class>ee.midaiganes.servlet.PortletServlet</servlet-class>
+		<load-on-startup>30</load-on-startup>
+		<async-supported>true</async-supported>
+	</servlet>
+	
+	<servlet>
+		<description>ee.midaiganes.servlet.LayoutPortletServlet</description>
+		<display-name>ee.midaiganes.servlet.LayoutPortletServlet</display-name>
+		<servlet-name>ee.midaiganes.servlet.LayoutPortletServlet</servlet-name>
+		<servlet-class>ee.midaiganes.servlet.LayoutPortletServlet</servlet-class>
+		<load-on-startup>40</load-on-startup>
+		<async-supported>true</async-supported>
+	</servlet>
+	
+	<servlet>
+		<description>org.springframework.web.servlet.ViewRendererServlet</description>
+		<display-name>org.springframework.web.servlet.ViewRendererServlet</display-name>
+		<servlet-name>org.springframework.web.servlet.ViewRendererServlet</servlet-name>
+		<servlet-class>org.springframework.web.servlet.ViewRendererServlet</servlet-class>
+		<!-- before PortletServlet -->
+		<load-on-startup>29</load-on-startup>
+		<async-supported>true</async-supported>
+	</servlet>
+	
+	<servlet>
+		<description>ee.midaiganes.servlet.RuntimePortletServlet</description>
+		<display-name>ee.midaiganes.servlet.RuntimePortletServlet</display-name>
+		<servlet-name>ee.midaiganes.servlet.RuntimePortletServlet</servlet-name>
+		<servlet-class>ee.midaiganes.servlet.RuntimePortletServlet</servlet-class>
+		<async-supported>true</async-supported>
+	</servlet>
+	
+	<servlet>
+		<description>ee.midaiganes.servlet.StaticContentServlet</description>
+		<display-name>ee.midaiganes.servlet.StaticContentServlet</display-name>
+		<servlet-name>ee.midaiganes.servlet.StaticContentServlet</servlet-name>
+		<servlet-class>ee.midaiganes.servlet.StaticContentServlet</servlet-class>
+		<async-supported>true</async-supported>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>ee.midaiganes.servlet.PortalServlet</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>ee.midaiganes.servlet.ThemeServlet</servlet-name>
+		<url-pattern>/WEB-INF/theme</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>ee.midaiganes.servlet.PageLayoutServlet</servlet-name>
+		<url-pattern>/WEB-INF/page-layout</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>ee.midaiganes.servlet.PortletServlet</servlet-name>
+		<url-pattern>/WEB-INF/portlet-servlet</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>ee.midaiganes.servlet.LayoutPortletServlet</servlet-name>
+		<url-pattern>/WEB-INF/layout-portlet</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>ee.midaiganes.servlet.RuntimePortletServlet</servlet-name>
+		<url-pattern>/WEB-INF/runtime-portlet</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>org.springframework.web.servlet.ViewRendererServlet</servlet-name>
+		<url-pattern>/WEB-INF/servlet/view</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>ee.midaiganes.servlet.StaticContentServlet</servlet-name>
+		<url-pattern>*.js</url-pattern>
+		<url-pattern>*.css</url-pattern>
+		<url-pattern>*.png</url-pattern>
+		<url-pattern>*.gif</url-pattern>
+	</servlet-mapping>
+	
+	<session-config>
+		<session-timeout>10</session-timeout>
+	</session-config>
+	
+	<jsp-config>
+		<taglib>
+			<taglib-uri>http://midaiganes.ee/portal-tags</taglib-uri>
+			<taglib-location>/WEB-INF/portal-taglib.tld</taglib-location>
+		</taglib>
+		<taglib>
+			<taglib-uri>http://midaiganes.ee/portal-tags/ui</taglib-uri>
+			<taglib-location>/WEB-INF/portal-ui-taglib.tld</taglib-location>
+		</taglib>
+		<taglib>
+			<taglib-uri>http://java.sun.com/portlet_2_0</taglib-uri>
+			<taglib-location>/WEB-INF/portlet_2_0.tld</taglib-location>
+		</taglib>
+		<jsp-property-group>
+			<display-name>portal JSP properties</display-name>
+			<url-pattern>*.jsp</url-pattern>
+			<page-encoding>UTF-8</page-encoding>
+			<scripting-invalid>true</scripting-invalid>
+			<default-content-type>UTF-8</default-content-type>
+			<error-on-undeclared-namespace>true</error-on-undeclared-namespace>
+		</jsp-property-group>
+	</jsp-config>
+</web-app>

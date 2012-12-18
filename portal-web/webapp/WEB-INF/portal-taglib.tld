@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<taglib 
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd"
+	version="2.1">
+	<description>portal taglib</description>
+	<display-name>portal taglib</display-name>
+	<tlib-version>0.1</tlib-version>
+	<short-name>portal-taglib</short-name>
+	<uri>http://midaiganes.ee/portal-tags</uri>
+	
+	<tag>
+		<name>page-layout</name>
+		<tag-class>ee.midaiganes.tag.PageLayoutTag</tag-class>
+		<body-content>empty</body-content>
+		<dynamic-attributes>false</dynamic-attributes>
+	</tag>
+	<tag>
+		<name>layout-portlet</name>
+		<tag-class>ee.midaiganes.tag.LayoutPortletTag</tag-class>
+		<tei-class>ee.midaiganes.tag.LayoutPortletTagTEI</tei-class>
+		<body-content>empty</body-content>
+		<attribute>
+			<name>id</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+			<type>java.lang.Long</type>
+		</attribute>
+		<dynamic-attributes>false</dynamic-attributes>
+	</tag>
+	<tag>
+		<name>runtime-portlet</name>
+		<tag-class>ee.midaiganes.tag.RuntimePortletTag</tag-class>
+		<body-content>empty</body-content>
+		<attribute>
+			<name>name</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+			<type>java.lang.String</type>
+		</attribute>
+		<dynamic-attributes>false</dynamic-attributes>
+	</tag>
+</taglib>
