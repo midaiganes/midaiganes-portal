@@ -1,3 +1,5 @@
+.settings
 bin
 build
-portal-gen/src/main/java/*
+portal-gen*
+portal-web/webapp/META-INF/tmpxsd
