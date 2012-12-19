@@ -25,6 +25,7 @@ import ee.midaiganes.model.DefaultLayout;
 import ee.midaiganes.model.Layout;
 import ee.midaiganes.model.LayoutTitle;
 import ee.midaiganes.model.PageLayoutName;
+import ee.midaiganes.model.Theme;
 import ee.midaiganes.model.ThemeName;
 import ee.midaiganes.services.SingleVmPool.Cache;
 import ee.midaiganes.services.SingleVmPool.Cache.Element;
@@ -41,6 +42,12 @@ public class LayoutRepository {
 
 	@Resource(name = PortalConfig.LANGUAGE_REPOSITORY)
 	private LanguageRepository languageRepository;
+
+	@Resource(name = PortalConfig.THEME_REPOSITORY)
+	private ThemeRepository themeRepository;
+
+	@Resource
+	private PageLayoutRepository pageLayoutRepository;
 
 	private static final String GET_LAYOUT_BY_LAYOUTSETID = "SELECT Layout.id, Layout.layoutSetId, Layout.friendlyUrl, Layout.pageLayoutId, Theme.name, Theme.context FROM Layout LEFT JOIN Theme ON (Layout.themeId = Theme.id) WHERE layoutSetId = ?";
 	private static final String ADD_LAYOUT = "INSERT INTO Layout(layoutSetId, friendlyUrl, themeId, pageLayoutId, parentId, nr, defaultLayoutTitleLanguageId) VALUES(?, ?, (SELECT id FROM Theme WHERE name = ? AND context = ?), ?, ?, (SELECT c FROM (SELECT COUNT(1) AS c FROM Layout WHERE layoutSetId = ? AND parentId = ?) AS t), ?)";
@@ -172,7 +179,9 @@ public class LayoutRepository {
 
 	public Layout getDefaultLayout(long layoutSetId, String friendlyUrl) {
 		log.warn("get layout; layoutsetid = {}; friendlyUrl = {}", layoutSetId, friendlyUrl);
-		return new DefaultLayout(layoutSetId, friendlyUrl);
+		Theme defaultTheme = themeRepository.getDefaultTheme();
+		String pageLayoutId = pageLayoutRepository.getDefaultPageLayout().getPageLayoutName().getFullName();
+		return new DefaultLayout(layoutSetId, friendlyUrl, defaultTheme.getThemeName(), pageLayoutId);
 	}
 
 	public boolean isFriendlyUrlValid(String friendlyUrl) {

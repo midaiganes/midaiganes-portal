@@ -1,14 +1,14 @@
 package ee.midaiganes.model;
 
-import ee.midaiganes.util.PortalUtil;
-
 public class DefaultLayout extends Layout {
 	private static final long serialVersionUID = 1L;
 	public static final long DEFAULT_LAYOUT_ID = 0;
 
-	public DefaultLayout(long layoutSetId, String friendlyUrl) {
+	public DefaultLayout(long layoutSetId, String friendlyUrl, ThemeName themeName, String pageLayoutId) {
 		super.setLayoutSetId(layoutSetId);
 		super.setFriendlyUrl(friendlyUrl);
+		super.setThemeName(themeName);
+		super.setPageLayoutId(pageLayoutId);
 	}
 
 	@Override
@@ -27,10 +27,5 @@ public class DefaultLayout extends Layout {
 	@Override
 	public boolean isDefault() {
 		return true;
-	}
-
-	@Override
-	public ThemeName getThemeName() {
-		return new ThemeName(PortalUtil.getPortalContextPath(), "default");
 	}
 }

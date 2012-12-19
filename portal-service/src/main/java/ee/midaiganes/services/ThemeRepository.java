@@ -40,15 +40,15 @@ public class ThemeRepository {
 
 	public Theme getDefaultTheme() {
 		for (Map.Entry<String, MidaiganesTheme> st : themes.entrySet()) {
-			if (!st.getValue().getTheme().isEmpty()) {
-				return getTheme(new ThemeName(st.getKey(), st.getValue().getTheme().get(0).getId()));
+			for (MidaiganesTheme.Theme theme : st.getValue().getTheme()) {
+				return getTheme(new ThemeName(st.getKey(), theme.getId()));
 			}
 		}
 		return null;
 	}
 
 	private final Theme getThemeFromMidaiganesTheme(String contextPath, MidaiganesTheme.Theme theme) {
-		return new Theme(new ThemeName(contextPath, theme.getName()), theme.getPath(), theme.getJavascriptPath(), theme.getCssPath());
+		return new Theme(new ThemeName(contextPath, theme.getId()), theme.getPath(), theme.getJavascriptPath(), theme.getCssPath());
 	}
 
 	private final MidaiganesTheme.Theme getMidaiganesTheme(ThemeName themeName) {
