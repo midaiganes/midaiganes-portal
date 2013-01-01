@@ -27,13 +27,13 @@ public abstract class PortletURLTag extends BasePortletTag {
 
 	@Override
 	public void release() {
-		super.release();
 		this.portletMode = null;
 		this.secure = null;
 		this.windowState = null;
 		this.escapeXml = null;
 		this.var = null;
 		this.parameters = null;
+		super.release();
 	}
 
 	@Override
@@ -62,6 +62,8 @@ public abstract class PortletURLTag extends BasePortletTag {
 			throw new JspException(e);
 		} catch (IOException e) {
 			throw new JspException(e);
+		} finally {
+			release();
 		}
 
 		return Tag.EVAL_PAGE;
