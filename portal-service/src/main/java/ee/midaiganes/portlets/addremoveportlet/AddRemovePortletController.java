@@ -22,6 +22,9 @@ import ee.midaiganes.services.PortletRepository;
 import ee.midaiganes.util.RequestUtil;
 import ee.midaiganes.util.StringUtil;
 
+/**
+ * TODO refactor bad parameter names
+ */
 @Controller(value = "addRemovePortletController")
 @RequestMapping("view")
 public class AddRemovePortletController {
@@ -38,12 +41,12 @@ public class AddRemovePortletController {
 		return "add-remove-portlet/view";
 	}
 
-	@RenderMapping(params = { "portletId", "portletBoxId" })
+	@RenderMapping(params = { "action=add-portlet", "portletId", "portletBoxId" })
 	public void addPortletView() {
 		log.info("add portlet view");
 	}
 
-	@ActionMapping(params = { "portletId", "portletBoxId" })
+	@ActionMapping(params = { "action=add-portlet", "portletId", "portletBoxId" })
 	public void addPortlet(ActionRequest request, @RequestParam("portletId") String portletId, @RequestParam("portletBoxId") String portletBoxId) {
 		PortletName portletName = new PortletName(portletId);
 		PageDisplay pageDisplay = RequestUtil.getPageDisplay(request);
