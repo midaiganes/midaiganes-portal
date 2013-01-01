@@ -4,6 +4,7 @@
 <div id="add-portlet">
 	<c:forEach items="${portletNames}" var="name">
 		<portlet:actionURL var="addPortletUrl">
+			<portlet:param name="action" value="add-portlet"/>
 			<portlet:param name="portletId" value="${name.fullName}"/>
 			<portlet:param name="portletBoxId" value="PORTLET_BOX_ID" />
 		</portlet:actionURL>
