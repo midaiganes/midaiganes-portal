@@ -85,7 +85,6 @@ public class PortletRepository {
 	}
 
 	private PortletAndConfiguration getPortlet(PortletName portletName) {
-		log.debug("portlets = {}", portlets);
 		Map<String, PortletAndConfiguration> map = portlets.get(portletName.getContext());
 		if (map != null) {
 			PortletAndConfiguration portlet = map.get(portletName.getName());
@@ -93,8 +92,8 @@ public class PortletRepository {
 				return portlet;
 			}
 		}
-		log.warn("no portlet with name = {}; return first portlet...", portletName);
-		return portlets.values().iterator().next().values().iterator().next();
+		log.warn("no portlet with name = {};", portletName);
+		return null;
 	}
 
 	private void initializePortletApp(ServletContext servletContext, PortletAppType portletAppType) {
@@ -109,7 +108,7 @@ public class PortletRepository {
 			initializePortlet(servletContext, portletType);
 			PortletName portletName = getPortletName(servletContext, portletType.getPortletName().getValue());
 			log.debug("full portlet name = {}", portletName);
-			portletInstanceRepository.addPortletInstance(portletName, StringPool.DEFAULT_PORTLET_WINDOWID);
+			portletInstanceRepository.addDefaultPortletInstance(portletName);
 		} catch (ClassNotFoundException e) {
 			log.error(e.getMessage(), e);
 		} catch (IllegalAccessException e) {
@@ -171,7 +170,7 @@ public class PortletRepository {
 
 	private String getContextPathName(ServletContext servletContext) {
 		String contextPathName = servletContext.getContextPath();
-		if (contextPathName.startsWith("/")) {
+		if (contextPathName.startsWith(StringPool.SLASH)) {
 			contextPathName = contextPathName.substring(1);
 		}
 		return contextPathName;

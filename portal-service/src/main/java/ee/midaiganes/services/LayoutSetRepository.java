@@ -2,7 +2,6 @@ package ee.midaiganes.services;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -11,50 +10,34 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
 import ee.midaiganes.model.DefaultLayoutSet;
 import ee.midaiganes.model.LayoutSet;
-import ee.midaiganes.model.ThemeName;
 import ee.midaiganes.services.SingleVmPool.Cache;
 import ee.midaiganes.services.SingleVmPool.Cache.Element;
-import ee.midaiganes.util.StringUtil;
+import ee.midaiganes.services.rowmapper.LayoutSetRowMapper;
+import ee.midaiganes.util.StringPool;
 
 public class LayoutSetRepository {
-
 	private static final Logger log = LoggerFactory.getLogger(LayoutSetRepository.class);
-
-	@Autowired
-	private JdbcTemplate jdbcTemplate;
-
 	private static final String GET_LAYOUT_SET_BY_VIRTUAL_HOST = "SELECT LayoutSet.id, LayoutSet.virtualHost, Theme.name, Theme.context FROM LayoutSet LEFT JOIN Theme ON (LayoutSet.themeId = Theme.id) WHERE virtualHost = ?";
 	private static final String GET_LAYOUT_SETS = "SELECT LayoutSet.id, LayoutSet.virtualHost, Theme.name, Theme.context FROM LayoutSet LEFT JOIN Theme ON (LayoutSet.themeId = Theme.id)";
 	private static final String ADD_LAYOUT_SET = "INSERT INTO LayoutSet(virtualHost, themeId) VALUES(?, ?)";
 	private static final String GET_LAYOUT_SETS_CACHE_KEY = "getLayoutSets";
 	private static final String GET_LAYOUT_SET_BY_VIRTUAL_HOST_CACHE_KEY_PREFIX = "getLayoutSet#";
+	private static final LayoutSetRowMapper layoutSetRowMapper = new LayoutSetRowMapper();
+	private static final String[] ID_ARRAY = new String[] { StringPool.ID };
+
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
 
 	private final Cache cache;
 
 	public LayoutSetRepository() {
 		cache = SingleVmPool.getCache(LayoutSetRepository.class.getName());
 	}
-
-	private static final RowMapper<LayoutSet> layoutSetRowMapper = new RowMapper<LayoutSet>() {
-		@Override
-		public LayoutSet mapRow(ResultSet rs, int rowNum) throws SQLException {
-			LayoutSet layoutSet = new LayoutSet();
-			layoutSet.setId(rs.getLong(1));
-			layoutSet.setVirtualHost(rs.getString(2));
-			String themeName = rs.getString(3);
-			String themeContext = rs.getString(4);
-			if (!StringUtil.isEmpty(themeName) && !StringUtil.isEmpty(themeContext)) {
-				layoutSet.setThemeName(new ThemeName(themeContext, themeName));
-			}
-			return layoutSet;
-		}
-	};
 
 	public List<LayoutSet> getLayoutSets() {
 		Element el = cache.getElement(GET_LAYOUT_SETS_CACHE_KEY);
@@ -85,7 +68,7 @@ public class LayoutSetRepository {
 			jdbcTemplate.update(new PreparedStatementCreator() {
 				@Override
 				public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-					PreparedStatement ps = con.prepareStatement(ADD_LAYOUT_SET, new String[] { "id" });
+					PreparedStatement ps = con.prepareStatement(ADD_LAYOUT_SET, ID_ARRAY);
 					ps.setString(1, virtualHost);
 					ps.setString(2, themeId);
 					return ps;

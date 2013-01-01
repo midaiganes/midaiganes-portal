@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import ee.midaiganes.generated.xml.theme.MidaiganesTheme;
 import ee.midaiganes.model.Theme;
 import ee.midaiganes.model.ThemeName;
+import ee.midaiganes.util.StringPool;
 
 public class ThemeRepository {
 	private static final Logger log = LoggerFactory.getLogger(ThemeRepository.class);
@@ -29,7 +30,7 @@ public class ThemeRepository {
 	}
 
 	public List<Theme> getThemes() {
-		List<Theme> themes = new ArrayList<Theme>();
+		List<Theme> themes = new ArrayList<Theme>(this.themes.size());
 		for (Map.Entry<String, MidaiganesTheme> entry : this.themes.entrySet()) {
 			for (MidaiganesTheme.Theme theme : entry.getValue().getTheme()) {
 				themes.add(getTheme(new ThemeName(entry.getKey(), theme.getId())));
@@ -70,7 +71,7 @@ public class ThemeRepository {
 			MidaiganesTheme theme = (MidaiganesTheme) unmarshaller.unmarshal(themeXmlInputStream);
 			log.info("contextPath = {}, theme = {}", contextPath, theme);
 			if (theme != null) {
-				themes.put(contextPath.startsWith("/") ? contextPath.substring(1) : contextPath, theme);
+				themes.put(contextPath.startsWith(StringPool.SLASH) ? contextPath.substring(1) : contextPath, theme);
 			}
 
 		} catch (JAXBException e) {

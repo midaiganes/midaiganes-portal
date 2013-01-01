@@ -1,23 +1,22 @@
 package ee.midaiganes.services;
 
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import ee.midaiganes.model.PortletName;
 import ee.midaiganes.services.SingleVmPool.Cache;
+import ee.midaiganes.services.rowmapper.PortletPreferencesResultSetExtractor;
+import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.StringUtil;
 
 public class PortletPreferencesRepository {
@@ -29,29 +28,7 @@ public class PortletPreferencesRepository {
 	private static final String INSERT_INTO_PORTLETPREFERENCEVALUES = "INSERT INTO PortletPreferenceValue (portletPreferenceId, preferenceValue) VALUES ((SELECT id FROM PortletPreference WHERE preferenceName = ? AND portletInstanceId = (SELECT id FROM portletInstance WHERE portletName = ? AND windowID = ? AND portletContext = ?)), ?)";
 
 	private final Cache cache = SingleVmPool.getCache(PortletPreferencesRepository.class.getName());
-	private static final ResultSetExtractor<Map<String, String[]>> getPortletPreferencesExtractor = new ResultSetExtractor<Map<String, String[]>>() {
-
-		@Override
-		public Map<String, String[]> extractData(ResultSet rs) throws SQLException {
-			Map<String, String[]> map = new HashMap<String, String[]>();
-			while (rs.next()) {
-				String name = rs.getString(1);
-				String value = rs.getString(2);
-				String[] values = map.get(name);
-				if (values == null) {
-					values = new String[] { value };
-				} else {
-					String[] nv = new String[values.length + 1];
-					System.arraycopy(values, 0, nv, 0, values.length);
-					nv[nv.length - 1] = value;
-					values = nv;
-				}
-				map.put(name, values);
-			}
-			return map;
-		}
-
-	};
+	private static final PortletPreferencesResultSetExtractor getPortletPreferencesExtractor = new PortletPreferencesResultSetExtractor();
 
 	public Map<String, String[]> getPortletPreferences(PortletName portletName, String windowID) {
 		String key = portletName.getFullName() + "#" + windowID;
@@ -70,8 +47,8 @@ public class PortletPreferencesRepository {
 
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = false, isolation = Isolation.DEFAULT)
 	public void savePortletPreferences(final PortletName portletName, final String windowID, Map<String, String[]> preferences) {
-		final List<String> keys = new ArrayList<String>(preferences.keySet());
-		final List<String[]> values = new ArrayList<String[]>();
+		List<String> keys = new ArrayList<String>(preferences.keySet());
+		List<String[]> values = new ArrayList<String[]>();
 		for (String key : keys) {
 			for (String k : preferences.get(key)) {
 				values.add(new String[] { key, k });
@@ -95,7 +72,7 @@ public class PortletPreferencesRepository {
 			}
 			jdbcTemplate
 					.update("DELETE FROM PortletPreference WHERE portletInstanceId = (SELECT id FROM PortletInstance WHERE portletName = ? AND windowID = ? AND portletContext = ?) AND preferenceName IN ("
-							+ StringUtil.repeat("?", ",", keys.size()) + ")", arguments);
+							+ StringUtil.repeat(StringPool.QUESTION, StringPool.COMMA, keys.size()) + ")", arguments);
 
 		}
 		jdbcTemplate.batchUpdate(INSERT_INTO_PORTLETPREFERENCE, new BatchPreparedStatementSetter() {

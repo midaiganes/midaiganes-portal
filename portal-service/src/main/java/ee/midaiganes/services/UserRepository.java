@@ -2,7 +2,6 @@ package ee.midaiganes.services;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -10,13 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
 import ee.midaiganes.model.User;
 import ee.midaiganes.services.SingleVmPool.Cache;
 import ee.midaiganes.services.exceptions.DuplicateUsernameException;
+import ee.midaiganes.services.rowmapper.UserRowMapper;
+import ee.midaiganes.util.StringPool;
 
 public class UserRepository {
 
@@ -26,18 +26,11 @@ public class UserRepository {
 	private static final String GET_USER_BY_USERID = SELECT_USER_FROM_USER + " WHERE id = ?";
 	private static final String GET_USER_BY_USERNAME_PASSWORD = SELECT_USER_FROM_USER + " WHERE username = ? AND password = ?";
 	private static final String ADD_USER = "INSERT INTO User(username, password) VALUES(?, ?)";
+	private static final String[] ID_ARRAY = new String[] { StringPool.ID };
 
 	private final Cache cache = SingleVmPool.getCache(UserRepository.class.getName());
 
-	private static final RowMapper<User> userRowMapper = new RowMapper<User>() {
-		@Override
-		public User mapRow(ResultSet rs, int rowNum) throws SQLException {
-			User user = new User();
-			user.setId(rs.getLong(1));
-			user.setUsername(rs.getString(2));
-			return user;
-		}
-	};
+	private static final UserRowMapper userRowMapper = new UserRowMapper();
 
 	public User getUser(long userid) {
 		String cacheKey = Long.toString(userid);
@@ -58,7 +51,7 @@ public class UserRepository {
 			jdbcTemplate.update(new PreparedStatementCreator() {
 				@Override
 				public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-					PreparedStatement ps = con.prepareStatement(ADD_USER, new String[] { "id" });
+					PreparedStatement ps = con.prepareStatement(ADD_USER, ID_ARRAY);
 					ps.setString(1, username);
 					ps.setString(2, password);
 					return ps;

@@ -2,7 +2,6 @@ package ee.midaiganes.services;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collections;
@@ -16,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
@@ -32,10 +30,22 @@ import ee.midaiganes.services.SingleVmPool.Cache.Element;
 import ee.midaiganes.services.exceptions.IllegalFriendlyUrlException;
 import ee.midaiganes.services.exceptions.IllegalLanguageIdException;
 import ee.midaiganes.services.exceptions.IllegalPageLayoutException;
+import ee.midaiganes.services.rowmapper.LayoutRowMapper;
+import ee.midaiganes.services.rowmapper.LayoutTitleRowMapper;
+import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.StringUtil;
 
 public class LayoutRepository {
 	private static final Logger log = LoggerFactory.getLogger(LayoutRepository.class);
+	private static final String GET_LAYOUT_BY_LAYOUTSETID = "SELECT Layout.id, Layout.layoutSetId, Layout.friendlyUrl, Layout.pageLayoutId, Theme.name, Theme.context FROM Layout LEFT JOIN Theme ON (Layout.themeId = Theme.id) WHERE layoutSetId = ?";
+	private static final String ADD_LAYOUT = "INSERT INTO Layout(layoutSetId, friendlyUrl, themeId, pageLayoutId, parentId, nr, defaultLayoutTitleLanguageId) VALUES(?, ?, (SELECT id FROM Theme WHERE name = ? AND context = ?), ?, ?, (SELECT c FROM (SELECT COUNT(1) AS c FROM Layout WHERE layoutSetId = ? AND parentId = ?) AS t), ?)";
+	private static final String DELETE_LAYOUT = "DELETE FROM Layout WHERE id = ?";
+	private static final String GET_LAYOUT_TITLES = "SELECT LayoutTitle.id, LayoutTitle.languageId, LayoutTitle.layoutId, LayoutTitle.title FROM LayoutTitle";
+	private static final String UPDATE_PAGE_LAYOUT = "UPDATE Layout SET pageLayoutId = ? WHERE id = ?";
+	private static final Pattern FRIENDLY_URL_PATTERN = Pattern.compile("^\\/[a-zA-Z0-9_\\-]+$");
+	private static final LayoutRowMapper layoutRowMapper = new LayoutRowMapper();
+	private static final LayoutTitleRowMapper layoutTitleRowMapper = new LayoutTitleRowMapper();
+	private static final String[] ID_ARRAY = { StringPool.ID };
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
@@ -49,49 +59,14 @@ public class LayoutRepository {
 	@Resource
 	private PageLayoutRepository pageLayoutRepository;
 
-	private static final String GET_LAYOUT_BY_LAYOUTSETID = "SELECT Layout.id, Layout.layoutSetId, Layout.friendlyUrl, Layout.pageLayoutId, Theme.name, Theme.context FROM Layout LEFT JOIN Theme ON (Layout.themeId = Theme.id) WHERE layoutSetId = ?";
-	private static final String ADD_LAYOUT = "INSERT INTO Layout(layoutSetId, friendlyUrl, themeId, pageLayoutId, parentId, nr, defaultLayoutTitleLanguageId) VALUES(?, ?, (SELECT id FROM Theme WHERE name = ? AND context = ?), ?, ?, (SELECT c FROM (SELECT COUNT(1) AS c FROM Layout WHERE layoutSetId = ? AND parentId = ?) AS t), ?)";
-	private static final String DELETE_LAYOUT = "DELETE FROM Layout WHERE id = ?";
-	private static final Pattern FRIENDLY_URL_PATTERN = Pattern.compile("^\\/[a-zA-Z0-9_\\-]+$");
-
 	private final Cache cache;
 
 	public LayoutRepository() {
 		cache = SingleVmPool.getCache(LayoutRepository.class.getName());
 	}
 
-	private static final RowMapper<Layout> layoutRowMapper = new RowMapper<Layout>() {
-		@Override
-		public Layout mapRow(ResultSet rs, int rowNum) throws SQLException {
-			Layout layout = new Layout();
-			layout.setId(rs.getLong(1));
-			layout.setLayoutSetId(rs.getLong(2));
-			layout.setFriendlyUrl(rs.getString(3));
-			layout.setPageLayoutId(rs.getString(4));
-			String themeName = rs.getString(5);
-			String themeContext = rs.getString(6);
-			if (!StringUtil.isEmpty(themeName) && !StringUtil.isEmpty(themeContext)) {
-				layout.setThemeName(new ThemeName(themeContext, themeName));
-			}
-			return layout;
-		}
-	};
-	private static final RowMapper<LayoutTitle> layoutTitleRowMapper = new RowMapper<LayoutTitle>() {
-
-		@Override
-		public LayoutTitle mapRow(ResultSet rs, int rowNum) throws SQLException {
-			LayoutTitle layoutTitle = new LayoutTitle();
-			layoutTitle.setId(rs.getLong(1));
-			layoutTitle.setLanguageId(rs.getString(2));
-			layoutTitle.setLayoutId(rs.getLong(3));
-			layoutTitle.setTitle(rs.getString(4));
-			return layoutTitle;
-		}
-	};
-
 	public List<LayoutTitle> getLayoutTitles() {
-		return jdbcTemplate.query("SELECT LayoutTitle.id, LayoutTitle.languageId, LayoutTitle.layoutId, LayoutTitle.title FROM LayoutTitle",
-				layoutTitleRowMapper);
+		return jdbcTemplate.query(GET_LAYOUT_TITLES, layoutTitleRowMapper);
 	}
 
 	public List<Layout> getLayouts(long layoutSetId) {
@@ -117,22 +92,13 @@ public class LayoutRepository {
 	public long addLayout(final long layoutSetId, final String friendlyUrl, final ThemeName themeName, final PageLayoutName pageLayoutName,
 			final Long parentId, final String defaultLayoutTitleLanguageId) throws IllegalFriendlyUrlException, IllegalLanguageIdException,
 			IllegalPageLayoutException {
-		if (!isFriendlyUrlValid(friendlyUrl)) {
-			throw new IllegalFriendlyUrlException(friendlyUrl);
-		}
-		if (!languageRepository.isLanguageIdSupported(defaultLayoutTitleLanguageId)) {
-			throw new IllegalLanguageIdException(defaultLayoutTitleLanguageId);
-		}
-		if (pageLayoutName == null) {
-			throw new IllegalPageLayoutException("pageLayoutId is null");
-		}
+		validateLayoutData(friendlyUrl, pageLayoutName, defaultLayoutTitleLanguageId);
 		try {
 			KeyHolder keyHolder = new GeneratedKeyHolder();
 			jdbcTemplate.update(new PreparedStatementCreator() {
-
 				@Override
 				public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-					PreparedStatement ps = con.prepareStatement(ADD_LAYOUT, new String[] { "id" });
+					PreparedStatement ps = con.prepareStatement(ADD_LAYOUT, ID_ARRAY);
 					ps.setLong(1, layoutSetId);
 					ps.setString(2, friendlyUrl);
 					if (themeName != null) {
@@ -161,9 +127,22 @@ public class LayoutRepository {
 		}
 	}
 
+	private void validateLayoutData(final String friendlyUrl, final PageLayoutName pageLayoutName, final String defaultLayoutTitleLanguageId)
+			throws IllegalFriendlyUrlException, IllegalLanguageIdException, IllegalPageLayoutException {
+		if (!isFriendlyUrlValid(friendlyUrl)) {
+			throw new IllegalFriendlyUrlException(friendlyUrl);
+		}
+		if (!languageRepository.isLanguageIdSupported(defaultLayoutTitleLanguageId)) {
+			throw new IllegalLanguageIdException(defaultLayoutTitleLanguageId);
+		}
+		if (pageLayoutName == null) {
+			throw new IllegalPageLayoutException("pageLayoutId is null");
+		}
+	}
+
 	public void updatePageLayout(long layoutId, PageLayoutName pageLayoutName) {
 		try {
-			jdbcTemplate.update("UPDATE Layout SET pageLayoutId = ? WHERE id = ?", pageLayoutName.getFullName(), layoutId);
+			jdbcTemplate.update(UPDATE_PAGE_LAYOUT, pageLayoutName.getFullName(), layoutId);
 		} finally {
 			cache.clear();
 		}
@@ -178,13 +157,13 @@ public class LayoutRepository {
 	}
 
 	public Layout getDefaultLayout(long layoutSetId, String friendlyUrl) {
-		log.warn("get layout; layoutsetid = {}; friendlyUrl = {}", layoutSetId, friendlyUrl);
+		log.warn("get default layout; layoutsetid = {}; friendlyUrl = {}", layoutSetId, friendlyUrl);
 		Theme defaultTheme = themeRepository.getDefaultTheme();
 		String pageLayoutId = pageLayoutRepository.getDefaultPageLayout().getPageLayoutName().getFullName();
 		return new DefaultLayout(layoutSetId, friendlyUrl, defaultTheme.getThemeName(), pageLayoutId);
 	}
 
 	public boolean isFriendlyUrlValid(String friendlyUrl) {
-		return !StringUtil.isEmpty(friendlyUrl) && friendlyUrl.startsWith("/") && FRIENDLY_URL_PATTERN.matcher(friendlyUrl).matches();
+		return !StringUtil.isEmpty(friendlyUrl) && friendlyUrl.startsWith(StringPool.SLASH) && FRIENDLY_URL_PATTERN.matcher(friendlyUrl).matches();
 	}
 }
