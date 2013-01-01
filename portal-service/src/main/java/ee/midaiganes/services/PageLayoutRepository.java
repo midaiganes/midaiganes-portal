@@ -1,21 +1,30 @@
 package ee.midaiganes.services;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ee.midaiganes.model.PageLayout;
 import ee.midaiganes.model.PageLayoutName;
-import ee.midaiganes.util.PortalUtil;
+import ee.midaiganes.util.PropsValues;
+import ee.midaiganes.util.StringPool;
 
 public class PageLayoutRepository {
 	private static final Logger log = LoggerFactory.getLogger(PageLayoutRepository.class);
+	private final ConcurrentHashMap<PageLayoutName, PageLayout> pageLayouts = new ConcurrentHashMap<>();
+
+	public PageLayoutRepository() {
+		PageLayoutName name = new PageLayoutName(PropsValues.PORTAL_CONTEXT.replaceAll("^/", StringPool.EMPTY), "1-column");
+		pageLayouts.put(name, new PageLayout(name, "/layouts/"));
+	}
 
 	public List<PageLayout> getPageLayouts() {
-		PageLayout pageLayout = new PageLayout(new PageLayoutName(PortalUtil.getPortalContextPath().replace("/", ""), "1-column"), "/layouts/");
-		return Arrays.asList(pageLayout);
+		return Collections.unmodifiableList(new ArrayList<>(pageLayouts.values()));
 	}
 
 	public PageLayout getPageLayout(String pageLayoutId) {
@@ -23,10 +32,9 @@ public class PageLayoutRepository {
 	}
 
 	public PageLayout getPageLayout(PageLayoutName pageLayoutName) {
-		for (PageLayout pl : getPageLayouts()) {
-			if (pl.getPageLayoutName().equals(pageLayoutName)) {
-				return pl;
-			}
+		PageLayout pl = pageLayouts.get(pageLayoutName);
+		if (pl != null) {
+			return pl;
 		}
 		if (log.isWarnEnabled()) {
 			log.warn("no pageLayout with name '" + pageLayoutName + "'; All pageLayouts = " + getPageLayouts());
@@ -35,6 +43,7 @@ public class PageLayoutRepository {
 	}
 
 	public PageLayout getDefaultPageLayout() {
-		return getPageLayouts().get(0);
+		Enumeration<PageLayout> e = this.pageLayouts.elements();
+		return e.hasMoreElements() ? e.nextElement() : null;
 	}
 }

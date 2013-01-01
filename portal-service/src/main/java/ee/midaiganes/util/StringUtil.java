@@ -14,11 +14,23 @@ public class StringUtil {
 	}
 
 	public static String repeat(String str, String separator, int count) {
-		StringBuilder sb = new StringBuilder(((str.length() + length(separator)) * count) - length(separator));
-		for (int i = 0; i < count; i++) {
-			if (i > 0 && length(separator) > 0) {
-				sb.append(separator);
+		int separatorLength = length(separator);
+		if (separatorLength != 0) {
+			StringBuilder sb = new StringBuilder(((str.length() + separatorLength) * count) - separatorLength);
+			for (int i = 0; i < count; i++) {
+				if (i != 0) {
+					sb.append(separator);
+				}
+				sb.append(str);
 			}
+			return sb.toString();
+		}
+		return repeat(str, count);
+	}
+
+	public static String repeat(String str, int count) {
+		StringBuilder sb = new StringBuilder(str.length() * count);
+		for (int i = 0; i < count; i++) {
 			sb.append(str);
 		}
 		return sb.toString();

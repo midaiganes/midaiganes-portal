@@ -6,4 +6,6 @@ public interface StringPool {
 	String MINUS = "-";
 	String EMPTY = "";
 	String QUESTION = "?";
+	String ID = "id";
+	String COMMA = ",";
 }
