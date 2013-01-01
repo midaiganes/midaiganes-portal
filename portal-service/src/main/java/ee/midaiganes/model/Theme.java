@@ -4,51 +4,32 @@ import java.io.Serializable;
 
 public class Theme implements Serializable {
 	private static final long serialVersionUID = 1L;
-	private ThemeName themeName;
-	private String themePath;
-	private String javascriptPath;
-	private String cssPath;
-
-	public Theme() {
-	}
+	private final ThemeName themeName;
+	private final String themePath;
+	private final String javascriptPath;
+	private final String cssPath;
 
 	public Theme(ThemeName themeName, String themePath, String javascriptPath, String cssPath) {
-		setThemePath(themePath);
-		setJavascriptPath(javascriptPath);
-		setCssPath(cssPath);
-		setThemeName(themeName);
+		this.themePath = themePath;
+		this.javascriptPath = javascriptPath;
+		this.cssPath = cssPath;
+		this.themeName = themeName;
 	}
 
 	public ThemeName getThemeName() {
 		return themeName;
 	}
 
-	public void setThemeName(ThemeName themeName) {
-		this.themeName = themeName;
-	}
-
 	public String getThemePath() {
 		return themePath;
-	}
-
-	public void setThemePath(String themePath) {
-		this.themePath = themePath;
 	}
 
 	public String getJavascriptPath() {
 		return javascriptPath;
 	}
 
-	public void setJavascriptPath(String javascriptPath) {
-		this.javascriptPath = javascriptPath;
-	}
-
 	public String getCssPath() {
 		return cssPath;
-	}
-
-	public void setCssPath(String cssPath) {
-		this.cssPath = cssPath;
 	}
 
 	@Override

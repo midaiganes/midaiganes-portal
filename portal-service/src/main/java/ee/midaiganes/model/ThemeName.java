@@ -1,8 +1,7 @@
 package ee.midaiganes.model;
 
-import java.io.Serializable;
 
-public class ThemeName extends ContextAndName implements Serializable {
+public class ThemeName extends ContextAndName {
 	private static final long serialVersionUID = 1L;
 
 	public ThemeName(String context, String name) {
@@ -11,6 +10,6 @@ public class ThemeName extends ContextAndName implements Serializable {
 
 	@Override
 	public boolean equals(Object o) {
-		return o != null && o instanceof ThemeName && super.equals(o);
+		return o instanceof ThemeName && super.equals(o);
 	}
 }

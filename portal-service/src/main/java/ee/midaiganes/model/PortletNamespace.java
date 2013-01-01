@@ -36,4 +36,18 @@ public class PortletNamespace implements Serializable {
 	public boolean isDefaultWindowID() {
 		return StringPool.DEFAULT_PORTLET_WINDOWID.equals(windowID);
 	}
+
+	@Override
+	public int hashCode() {
+		return windowID.hashCode() + portletName.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof PortletNamespace && equals((PortletNamespace) obj);
+	}
+
+	private boolean equals(PortletNamespace pn) {
+		return pn != null && windowID.equals(pn.windowID) && portletName.equals(portletName);
+	}
 }

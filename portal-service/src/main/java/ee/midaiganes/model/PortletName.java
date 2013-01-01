@@ -1,12 +1,9 @@
 package ee.midaiganes.model;
 
-import java.io.Serializable;
-
 import ee.midaiganes.util.StringUtil;
 
-public class PortletName extends ContextAndName implements Serializable {
+public class PortletName extends ContextAndName {
 	private static final long serialVersionUID = 1L;
-	private static final String SEPARATOR = "_w_";
 
 	public PortletName(String fullPortletName) {
 		super(fullPortletName);
