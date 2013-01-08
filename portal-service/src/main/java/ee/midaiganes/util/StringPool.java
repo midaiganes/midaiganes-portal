@@ -8,4 +8,5 @@ public interface StringPool {
 	String QUESTION = "?";
 	String ID = "id";
 	String COMMA = ",";
+	String UTF_8 = "UTF-8";
 }

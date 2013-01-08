@@ -9,7 +9,12 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class IOUtil {
+	private static final Logger log = LoggerFactory.getLogger(IOUtil.class);
+
 	public static String toString(InputStream is, String encoding) throws IOException {
 		StringWriter sw = new StringWriter();
 		copy(is, sw, encoding);
@@ -33,12 +38,14 @@ public class IOUtil {
 				closeable.close();
 			}
 		} catch (IOException e) {
-			// ignore
+			log.debug(e.getMessage(), e);
 		}
 	}
 
 	private static void copy(InputStream is, Writer out, String encoding) throws IOException {
-		copy(new InputStreamReader(is, encoding), out);
+		try (InputStreamReader reader = new InputStreamReader(is, encoding)) {
+			copy(reader, out);
+		}
 	}
 
 	private static long copy(Reader input, Writer out) throws IOException {

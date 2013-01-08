@@ -7,11 +7,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import ee.midaiganes.util.StringPool;
+
 public class ContentTypeFilter extends HttpFilter {
 
 	@Override
 	protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-		response.setCharacterEncoding("UTF-8");
+		response.setCharacterEncoding(StringPool.UTF_8);
 		chain.doFilter(request, response);
 	}
 
