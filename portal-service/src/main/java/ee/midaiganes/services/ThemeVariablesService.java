@@ -16,15 +16,14 @@ import ee.midaiganes.model.NavItem;
 import ee.midaiganes.model.PageDisplay;
 import ee.midaiganes.util.MidaiganesPortlets;
 import ee.midaiganes.util.RequestUtil;
-import ee.midaiganes.util.StringPool;
 
 public class ThemeVariablesService {
 	private static final String LOG_IN_URL = "logInUrl";
 	private static final String NAV_ITEMS = "navItems";
 	private static final String ADD_LAYOUT_URL = "addLayoutUrl";
 	private static final String CHANGE_PAGE_LAYOUT_URL = "changePageLayoutUrl";
-	private static final String THEME_JAVASCRIPT_DIR = "themeJavascriptDir";
 	private static final String ADD_REMOVE_PORTLET_URL = "addRemovePortletUrl";
+	private static final String PAGE_DISPLAY = "pageDisplay";
 
 	@Resource(name = RootApplicationContext.LAYOUT_REPOSITORY)
 	private LayoutRepository layoutRepository;
@@ -36,9 +35,8 @@ public class ThemeVariablesService {
 		PageDisplay pageDisplay = RequestUtil.getPageDisplay(request);
 		List<ThemeVariable> variables = new ArrayList<ThemeVariable>();
 		variables.add(new ThemeVariable(LOG_IN_URL, getLogInUrl()));
-		variables.add(new ThemeVariable(THEME_JAVASCRIPT_DIR, pageDisplay.getTheme().getThemeName().getContextWithSlash()
-				+ pageDisplay.getTheme().getThemePath() + StringPool.SLASH + pageDisplay.getTheme().getJavascriptPath()));
 		variables.add(new ThemeVariable(NAV_ITEMS, getNavItems(pageDisplay)));
+		variables.add(new ThemeVariable(PAGE_DISPLAY, pageDisplay));
 		try {
 			variables.add(new ThemeVariable(ADD_LAYOUT_URL, portletURLFactory.makeRenderURL(request, MidaiganesPortlets.LAYOUT_PORTLET.getPortletName(),
 					MidaiganesWindowState.EXCLUSIVE)));

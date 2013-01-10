@@ -96,7 +96,7 @@ public class StaticContentServlet extends HttpServlet {
 	}
 
 	private Map<String, Theme> getStaticContents(ServletContext ctx, Theme theme, String resourcePath) {
-		List<String> list = servletContextResourceRepository.getContextResourcePaths(ctx, theme.getThemePath() + StringPool.SLASH + theme.getJavascriptPath());
+		List<String> list = servletContextResourceRepository.getContextResourcePaths(ctx, resourcePath);
 		// ctx.getResourcePaths(theme.getThemePath() + StringPool.SLASH +
 		// theme.getJavascriptPath());
 		Map<String, Theme> files = new HashMap<String, Theme>();
