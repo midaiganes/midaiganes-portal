@@ -11,4 +11,8 @@ public class GetterUtil {
 		}
 		return defaultValue;
 	}
+
+	public static <A> A get(A a, A def) {
+		return a != null ? a : def;
+	}
 }

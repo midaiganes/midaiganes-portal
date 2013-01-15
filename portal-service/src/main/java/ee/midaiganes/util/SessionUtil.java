@@ -16,6 +16,10 @@ public class SessionUtil {
 		return userid != null ? userid.longValue() : DefaultUser.DEFAULT_USER_ID;
 	}
 
+	public static long getUserId(PortletRequest request) {
+		return getUserId(RequestUtil.getHttpServletRequest(request));
+	}
+
 	public static void setUserId(PortletRequest request, Long userId) {
 		setUserId(RequestUtil.getHttpServletRequest(request), userId);
 	}

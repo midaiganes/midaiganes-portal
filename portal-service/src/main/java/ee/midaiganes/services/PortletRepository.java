@@ -5,9 +5,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.annotation.Resource;
 import javax.portlet.Portlet;
@@ -39,7 +39,8 @@ import ee.midaiganes.util.XmlUtil;
 
 public class PortletRepository {
 	private static final Logger log = LoggerFactory.getLogger(PortletRepository.class);
-	private final Map<String, Map<String, PortletAndConfiguration>> portlets = new ConcurrentHashMap<String, Map<String, PortletAndConfiguration>>();
+	private final ConcurrentHashMap<PortletName, PortletAndConfiguration> portlets = new ConcurrentHashMap<>();
+	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
 	@Resource(name = PortalConfig.PORTLET_PREFERENCES_REPOSITORY)
 	private PortletPreferencesRepository portletPreferencesRepository;
@@ -48,13 +49,12 @@ public class PortletRepository {
 	private PortletInstanceRepository portletInstanceRepository;
 
 	public List<PortletName> getPortletNames() {
-		List<PortletName> list = new ArrayList<>();
-		for (Map.Entry<String, Map<String, PortletAndConfiguration>> p : portlets.entrySet()) {
-			for (String name : p.getValue().keySet()) {
-				list.add(new PortletName(p.getKey(), name));
-			}
+		lock.readLock().lock();
+		try {
+			return new ArrayList<>(portlets.keySet());
+		} finally {
+			lock.readLock().unlock();
 		}
-		return list;
 	}
 
 	public void registerPortlets(ServletContext servletContext, InputStream portletXmlInputStream) {
@@ -67,6 +67,32 @@ public class PortletRepository {
 			log.error(e.getMessage(), e);
 		} catch (RuntimeException e) {
 			log.error(e.getMessage(), e);
+		}
+	}
+
+	// TODO Before the portlet container calls the destroy method, it should
+	// allow any threads that are currently processing requests within the
+	// portlet object to complete execution
+	public void unregisterPortlets(ServletContext sc) {
+		String contextPath = sc.getContextPath();
+		for (PortletName entry : getPortletNames()) {
+			if (entry.getContextWithSlash().equals(contextPath)) {
+				try {
+					lock.writeLock().lock();
+					PortletAndConfiguration conf = null;
+					try {
+						conf = portlets.remove(entry);
+					} finally {
+						lock.writeLock().unlock();
+					}
+					if (conf != null) {
+						conf.getPortlet().destroy();
+						log.info("portlet destroyed: {}", entry);
+					}
+				} catch (RuntimeException e) {
+					log.error(e.getMessage(), e);
+				}
+			}
 		}
 	}
 
@@ -85,12 +111,14 @@ public class PortletRepository {
 	}
 
 	private PortletAndConfiguration getPortlet(PortletName portletName) {
-		Map<String, PortletAndConfiguration> map = portlets.get(portletName.getContext());
-		if (map != null) {
-			PortletAndConfiguration portlet = map.get(portletName.getName());
+		lock.readLock().lock();
+		try {
+			PortletAndConfiguration portlet = portlets.get(portletName);
 			if (portlet != null) {
 				return portlet;
 			}
+		} finally {
+			lock.readLock().unlock();
 		}
 		log.warn("no portlet with name = {};", portletName);
 		return null;
@@ -105,10 +133,11 @@ public class PortletRepository {
 	private void initializePortletType(ServletContext servletContext, PortletType portletType) {
 		log.debug("portlet = {}", portletType);
 		try {
-			initializePortlet(servletContext, portletType);
-			PortletName portletName = getPortletName(servletContext, portletType.getPortletName().getValue());
+			PortletName portletName = initializePortlet(servletContext, portletType);
 			log.debug("full portlet name = {}", portletName);
-			portletInstanceRepository.addDefaultPortletInstance(portletName);
+			if (portletName != null) {
+				portletInstanceRepository.addDefaultPortletInstance(portletName);
+			}
 		} catch (ClassNotFoundException e) {
 			log.error(e.getMessage(), e);
 		} catch (IllegalAccessException e) {
@@ -120,7 +149,7 @@ public class PortletRepository {
 		}
 	}
 
-	private void initializePortlet(ServletContext servletContext, PortletType portletType) throws ClassNotFoundException, InstantiationException,
+	private PortletName initializePortlet(ServletContext servletContext, PortletType portletType) throws ClassNotFoundException, InstantiationException,
 			IllegalAccessException {
 		Class<?> obj = Class.forName(portletType.getPortletClass());
 		if (Portlet.class.isAssignableFrom(obj)) {
@@ -128,17 +157,20 @@ public class PortletRepository {
 			try {
 				PortletConfig portletConfig = getPortletConfig(servletContext, portletType);
 				portlet.init(portletConfig);
-				Map<String, PortletAndConfiguration> map = portlets.get(getContextPathName(servletContext));
-				if (map == null) {
-					map = new ConcurrentHashMap<String, PortletAndConfiguration>();
-					portlets.put(getContextPathName(servletContext), map);
+				PortletName portletName = new PortletName(getContextPathName(servletContext), portletType.getPortletName().getValue());
+				lock.writeLock().lock();
+				try {
+					portlets.put(portletName, new PortletAndConfiguration(portlet, portletConfig, portletType));
+				} finally {
+					lock.writeLock().unlock();
 				}
-				map.put(portletType.getPortletName().getValue(), new PortletAndConfiguration(portlet, portletConfig, portletType));
+				return portletName;
 			} catch (PortletException e) {
 				log.error(e.getMessage(), e);
 			} catch (IOException e) {
 				log.error(e.getMessage(), e);
 			}
+			return null;
 		} else {
 			throw new IllegalArgumentException(portletType.getPortletClass() + " is not implementing " + Portlet.class.getName());
 		}
@@ -174,9 +206,5 @@ public class PortletRepository {
 			contextPathName = contextPathName.substring(1);
 		}
 		return contextPathName;
-	}
-
-	private PortletName getPortletName(ServletContext servletContext, String portletName) {
-		return new PortletName(getContextPathName(servletContext), portletName);
 	}
 }

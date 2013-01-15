@@ -264,4 +264,8 @@ public class PortletRequestImpl implements PortletRequest {
 	public List<PortletMode> getAllowedPortletModes() {
 		return portletModes;
 	}
+
+	public PortletNamespace getPortletNamespace() {
+		return namespace;
+	}
 }

@@ -13,9 +13,13 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.util.FastStringWriter;
+import ee.midaiganes.util.StringPool;
 
 public class BaseURLImpl implements BaseURL {
+	private static final String HTTPS = "https://";
+	private static final String HTTP = "http://";
+	private static final String PORT_8080 = ":8080";
+
 	private static final class ParametersMap extends HashMap<String, String[]> {
 		private static final long serialVersionUID = 1L;
 
@@ -43,7 +47,7 @@ public class BaseURLImpl implements BaseURL {
 	}
 
 	public BaseURLImpl(PortletRequest request) {
-		this(request, "/");
+		this(request, StringPool.SLASH);
 	}
 
 	public BaseURLImpl(PortletRequest request, String path) {
@@ -54,8 +58,19 @@ public class BaseURLImpl implements BaseURL {
 		this(request.getServerName(), request.getServerPort(), request.getRequestURI(), request.isSecure());
 	}
 
-	private String getHostAndPath() {
-		return (secure ? "https://" : "http://") + host + (!secure && port == 80 ? "" : ":" + port) + path;
+	private void appendHostAndPath(Appendable sb) throws IOException {
+		sb.append(secure ? HTTPS : HTTP).append(host);
+		if (secure || port != 80) {
+			switch (port) {
+				case 8080:
+					sb.append(PORT_8080);
+					break;
+				default:
+					sb.append(':');
+					sb.append(Integer.toString(port));
+			}
+		}
+		sb.append(path);
 	}
 
 	@Override
@@ -126,28 +141,28 @@ public class BaseURLImpl implements BaseURL {
 
 	@Override
 	public String toString() {
-		try (FastStringWriter sw = new FastStringWriter()) {
-			createURL(sw);
-			return sw.getString();
+		try {
+			return createURL(new StringBuilder(256)).toString();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	private void createURL(Writer w) throws IOException {
-		w.append(getHostAndPath());
-		w.append("?");
+	private <A extends Appendable> A createURL(A w) throws IOException {
+		appendHostAndPath(w);
+		w.append('?');
 		boolean addAnd = false;
 		for (Map.Entry<String, String[]> entry : this.parameters.entrySet()) {
 			for (String val : entry.getValue()) {
 				if (addAnd) {
-					w.append("&");
+					w.append('&');
 				} else {
 					addAnd = true;
 				}
-				w.append(entry.getKey()).append("=").append(val);
+				w.append(entry.getKey()).append('=').append(val);
 			}
 		}
+		return w;
 	}
 
 	protected String[] getParameter(String name) {

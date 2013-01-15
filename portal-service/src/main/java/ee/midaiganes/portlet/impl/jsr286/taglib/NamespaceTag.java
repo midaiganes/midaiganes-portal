@@ -13,6 +13,8 @@ public class NamespaceTag extends BasePortletTag {
 			getOut().print(getPortletResponse().getNamespace());
 		} catch (IOException e) {
 			throw new JspException(e);
+		} finally {
+			release();
 		}
 		return Tag.EVAL_PAGE;
 	}

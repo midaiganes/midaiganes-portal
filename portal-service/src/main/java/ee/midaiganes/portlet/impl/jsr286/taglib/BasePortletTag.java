@@ -1,5 +1,9 @@
 package ee.midaiganes.portlet.impl.jsr286.taglib;
 
+import static ee.midaiganes.util.PortletConstant.JAVAX_PORTLET_CONFIG;
+import static ee.midaiganes.util.PortletConstant.JAVAX_PORTLET_REQUEST;
+import static ee.midaiganes.util.PortletConstant.JAVAX_PORTLET_RESPONSE;
+
 import javax.portlet.PortletConfig;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
@@ -8,8 +12,6 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
-
-import ee.midaiganes.util.PortletConstant;
 
 public class BasePortletTag implements Tag {
 	private Tag parent;
@@ -54,19 +56,25 @@ public class BasePortletTag implements Tag {
 		return (HttpServletRequest) pageContext.getRequest();
 	}
 
+	private <A> A getRequestAttribute(String name) {
+		@SuppressWarnings("unchecked")
+		A attr = (A) pageContext.getRequest().getAttribute(name);
+		return attr;
+	}
+
 	protected PortletRequest getPortletRequest() {
-		return (PortletRequest) getHttpServletRequest().getAttribute(PortletConstant.JAVAX_PORTLET_REQUEST);
+		return getRequestAttribute(JAVAX_PORTLET_REQUEST);
 	}
 
 	protected PortletResponse getPortletResponse() {
-		return (PortletResponse) getHttpServletRequest().getAttribute(PortletConstant.JAVAX_PORTLET_RESPONSE);
+		return getRequestAttribute(JAVAX_PORTLET_RESPONSE);
 	}
 
 	protected PortletConfig getPortletConfig() {
-		return (PortletConfig) getHttpServletRequest().getAttribute(PortletConstant.JAVAX_PORTLET_CONFIG);
+		return getRequestAttribute(JAVAX_PORTLET_CONFIG);
 	}
 
 	protected JspWriter getOut() {
-		return getPageContext().getOut();
+		return pageContext.getOut();
 	}
 }

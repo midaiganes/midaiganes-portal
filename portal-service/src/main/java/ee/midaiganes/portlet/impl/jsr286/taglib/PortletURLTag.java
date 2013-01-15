@@ -46,11 +46,11 @@ public abstract class PortletURLTag extends BasePortletTag {
 		PortletURL portletUrl = getPortletURL();
 		try {
 			portletUrl.setPortletMode(getPortletMode());
-			portletUrl.setSecure(secure == null ? getPortletRequest().isSecure() : Boolean.getBoolean(secure));
+			portletUrl.setSecure(isSecure());
 			portletUrl.setWindowState(getWindowState());
 			setParameters(portletUrl);
 			if (var == null) {
-				portletUrl.write(getOut(), Boolean.getBoolean(escapeXml));
+				portletUrl.write(getOut(), isEscapeXml());
 			} else {
 				getPageContext().setAttribute(var, portletUrl.toString());
 			}
@@ -77,18 +77,26 @@ public abstract class PortletURLTag extends BasePortletTag {
 		}
 	}
 
-	private PortletMode getPortletMode() {
+	protected boolean isEscapeXml() {
+		return Boolean.parseBoolean(escapeXml);
+	}
+
+	protected PortletMode getPortletMode() {
 		if (portletMode == null) {
 			return getPortletRequest().getPortletMode();
 		}
 		return PortletModeUtil.getPortletMode(portletMode);
 	}
 
-	public WindowState getWindowState() {
+	protected WindowState getWindowState() {
 		if (windowState == null) {
 			return getPortletRequest().getWindowState();
 		}
 		return WindowStateUtil.getWindowState(windowState);
+	}
+
+	protected boolean isSecure() {
+		return secure == null ? getPortletRequest().isSecure() : Boolean.parseBoolean(secure);
 	}
 
 	public void addParam(String name, String value) {

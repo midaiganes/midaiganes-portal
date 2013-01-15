@@ -1,5 +1,6 @@
 package ee.midaiganes.javax.servlet;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import javax.annotation.Resource;
@@ -34,6 +35,25 @@ public class PortalPluginListener implements ServletContextListener {
 
 	@Override
 	public void contextDestroyed(ServletContextEvent sce) {
+		ServletContext sc = sce.getServletContext();
+		unregisterThemes(sc);
+		unregisterPortlets(sc);
+	}
+
+	private void unregisterPortlets(ServletContext sc) {
+		try {
+			portletRepository.unregisterPortlets(sc);
+		} catch (RuntimeException e) {
+			log.error(e.getMessage(), e);
+		}
+	}
+
+	private void unregisterThemes(ServletContext sc) {
+		try {
+			themeRepository.unregisterThemes(sc.getContextPath());
+		} catch (RuntimeException e) {
+			log.error(e.getMessage(), e);
+		}
 	}
 
 	private void autowire(ServletContext sc) {
@@ -41,23 +61,21 @@ public class PortalPluginListener implements ServletContextListener {
 	}
 
 	private void initThemes(ServletContext sc) {
-		try {
-			InputStream themeXmlInputStream = sc.getResourceAsStream("/WEB-INF/midaiganes-theme.xml");
+		try (InputStream themeXmlInputStream = sc.getResourceAsStream("/WEB-INF/midaiganes-theme.xml")) {
 			log.debug("midaiganes-theme.xml exists ? {}", themeXmlInputStream != null);
 			themeRepository.registerThemes(sc.getContextPath(), themeXmlInputStream);
-		} catch (RuntimeException e) {
+		} catch (RuntimeException | IOException e) {
 			log.error(e.getMessage(), e);
 		}
 	}
 
 	private void initPortlets(ServletContext sc) {
-		try {
-			InputStream portletInputStream = sc.getResourceAsStream("/WEB-INF/portlet.xml");
+		try (InputStream portletInputStream = sc.getResourceAsStream("/WEB-INF/portlet.xml")) {
 			log.debug("portlet.xml exists ? {}", portletInputStream != null);
 			if (portletInputStream != null) {
 				portletRepository.registerPortlets(sc, portletInputStream);
 			}
-		} catch (RuntimeException e) {
+		} catch (RuntimeException | IOException e) {
 			log.error(e.getMessage(), e);
 		}
 	}

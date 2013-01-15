@@ -26,7 +26,7 @@ public class PortletURLImpl extends BaseURLImpl implements PortletURL {
 	private final List<PortletMode> allowedPortletModes;
 
 	public PortletURLImpl(PortletRequestImpl request, PortletLifecycle lifecycle) {
-		this(request, new PortletNamespace(request.getWindowID()), lifecycle);
+		this(request, request.getPortletNamespace(), lifecycle);
 	}
 
 	public PortletURLImpl(PortletRequestImpl request, PortletNamespace namespace, PortletLifecycle lifecycle) {

@@ -10,9 +10,9 @@ public class ParamTag extends BasePortletTag {
 	@Override
 	public int doEndTag() throws JspException {
 		try {
-			Tag parent = getParent();
-			if (parent instanceof PortletURLTag) {
-				((PortletURLTag) parent).addParam(name, value);
+			PortletURLTag parent = getPortletURLTag();
+			if (parent != null) {
+				parent.addParam(name, value);
 			} else {
 				throw new JspException("param tag must be in actionURL/renderURL");
 			}
@@ -20,6 +20,17 @@ public class ParamTag extends BasePortletTag {
 		} finally {
 			release();
 		}
+	}
+
+	private PortletURLTag getPortletURLTag() {
+		Tag tag = getParent();
+		while (tag != null) {
+			if (tag instanceof PortletURLTag) {
+				return (PortletURLTag) tag;
+			}
+			tag = tag.getParent();
+		}
+		return null;
 	}
 
 	@Override

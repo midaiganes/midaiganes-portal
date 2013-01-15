@@ -63,6 +63,6 @@ public class DefineObjectsTag extends BasePortletTag {
 
 	private void setAttribute(String name, Object value) {
 		getPageContext().setAttribute(name, value);
-		getPageContext().getRequest().setAttribute(name, value);
+		getHttpServletRequest().setAttribute(name, value);
 	}
 }

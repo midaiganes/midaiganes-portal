@@ -8,6 +8,10 @@ import javax.portlet.PortletMode;
 public class PortletModeUtil {
 	private static final List<PortletMode> portalSupportedPortletModes = Arrays.asList(PortletMode.VIEW, PortletMode.EDIT);
 
+	public static List<PortletMode> getPortalSupportedPortletModes() {
+		return portalSupportedPortletModes;
+	}
+
 	public static PortletMode getPortletMode(String pm) {
 		for (PortletMode portletMode : portalSupportedPortletModes) {
 			if (portletMode.toString().equals(pm)) {
@@ -18,7 +22,6 @@ public class PortletModeUtil {
 	}
 
 	public static PortletMode getPortletMode(String pm, PortletMode def) {
-		PortletMode portletMode = getPortletMode(pm);
-		return portletMode != null ? portletMode : def;
+		return GetterUtil.get(getPortletMode(pm), def);
 	}
 }
