@@ -61,7 +61,11 @@ public class LayoutPortletServlet extends HttpServlet {
 	private void getPortletAppAndRenderPortlet(HttpServletRequest request, HttpServletResponse response, PageDisplay pageDisplay, LayoutPortlet layoutPortlet) {
 		PortletURL portletURL = pageDisplay.getPortletURL();
 		PortletApp portletApp = getPortletApp(layoutPortlet, portletURL, layoutPortlet.getPortletInstance());
-		portletApp.doRender(request, response);
+		if (portletApp != null) {
+			portletApp.doRender(request, response);
+		} else {
+			log.info("portlet app not found for layout portlet: {}", layoutPortlet);
+		}
 	}
 
 	private PortletApp getPortletApp(LayoutPortlet layoutPortlet, PortletURL portletURL, PortletInstance pi) {
