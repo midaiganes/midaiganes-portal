@@ -50,4 +50,10 @@ public class LayoutPortlet implements Serializable {
 	public void setPortletInstance(PortletInstance portletInstance) {
 		this.portletInstance = portletInstance;
 	}
+
+	@Override
+	public String toString() {
+		return "LayoutPortlet [id=" + id + ", portletInstanceId=" + portletInstanceId + ", layoutId=" + layoutId + ", rowId=" + rowId + ", portletInstance="
+				+ portletInstance + "]";
+	}
 }
