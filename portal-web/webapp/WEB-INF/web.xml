@@ -11,16 +11,6 @@
 	<distributable/>
 	
 	<context-param>
-		<param-name>log4jConfigLocation</param-name>
-		<param-value>file:@project.basedir@/portal-web/webapp/WEB-INF/log4j.xml</param-value>
-	</context-param>
-	
-	<context-param>
-		<param-name>log4jRefreshInterval</param-name>
-		<param-value>5000</param-value>
-	</context-param>
-	
-	<context-param>
 		<param-name>parentContextKey</param-name>
 		<param-value>portal</param-value>
 	</context-param>
@@ -39,10 +29,6 @@
 		<param-name>contextClass</param-name>
 		<param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
 	</context-param>
-	
-	<listener>
-		<listener-class>ee.midaiganes.servlet.listener.Log4jConfigListener</listener-class>
-	</listener>
 	
 	<listener>
 		<listener-class>ee.midaiganes.servlet.listener.LoggingListener</listener-class>
