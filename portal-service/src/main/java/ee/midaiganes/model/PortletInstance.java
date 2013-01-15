@@ -32,4 +32,9 @@ public class PortletInstance implements Serializable {
 	public void setWindowID(String windowID) {
 		this.windowID = windowID;
 	}
+
+	@Override
+	public String toString() {
+		return "PortletInstance [id=" + id + ", portletName=" + portletName + ", windowID=" + windowID + "]";
+	}
 }
