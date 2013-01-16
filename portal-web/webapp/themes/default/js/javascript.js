@@ -142,13 +142,16 @@ jQuery(function() {
 		return false;
 	});
 	jQuery('body').on('click', 'form .ajax-submit', function() {
-		var f = jQuery(this).closes('form');
-		var d = jQuery(f).serialize();
-		jQuery.post({
-			url: f.attr('action'),
+		var f = jQuery(this).closest('form');
+		var d = f.serialize();
+		var _url = f.attr('action');
+		jQuery.ajax({
+			type: 'POST',
+			url: _url,
 			data: d,
-			success: function(d) {
-				f.parent().html(d);
+			dataType: "html",
+			success: function(data) {
+				f.parent().html(data);
 			},
 			error: function() {
 				// TODO
