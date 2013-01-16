@@ -42,4 +42,39 @@
 		</attribute>
 		<dynamic-attributes>false</dynamic-attributes>
 	</tag>
+	<tag>
+		<name>portlet-render-url</name>
+		<tag-class>ee.midaiganes.tag.PortalPortletRenderURLTag</tag-class>
+		<body-content>JSP</body-content>
+		<attribute>
+		   <name>portletMode</name>
+		   <rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+		   <name>secure</name>
+		   <rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+		   <name>var</name>
+		   <rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+		   <name>windowState</name>
+		   <rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+		   <name>escapeXml</name>
+		   <rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+		   <name>copyCurrentRenderParameters</name>
+		   <rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+		   <name>portletName</name>
+		   <required>true</required>
+		   <rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<dynamic-attributes>false</dynamic-attributes>
+	</tag>
 </taglib>

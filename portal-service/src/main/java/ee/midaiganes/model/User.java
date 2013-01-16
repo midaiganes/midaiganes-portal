@@ -32,4 +32,8 @@ public class User implements Serializable {
 	public void setPassword(String password) {
 		this.password = password;
 	}
+
+	public boolean isDefaultUser() {
+		return id == DefaultUser.DEFAULT_USER_ID;
+	}
 }

@@ -146,4 +146,25 @@
 			<keywords>welcome</keywords>
 		</portlet-info>
 	</portlet>
+	
+	<portlet>
+		<portlet-name>login</portlet-name>
+		<display-name>login</display-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<init-param>
+			<name>contextConfigLocation</name>
+			<value>/WEB-INF/portlet-context/login-portlet.xml</value>
+		</init-param>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+			<window-state>normal</window-state>
+			<window-state>exclusive</window-state>
+		</supports>
+		<portlet-info>
+			<title>login</title>
+			<short-title>login</short-title>
+			<keywords>login</keywords>
+		</portlet-info>
+	</portlet>
 </portlet-app>

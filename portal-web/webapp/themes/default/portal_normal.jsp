@@ -27,6 +27,15 @@
 		</div>
 		<div id="page">
 			<div id="header">
+				<c:choose>
+					<c:when test="${pageDisplay.user.defaultUser}">
+						<portal-taglib:portlet-render-url portletName="midaiganes_w_login" var="loginUrl" windowState="exclusive" />
+						<a href="${loginUrl}" class="open-dialog">Log in</a>
+					</c:when>
+					<c:otherwise>
+						Username: ${pageDisplay.user.username}
+					</c:otherwise>
+				</c:choose>
 			</div>
 			<div id="site-menu">
 				<c:forEach items="${navItems}" var="navItem">
@@ -34,7 +43,7 @@
 				</c:forEach>
 			</div>
 			<div id="content">
-				<%-- portal-taglib:runtime-portlet name="snowportal_w_layout-set" / --%>
+				<%-- portal-taglib:runtime-portlet name="midaiganes_w_layout-set" / --%>
 				<portal-taglib:page-layout />
 			</div>
 		</div>

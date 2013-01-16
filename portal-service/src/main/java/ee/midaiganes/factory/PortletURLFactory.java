@@ -8,12 +8,16 @@ import javax.portlet.WindowState;
 import javax.portlet.WindowStateException;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.stereotype.Component;
+
+import ee.midaiganes.beans.RootApplicationContext;
 import ee.midaiganes.model.MidaiganesWindowState;
 import ee.midaiganes.model.PortletLifecycle;
 import ee.midaiganes.model.PortletName;
 import ee.midaiganes.portlet.impl.PortletURLImpl;
 import ee.midaiganes.util.StringPool;
 
+@Component(value = RootApplicationContext.PORTLET_URL_FACTORY)
 public class PortletURLFactory {
 	public PortletURL makeRenderURL(HttpServletRequest request, PortletName portletName) {
 		return new PortletURLImpl(request, StringPool.DEFAULT_PORTLET_WINDOWID,

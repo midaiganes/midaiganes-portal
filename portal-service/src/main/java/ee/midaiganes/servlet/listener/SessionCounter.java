@@ -1,6 +1,7 @@
 package ee.midaiganes.servlet.listener;
 
-import java.lang.management.ManagementFactory;
+import static java.lang.management.ManagementFactory.getPlatformMBeanServer;
+
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.management.InstanceAlreadyExistsException;
@@ -21,10 +22,10 @@ import org.slf4j.LoggerFactory;
 public class SessionCounter implements SessionCounterMBean, HttpSessionListener, ServletContextListener {
 	private static final Logger log = LoggerFactory.getLogger(SessionCounter.class);
 	private final AtomicLong sessionCount = new AtomicLong();
+	private static final String OBJECT_NAME = "ee.midaiganes:type=Sessions";
 
 	private void registerMBean() throws MalformedObjectNameException, InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException {
-		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-		mbs.registerMBean(this, new ObjectName("ee.midaiganes:type=Sessions"));
+		getPlatformMBeanServer().registerMBean(this, new ObjectName(OBJECT_NAME));
 	}
 
 	@Override
@@ -39,8 +40,8 @@ public class SessionCounter implements SessionCounterMBean, HttpSessionListener,
 	@Override
 	public void contextDestroyed(ServletContextEvent sce) {
 		try {
-			MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-			ObjectName name = new ObjectName("ee.midaiganes:type=Sessions");
+			MBeanServer mbs = getPlatformMBeanServer();
+			ObjectName name = new ObjectName(OBJECT_NAME);
 			if (mbs.isRegistered(name)) {
 				mbs.unregisterMBean(name);
 			}
