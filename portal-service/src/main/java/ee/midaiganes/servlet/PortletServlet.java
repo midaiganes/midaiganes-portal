@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
-import javax.portlet.Portlet;
 import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
@@ -12,12 +11,13 @@ import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
-import javax.portlet.ResourceServingPortlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ee.midaiganes.portlet.MidaiganesPortlet;
 
 public class PortletServlet extends HttpServlet {
 
@@ -32,7 +32,7 @@ public class PortletServlet extends HttpServlet {
 
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response) {
-		Portlet portlet = (Portlet) request.getAttribute(PORTLET_APP);
+		MidaiganesPortlet portlet = (MidaiganesPortlet) request.getAttribute(PORTLET_APP);
 		PortletRequest portletRequest = (PortletRequest) request.getAttribute(PORTLET_REQUEST);
 		PortletResponse portletResponse = (PortletResponse) request.getAttribute(PORTLET_RESPONSE);
 		String method = (String) request.getAttribute(PORTLET_METHOD);
@@ -48,14 +48,14 @@ public class PortletServlet extends HttpServlet {
 		}
 	}
 
-	private void executePortlet(Portlet portlet, PortletRequest portletRequest, PortletResponse portletResponse, String method) throws PortletException,
-			IOException {
+	private void executePortlet(MidaiganesPortlet portlet, PortletRequest portletRequest, PortletResponse portletResponse, String method)
+			throws PortletException, IOException {
 		if (PORTLET_METHOD_RENDER.equals(method)) {
 			portlet.render((RenderRequest) portletRequest, (RenderResponse) portletResponse);
 		} else if (PORTLET_METHOD_ACTION.equals(method)) {
 			portlet.processAction((ActionRequest) portletRequest, (ActionResponse) portletResponse);
 		} else if (PORTLET_METHOD_RESOURCE.equals(method)) {
-			((ResourceServingPortlet) portlet).serveResource((ResourceRequest) portletRequest, (ResourceResponse) portletResponse);
+			portlet.serveResource((ResourceRequest) portletRequest, (ResourceResponse) portletResponse);
 		} else {
 			log.warn("unknown method: '{}'", method);
 		}

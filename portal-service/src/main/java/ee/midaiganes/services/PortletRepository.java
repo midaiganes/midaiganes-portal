@@ -32,6 +32,7 @@ import ee.midaiganes.model.PortletAndConfiguration;
 import ee.midaiganes.model.PortletInitParameter;
 import ee.midaiganes.model.PortletInitParameter.Description;
 import ee.midaiganes.model.PortletName;
+import ee.midaiganes.portlet.MidaiganesPortlet;
 import ee.midaiganes.portlet.app.PortletApp;
 import ee.midaiganes.portlet.impl.PortletConfigImpl;
 import ee.midaiganes.util.StringPool;
@@ -86,7 +87,8 @@ public class PortletRepository {
 						lock.writeLock().unlock();
 					}
 					if (conf != null) {
-						conf.getPortlet().destroy();
+						// conf.getPortlet().destroy();
+						conf.getMidaiganesPortlet().destroy();
 						log.info("portlet destroyed: {}", entry);
 					}
 				} catch (RuntimeException e) {
@@ -107,7 +109,8 @@ public class PortletRepository {
 	}
 
 	public PortletApp getPortletApp(LayoutPortlet layoutPortlet, PortletMode portletMode, WindowState windowState) {
-		return getPortletApp(layoutPortlet.getPortletInstance().getPortletName(), layoutPortlet.getPortletInstance().getWindowID(), portletMode, windowState);
+		return getPortletApp(layoutPortlet.getPortletInstance().getPortletNamespace().getPortletName(), layoutPortlet.getPortletInstance()
+				.getPortletNamespace().getWindowID(), portletMode, windowState);
 	}
 
 	private PortletAndConfiguration getPortlet(PortletName portletName) {
@@ -160,7 +163,7 @@ public class PortletRepository {
 				PortletName portletName = new PortletName(getContextPathName(servletContext), portletType.getPortletName().getValue());
 				lock.writeLock().lock();
 				try {
-					portlets.put(portletName, new PortletAndConfiguration(portlet, portletConfig, portletType));
+					portlets.put(portletName, new PortletAndConfiguration(new MidaiganesPortlet(portlet, portletName), portletConfig, portletType));
 				} finally {
 					lock.writeLock().unlock();
 				}

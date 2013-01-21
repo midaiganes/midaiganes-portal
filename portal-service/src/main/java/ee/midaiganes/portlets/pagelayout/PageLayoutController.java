@@ -37,7 +37,10 @@ public class PageLayoutController {
 
 	@RenderMapping
 	public String view(RenderRequest request, Model model) {
-		model.addAttribute("pageLayoutName", pageLayoutRepository.getPageLayout(getPageLayoutId(request)).getPageLayoutName());
+		PageLayout pageLayout = pageLayoutRepository.getPageLayout(getPageLayoutId(request));
+		if (pageLayout != null) {
+			model.addAttribute("pageLayoutName", pageLayout.getPageLayoutName());
+		}
 		return "pagelayout/view";
 	}
 

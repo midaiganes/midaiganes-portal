@@ -6,8 +6,7 @@ public class PortletInstance implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private long id;
-	private PortletName portletName;
-	private String windowID;
+	private PortletNamespace portletNamespace;
 
 	public long getId() {
 		return id;
@@ -17,24 +16,16 @@ public class PortletInstance implements Serializable {
 		this.id = id;
 	}
 
-	public PortletName getPortletName() {
-		return portletName;
+	public PortletNamespace getPortletNamespace() {
+		return portletNamespace;
 	}
 
-	public void setPortletName(PortletName portletName) {
-		this.portletName = portletName;
-	}
-
-	public String getWindowID() {
-		return windowID;
-	}
-
-	public void setWindowID(String windowID) {
-		this.windowID = windowID;
+	public void setPortletNamespace(PortletNamespace portletNamespace) {
+		this.portletNamespace = portletNamespace;
 	}
 
 	@Override
 	public String toString() {
-		return "PortletInstance [id=" + id + ", portletName=" + portletName + ", windowID=" + windowID + "]";
+		return "PortletInstance [id=" + id + ", portletNamespace=" + portletNamespace + "]";
 	}
 }

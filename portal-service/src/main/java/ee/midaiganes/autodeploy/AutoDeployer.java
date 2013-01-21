@@ -1,17 +1,18 @@
 package ee.midaiganes.autodeploy;
 
-import java.io.ByteArrayOutputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.file.ClosedWatchServiceException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
@@ -43,27 +44,29 @@ import org.xml.sax.SAXException;
 
 import ee.midaiganes.javax.servlet.PortalPluginListener;
 import ee.midaiganes.servlet.PortletServlet;
+import ee.midaiganes.util.IOUtil;
+import ee.midaiganes.util.StringPool;
 
 public class AutoDeployer implements Runnable {
 	private static final Logger log = LoggerFactory.getLogger(AutoDeployer.class);
-	// private final String autoDeployDir;
+	private static final Charset UTF_8 = Charset.forName(StringPool.UTF_8);
 	private final WatchService watcher;
-	private final Path dir;
+	private final Path autodeployDir;
+	private final Path webappsDir;
+	private boolean run = true;
 
-	public AutoDeployer(String autoDeployDir) throws IOException {
-		// this.autoDeployDir = autoDeployDir;
-		log.info("AUTODEPLOY DIR: " + new File(autoDeployDir).getAbsolutePath());
-		// System.getProperty("java.io.tmpdir");
-		dir = Paths.get(autoDeployDir);
+	public AutoDeployer(Path autodeployDir, Path webappsDir) throws IOException {
+		this.autodeployDir = autodeployDir;
+		this.webappsDir = webappsDir;
+		log.info("AUTODEPLOY DIR: '" + autodeployDir.toFile().getAbsolutePath() + "'; WEBAPPS DIR: '" + this.webappsDir.toFile().getAbsolutePath() + "'");
 		watcher = FileSystems.getDefault().newWatchService();
 		// WatchKey key =
-
-		dir.register(watcher, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
+		autodeployDir.register(watcher, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
 	}
 
 	@Override
 	public void run() {
-		while (true) {
+		while (run) {
 			WatchKey key = null;
 			try {
 				key = watcher.take();// throws
@@ -75,6 +78,7 @@ public class AutoDeployer implements Runnable {
 				break;
 			} catch (InterruptedException e) {
 				log.info("autodeployer interrupted");
+				log.debug(e.getMessage(), e);
 			} catch (RuntimeException | IOException e) {
 				log.error(e.getMessage(), e);
 			} finally {
@@ -90,7 +94,7 @@ public class AutoDeployer implements Runnable {
 		if (!kind.equals(StandardWatchEventKinds.OVERFLOW)) {
 			WatchEvent<?/* Path */> ev = event;
 			Path name = (Path) ev.context();
-			Path child = dir.resolve(name);
+			Path child = autodeployDir.resolve(name);
 			if (isReadableWarFileCreated(kind, child)) {
 				doWithWarFile(child);
 			}
@@ -103,53 +107,48 @@ public class AutoDeployer implements Runnable {
 				if (Files.isReadable(child)) {
 					return true;
 				} else {
-					log.warn("not readable file:" + child);
+					log.warn("not readable file: '{}'", child);
 				}
 			} else {
-				log.warn("not regular file: " + child);
+				log.warn("not regular file: '{}'", child);
 			}
 		} else {
-			log.warn("kind: " + kind);
+			log.warn("kind: '{}'", kind);
 		}
 		return false;
 	}
 
 	private void doWithWarFile(Path warFilePath) throws ZipException, IOException {
 		File childFile = warFilePath.toFile();
-		try (ZipFile warFile = new ZipFile(childFile); ZipOutputStream tempZipFile = getTempZipFile(childFile.getName())) {
+		TempZipFile tempZipFile = getTempZipFile(childFile.getName());
+		try (ZipFile warFile = new ZipFile(childFile, ZipFile.OPEN_READ, UTF_8); ZipOutputStream tempZipFileStream = tempZipFile.getZipOutputStream()) {
 			Enumeration<? extends ZipEntry> e = warFile.entries();
 			while (e.hasMoreElements()) {
-				doWithZipEntry(warFile, tempZipFile, e.nextElement());
+				doWithZipEntry(warFile, tempZipFileStream, e.nextElement());
 			}
 		}
+		// TODO
+		Files.move(tempZipFile.file.toPath(), autodeployDir.getParent().resolve("apache-tomcat-7.0.26").resolve("webapps").resolve(childFile.getName()),
+				StandardCopyOption.ATOMIC_MOVE);
 	}
 
 	private void doWithZipEntry(ZipFile warFile, ZipOutputStream tempZipFile, ZipEntry entry) throws IOException {
-		String name = entry.getName();
-		log.error("zip-entry: " + name);
-		if (name.equals("WEB-INF/web.xml") && !entry.isDirectory()) {
-			tempZipFile.putNextEntry(entry);
-			try (InputStream in = warFile.getInputStream(entry)) {
-				byte[] buffer = new byte[1024];
-				int bytesRead;
-				while ((bytesRead = in.read(buffer)) != -1) {
-					tempZipFile.write(buffer, 0, bytesRead);
-				}
-			}
-			doWithWebXmlZipEntry(warFile, tempZipFile, entry);
-		} else {
-			tempZipFile.putNextEntry(entry);
-			if (!entry.isDirectory()) {
-				try (InputStream in = warFile.getInputStream(entry)) {
-					int bytesRead;
-					byte[] buffer = new byte[1024];
-					while ((bytesRead = in.read(buffer)) != -1) {
-						tempZipFile.write(buffer, 0, bytesRead);
+		try {
+			String name = entry.getName();
+			log.debug("zip-entry: '{}'", name);
+			if (name.equals("WEB-INF/web.xml") && !entry.isDirectory()) {
+				doWithWebXmlZipEntry(warFile, tempZipFile, entry);
+			} else {
+				tempZipFile.putNextEntry(entry);
+				if (!entry.isDirectory()) {
+					try (InputStream in = warFile.getInputStream(entry)) {
+						IOUtil.copy(in, tempZipFile);
 					}
 				}
 			}
+		} finally {
+			tempZipFile.closeEntry();
 		}
-		tempZipFile.closeEntry();
 	}
 
 	private void doWithWebXmlZipEntry(ZipFile warFile, ZipOutputStream tempZipFile, ZipEntry entry) {
@@ -171,18 +170,16 @@ public class AutoDeployer implements Runnable {
 				//
 				DOMSource source = new DOMSource(doc);
 				Transformer transformer = TransformerFactory.newInstance().newTransformer();
-				transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+				transformer.setOutputProperty(OutputKeys.ENCODING, StringPool.UTF_8);
 				transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				StreamResult result = new StreamResult(baos);
-				transformer.transform(source, result);
-				System.out.println("XML = " + baos.toString("UTF-8"));
+
+				// write to tmp zip entry
+				tempZipFile.putNextEntry(new ZipEntry(entry.getName()));
+				transformer.transform(source, new StreamResult(tempZipFile));
 			} catch (SAXException | ParserConfigurationException | TransformerConfigurationException | TransformerFactoryConfigurationError e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error(e.getMessage(), e);
 			} catch (TransformerException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error(e.getMessage(), e);
 			}
 		} catch (/* JAXBException | */IOException e) {
 			log.error(e.getMessage(), e);
@@ -219,15 +216,29 @@ public class AutoDeployer implements Runnable {
 		return el;
 	}
 
-	private ZipOutputStream getTempZipFile(String name) throws FileNotFoundException, IOException {
-		return new ZipOutputStream(new FileOutputStream(Files.createTempFile(name, ".war").toFile()));
+	private TempZipFile getTempZipFile(String name) throws FileNotFoundException, IOException {
+		return new TempZipFile(name);
 	}
 
 	public void stop() {
 		try {
+			this.run = false;
 			watcher.close();
 		} catch (IOException e) {
 			log.error(e.getMessage(), e);
+		}
+	}
+
+	private class TempZipFile {
+		private final File file;
+
+		public TempZipFile(String name) throws IOException {
+			// TODO create file into webapps dir?
+			file = Files.createFile(autodeployDir.getParent().resolve(name)).toFile();
+		}
+
+		public ZipOutputStream getZipOutputStream() throws FileNotFoundException {
+			return new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(file), 1024), UTF_8);
 		}
 	}
 }

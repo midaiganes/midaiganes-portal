@@ -51,7 +51,7 @@ public class LayoutPortletRepository {
 
 	public LayoutPortlet getLayoutPortlet(long layoutId, String portletWindowID) {
 		for (LayoutPortlet layoutPortlet : getLayoutPortlets(layoutId)) {
-			if (layoutPortlet.getPortletInstance().getWindowID().equals(portletWindowID)) {
+			if (layoutPortlet.getPortletInstance().getPortletNamespace().getWindowID().equals(portletWindowID)) {
 				return layoutPortlet;
 			}
 		}

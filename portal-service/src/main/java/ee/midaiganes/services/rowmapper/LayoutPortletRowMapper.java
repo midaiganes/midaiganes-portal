@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.RowMapper;
 import ee.midaiganes.model.LayoutPortlet;
 import ee.midaiganes.model.PortletInstance;
 import ee.midaiganes.model.PortletName;
+import ee.midaiganes.model.PortletNamespace;
 
 public class LayoutPortletRowMapper implements RowMapper<LayoutPortlet> {
 	@Override
@@ -19,8 +20,7 @@ public class LayoutPortletRowMapper implements RowMapper<LayoutPortlet> {
 		layoutPortlet.setPortletInstanceId(rs.getLong(4));
 		PortletInstance portletInstance = new PortletInstance();
 		portletInstance.setId(rs.getLong(5));
-		portletInstance.setPortletName(new PortletName(rs.getString(6), rs.getString(7)));
-		portletInstance.setWindowID(rs.getString(8));
+		portletInstance.setPortletNamespace(new PortletNamespace(new PortletName(rs.getString(6), rs.getString(7)), rs.getString(8)));
 		layoutPortlet.setPortletInstance(portletInstance);
 		return layoutPortlet;
 	}

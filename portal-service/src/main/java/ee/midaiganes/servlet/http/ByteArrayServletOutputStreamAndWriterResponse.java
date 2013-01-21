@@ -52,9 +52,13 @@ public class ByteArrayServletOutputStreamAndWriterResponse extends HttpServletRe
 
 	private void initWriter() throws IOException {
 		try {
-			writer = new PrintWriter(new OutputStreamWriter(basos, getCharacterEncoding()), true);
+			writer = new PrintWriter(getOutputStreamWriter(), true);
 		} catch (UnsupportedEncodingException e) {
 			throw new IOException(e);
 		}
+	}
+
+	private OutputStreamWriter getOutputStreamWriter() throws UnsupportedEncodingException {
+		return new OutputStreamWriter(basos, getCharacterEncoding());
 	}
 }

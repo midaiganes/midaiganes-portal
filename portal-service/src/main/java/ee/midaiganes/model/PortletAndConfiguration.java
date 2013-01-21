@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.portlet.Portlet;
 import javax.portlet.PortletConfig;
 import javax.portlet.PortletMode;
 import javax.portlet.WindowState;
@@ -13,24 +12,25 @@ import ee.midaiganes.generated.xml.portlet.PortletModeType;
 import ee.midaiganes.generated.xml.portlet.PortletType;
 import ee.midaiganes.generated.xml.portlet.SupportsType;
 import ee.midaiganes.generated.xml.portlet.WindowStateType;
+import ee.midaiganes.portlet.MidaiganesPortlet;
 import ee.midaiganes.util.PortletModeUtil;
 import ee.midaiganes.util.WindowStateUtil;
 
 public class PortletAndConfiguration {
-	private final Portlet portlet;
+	private final MidaiganesPortlet midaiganesPortlet;
 	private final PortletConfig portletConfig;
 	private final List<WindowState> supportedWindowStates;
 	private final List<PortletMode> supportedPortletModes;
 
-	public PortletAndConfiguration(Portlet portlet, PortletConfig portletConfig, PortletType portletType) {
-		this.portlet = portlet;
+	public PortletAndConfiguration(MidaiganesPortlet portlet, PortletConfig portletConfig, PortletType portletType) {
+		this.midaiganesPortlet = portlet;
 		this.portletConfig = portletConfig;
 		this.supportedWindowStates = getSupportedWindowStates(portletType);
 		this.supportedPortletModes = getSupportedPortletModes(portletType);
 	}
 
-	public Portlet getPortlet() {
-		return portlet;
+	public MidaiganesPortlet getMidaiganesPortlet() {
+		return midaiganesPortlet;
 	}
 
 	public PortletConfig getPortletConfig() {
@@ -73,7 +73,6 @@ public class PortletAndConfiguration {
 
 	@Override
 	public String toString() {
-		return "PortletAndConfiguration [portlet=" + portlet + ", supportedWindowStates=" + supportedWindowStates + ", supportedPortletModes="
-				+ supportedPortletModes + "]";
+		return "PortletAndConfiguration [supportedWindowStates=" + supportedWindowStates + ", supportedPortletModes=" + supportedPortletModes + "]";
 	}
 }

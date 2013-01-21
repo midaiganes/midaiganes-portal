@@ -1,6 +1,7 @@
 package ee.midaiganes.javax.servlet;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -19,7 +20,7 @@ public class PortalServletContextListener implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 		try {
-			autoDeployer = new AutoDeployer("../../autodeploy");
+			autoDeployer = new AutoDeployer(Paths.get("../../autodeploy"), Paths.get("./"));// TODO
 			autoDeploy = new Thread(autoDeployer, AutoDeployer.class.getName());
 			autoDeploy.start();
 		} catch (IOException e) {

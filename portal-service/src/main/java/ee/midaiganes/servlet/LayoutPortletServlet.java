@@ -18,12 +18,14 @@ import ee.midaiganes.beans.RootApplicationContext;
 import ee.midaiganes.model.LayoutPortlet;
 import ee.midaiganes.model.PageDisplay;
 import ee.midaiganes.model.PortletInstance;
+import ee.midaiganes.model.PortletNamespace;
 import ee.midaiganes.model.RequestInfo.PortletURL;
 import ee.midaiganes.portlet.app.PortletApp;
 import ee.midaiganes.services.LayoutPortletRepository;
 import ee.midaiganes.services.PortletRepository;
 import ee.midaiganes.util.RequestUtil;
 import ee.midaiganes.util.StringPool;
+import ee.midaiganes.util.ThemeUtil;
 
 public class LayoutPortletServlet extends HttpServlet {
 	public static final String ID = LayoutPortletServlet.class.getName() + ".ID";
@@ -47,7 +49,7 @@ public class LayoutPortletServlet extends HttpServlet {
 
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		long id = (Long) request.getAttribute(ID);
+		long id = ((Long) request.getAttribute(ID)).longValue();
 		if (id < 0) {
 			throw new ServletException("id(" + id + ") is < 0");
 		}
@@ -65,18 +67,27 @@ public class LayoutPortletServlet extends HttpServlet {
 			portletApp.doRender(request, response);
 		} else {
 			log.info("portlet app not found for layout portlet: {}", layoutPortlet);
+			includePortletJsp(request, response, layoutPortlet.getPortletInstance());
+		}
+	}
+
+	private void includePortletJsp(HttpServletRequest request, HttpServletResponse response, PortletInstance portletInstance) {
+		try {
+			ThemeUtil.includePortletJsp(request, response, portletInstance.getPortletNamespace(), "portlet is undeployed");
+		} catch (ServletException | IOException e) {
+			log.error(e.getMessage(), e);
 		}
 	}
 
 	private PortletApp getPortletApp(LayoutPortlet layoutPortlet, PortletURL portletURL, PortletInstance pi) {
-		if (portletURL != null && isCurrentPortletInUrl(portletURL, pi, portletURL.getWindowID())) {
+		if (portletURL != null && isCurrentPortletInUrl(portletURL, pi.getPortletNamespace(), portletURL.getWindowID())) {
 			return portletRepository.getPortletApp(layoutPortlet, portletURL.getPortletMode(), portletURL.getWindowState());
 		}
 		return portletRepository.getPortletApp(layoutPortlet, PortletMode.VIEW, WindowState.NORMAL);
 	}
 
-	private boolean isCurrentPortletInUrl(PortletURL portletURL, PortletInstance pi, String urlWindowId) {
-		return isDefaultWindowId(urlWindowId) ? pi.getPortletName().equals(portletURL.getPortletName()) : pi.getWindowID().equals(urlWindowId);
+	private boolean isCurrentPortletInUrl(PortletURL portletURL, PortletNamespace pn, String urlWindowId) {
+		return isDefaultWindowId(urlWindowId) ? pn.getPortletName().equals(portletURL.getPortletName()) : pn.getWindowID().equals(urlWindowId);
 	}
 
 	private boolean isDefaultWindowId(String urlWindowId) {

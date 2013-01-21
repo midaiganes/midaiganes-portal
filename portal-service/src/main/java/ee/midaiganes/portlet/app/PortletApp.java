@@ -4,14 +4,12 @@ import java.io.IOException;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
-import javax.portlet.Portlet;
 import javax.portlet.PortletException;
 import javax.portlet.PortletMode;
 import javax.portlet.PortletPreferences;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
 import javax.portlet.RenderResponse;
-import javax.portlet.ResourceServingPortlet;
 import javax.portlet.WindowState;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -26,7 +24,7 @@ import ee.midaiganes.model.MidaiganesWindowState;
 import ee.midaiganes.model.PortletAndConfiguration;
 import ee.midaiganes.model.PortletName;
 import ee.midaiganes.model.PortletNamespace;
-import ee.midaiganes.model.Theme;
+import ee.midaiganes.portlet.MidaiganesPortlet;
 import ee.midaiganes.portlet.impl.ActionRequestImpl;
 import ee.midaiganes.portlet.impl.ActionResponseImpl;
 import ee.midaiganes.portlet.impl.PortletPreferencesImpl;
@@ -39,13 +37,12 @@ import ee.midaiganes.servlet.PortletServlet;
 import ee.midaiganes.servlet.http.ByteArrayServletOutputStreamAndWriterResponse;
 import ee.midaiganes.servlet.http.PortletServletRequest;
 import ee.midaiganes.util.ContextUtil;
-import ee.midaiganes.util.RequestUtil;
 import ee.midaiganes.util.StringPool;
+import ee.midaiganes.util.ThemeUtil;
 
 public class PortletApp {
 	private static final Logger log = LoggerFactory.getLogger(PortletApp.class);
-	private static final String PORTLET_JSP = "/portlet.jsp";
-	private final Portlet portlet;
+	private final MidaiganesPortlet portlet;
 	private final PortletNamespace namespace;
 	private final PortletMode portletMode;
 	private final WindowState windowState;
@@ -57,7 +54,7 @@ public class PortletApp {
 		if (windowID == null) {
 			throw new IllegalArgumentException("windowID is null");
 		}
-		this.portlet = portletConfiguration.getPortlet();
+		this.portlet = portletConfiguration.getMidaiganesPortlet();
 		if (portlet == null) {
 			throw new IllegalArgumentException("portlet is null");
 		}
@@ -105,19 +102,10 @@ public class PortletApp {
 			PortletPreferences portletPreferences = getPortletPreferences();
 			RenderRequestImpl renderRequest = getRenderRequest(request, resp, portletPreferences);
 			includePortletServlet(request, resp, renderRequest, getRenderResponse(resp, renderRequest), PortletServlet.PORTLET_METHOD_RENDER);
-			includePortletJsp(request, response, new String(resp.getBytes(), resp.getCharacterEncoding()));
+			ThemeUtil.includePortletJsp(request, response, namespace, new String(resp.getBytes(), resp.getCharacterEncoding()));
 		} catch (ServletException | IOException | RuntimeException e) {
 			log.error(e.getMessage(), e);
 		}
-	}
-
-	private void includePortletJsp(HttpServletRequest request, HttpServletResponse response, String portletContent) throws ServletException, IOException {
-		Theme theme = RequestUtil.getPageDisplay(request).getTheme();
-		getRequestDispatcher(theme, request).include(new PortletJspRequest(request, portletContent, namespace), response);
-	}
-
-	private RequestDispatcher getRequestDispatcher(Theme theme, HttpServletRequest request) {
-		return ContextUtil.getRequestDispatcher(request, theme.getThemeName().getContextWithSlash(), theme.getThemePath() + PORTLET_JSP);
 	}
 
 	public boolean processAction(HttpServletRequest request, HttpServletResponse response) {
@@ -133,15 +121,15 @@ public class PortletApp {
 	}
 
 	public void serveResource(HttpServletRequest request, HttpServletResponse response) {
-		if (portlet instanceof ResourceServingPortlet) {
+		if (portlet.isResourceServingPortlet()) {
 			try {
 				log.warn("serveResource not implemented");
-				((ResourceServingPortlet) portlet).serveResource(null, null);
+				portlet.serveResource(null, null);
 			} catch (RuntimeException | IOException | PortletException e) {
 				log.error(e.getMessage(), e);
 			}
 		} else {
-			log.error("portlet({}) is not implementing ResourceServingPortlet interface", portlet.getClass().getName());
+			log.error("portlet is not implementing ResourceServingPortlet interface");
 		}
 	}
 
