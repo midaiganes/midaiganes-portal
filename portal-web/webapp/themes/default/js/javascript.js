@@ -74,7 +74,13 @@ window.SPortal = {
 					return false;
 				});
 				jQuery('#add-portlet .draggable-portlet-name').draggable({
-					revert: "invalid"
+					revert: "invalid",
+					start: function() {
+						jQuery('.portlet-box').css('background', 'yellow').css('padding', '10px');
+					},
+					stop: function() {
+						jQuery('.portlet-box').css('background', '').css('padding', '');
+					}
 				});
 				jQuery('.portlet-box').droppable({
 					accept: '.draggable-portlet-name',
