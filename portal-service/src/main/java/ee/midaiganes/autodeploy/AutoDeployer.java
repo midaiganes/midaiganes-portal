@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.nio.file.ClosedWatchServiceException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -44,12 +43,12 @@ import org.xml.sax.SAXException;
 
 import ee.midaiganes.javax.servlet.PortalPluginListener;
 import ee.midaiganes.servlet.PortletServlet;
+import ee.midaiganes.util.CharsetPool;
 import ee.midaiganes.util.IOUtil;
 import ee.midaiganes.util.StringPool;
 
 public class AutoDeployer implements Runnable {
 	private static final Logger log = LoggerFactory.getLogger(AutoDeployer.class);
-	private static final Charset UTF_8 = Charset.forName(StringPool.UTF_8);
 	private final WatchService watcher;
 	private final Path autodeployDir;
 	private final Path webappsDir;
@@ -121,7 +120,8 @@ public class AutoDeployer implements Runnable {
 	private void doWithWarFile(Path warFilePath) throws ZipException, IOException {
 		File childFile = warFilePath.toFile();
 		TempZipFile tempZipFile = getTempZipFile(childFile.getName());
-		try (ZipFile warFile = new ZipFile(childFile, ZipFile.OPEN_READ, UTF_8); ZipOutputStream tempZipFileStream = tempZipFile.getZipOutputStream()) {
+		try (ZipFile warFile = new ZipFile(childFile, ZipFile.OPEN_READ, CharsetPool.UTF_8);
+				ZipOutputStream tempZipFileStream = tempZipFile.getZipOutputStream()) {
 			Enumeration<? extends ZipEntry> e = warFile.entries();
 			while (e.hasMoreElements()) {
 				doWithZipEntry(warFile, tempZipFileStream, e.nextElement());
@@ -238,7 +238,7 @@ public class AutoDeployer implements Runnable {
 		}
 
 		public ZipOutputStream getZipOutputStream() throws FileNotFoundException {
-			return new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(file), 1024), UTF_8);
+			return new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(file), 1024), CharsetPool.UTF_8);
 		}
 	}
 }

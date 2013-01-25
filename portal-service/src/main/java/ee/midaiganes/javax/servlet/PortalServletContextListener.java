@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ee.midaiganes.autodeploy.AutoDeployer;
+import ee.midaiganes.util.PropsValues;
 
 public class PortalServletContextListener implements ServletContextListener {
 
@@ -20,7 +21,7 @@ public class PortalServletContextListener implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 		try {
-			autoDeployer = new AutoDeployer(Paths.get("../../autodeploy"), Paths.get("./"));// TODO
+			autoDeployer = new AutoDeployer(Paths.get(PropsValues.AUTODEPLOY_DIR), Paths.get(PropsValues.WEBAPPS_DIR));// TODO
 			autoDeploy = new Thread(autoDeployer, AutoDeployer.class.getName());
 			autoDeploy.start();
 		} catch (IOException e) {
