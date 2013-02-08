@@ -37,7 +37,7 @@ public class ThemeServlet extends HttpServlet {
 		try {
 			Theme theme = (Theme) request.getAttribute(THEME);
 			request = setThemeVariables(request, themeVariablesService.getThemeVariables(request));
-			request.getRequestDispatcher(theme.getThemePath() + "/portal_normal.jsp").include(request, response);
+			request.getRequestDispatcher(theme.getPortalNormalPath()).include(request, response);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}

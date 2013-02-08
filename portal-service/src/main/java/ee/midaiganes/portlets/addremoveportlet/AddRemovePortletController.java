@@ -1,9 +1,11 @@
 package ee.midaiganes.portlets.addremoveportlet;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.annotation.Resource;
 import javax.portlet.ActionRequest;
+import javax.portlet.ActionResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +21,7 @@ import ee.midaiganes.model.PageDisplay;
 import ee.midaiganes.model.PortletName;
 import ee.midaiganes.services.LayoutPortletRepository;
 import ee.midaiganes.services.PortletRepository;
+import ee.midaiganes.util.PortalURLUtil;
 import ee.midaiganes.util.RequestUtil;
 import ee.midaiganes.util.StringUtil;
 
@@ -63,8 +66,9 @@ public class AddRemovePortletController {
 	}
 
 	@ActionMapping(params = { "action=remove-portlet", "window-id" })
-	public void removePortletAction(@RequestParam("window-id") String windowID) {
+	public void removePortletAction(@RequestParam("window-id") String windowID, ActionRequest request, ActionResponse response) throws IOException {
 		layoutPortletRepository.deleteLayoutPortlet(windowID);
+		response.sendRedirect(PortalURLUtil.getFullURLByFriendlyURL(RequestUtil.getPageDisplay(request).getLayout().getFriendlyUrl()));
 	}
 
 	@ModelAttribute("portletNames")

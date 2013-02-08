@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivysettings>
+	<property name="ivy.shared.default.root"             value="${ivy.default.ivy.user.dir}/shared" override="false"/>
+	<property name="ivy.shared.default.ivy.pattern"      value="[organisation]/[module]/[revision]/[type]s/[artifact].[ext]" override="false"/>
+	<property name="ivy.shared.default.artifact.pattern" value="[organisation]/[module]/[revision]/[type]s/[artifact].[ext]" override="false"/>
+	<property name="ivy.local.default.root"             value="${ivy.default.ivy.user.dir}/local" override="false"/>
+	<property name="ivy.local.default.ivy.pattern"      value="[organisation]/[module]/[revision]/[type]s/[artifact].[ext]" override="false"/>
+	<property name="ivy.local.default.artifact.pattern" value="[organisation]/[module]/[revision]/[type]s/[artifact].[ext]" override="false"/>
+
+	<property name="jetty.version" value="9.0.0.M5" override="true"/>
+	<property name="spring.version" value="${ivy.spring.version}" override="true"/>
+	<properties file="${ivy.settings.dir}/conf/portal.properties" />
+	
+	
+	<settings defaultResolver="default" />
+	
+	<resolvers>
+		<ibiblio name="public" m2compatible="true"/>
+	</resolvers>
+	<resolvers>
+		<filesystem name="shared">
+			<ivy pattern="${ivy.shared.default.root}/${ivy.shared.default.ivy.pattern}" />
+			<artifact pattern="${ivy.shared.default.root}/${ivy.shared.default.artifact.pattern}" />
+		</filesystem>
+	</resolvers>
+	
+	<resolvers>
+		<filesystem name="local">
+			<ivy pattern="${ivy.local.default.root}/${ivy.local.default.ivy.pattern}" />
+			<artifact pattern="${ivy.local.default.root}/${ivy.local.default.artifact.pattern}" />
+		</filesystem>
+	</resolvers>
+	
+	<resolvers>
+		<chain name="main" dual="true">
+			<resolver ref="shared"/>
+			<resolver ref="public"/>
+		</chain>
+	</resolvers>
+	
+	<resolvers>
+		<chain name="default" returnFirst="true" checkmodified="true">
+			<resolver ref="local"/>
+			<resolver ref="main"/>
+		</chain>
+	</resolvers>
+</ivysettings>

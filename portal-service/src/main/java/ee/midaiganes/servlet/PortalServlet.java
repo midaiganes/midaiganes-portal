@@ -63,17 +63,20 @@ public class PortalServlet extends HttpServlet {
 		RequestInfo.PortletURL portletURL = pageDisplay.getRequestInfo().getPortletURL();
 		log.debug("portletURL = {}", portletURL);
 		if (portletURL != null) {
-			log.debug("lifecycle = {}", portletURL.getLifecycle());
 			if (PortletLifecycle.ACTION.equals(portletURL.getLifecycle())) {
 				PortletApp portletApp = getPortletApp(pageDisplay, portletURL);
-				log.debug("portletApp = {}", portletApp);
 				if (portletApp != null) {
-					if (portletApp.processAction(request, response)) {
+					boolean success = portletApp.processAction(request, response);
+					if (response.isCommitted()) {
+						return;
+					}
+					if (success) {
 						if (MidaiganesWindowState.EXCLUSIVE.equals(portletURL.getWindowState())) {
 							portletApp.doRender(request, response);
 							return;
 						}
 					} else {
+
 						// TODO
 						log.error("action failed");
 					}

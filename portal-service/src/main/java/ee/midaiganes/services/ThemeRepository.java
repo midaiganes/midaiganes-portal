@@ -8,9 +8,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +18,7 @@ import ee.midaiganes.model.Theme;
 import ee.midaiganes.model.ThemeName;
 import ee.midaiganes.util.CollectionUtil;
 import ee.midaiganes.util.StringPool;
+import ee.midaiganes.util.XmlUtil;
 
 public class ThemeRepository {
 	private static final Logger log = LoggerFactory.getLogger(ThemeRepository.class);
@@ -57,17 +56,9 @@ public class ThemeRepository {
 		return new Theme(new ThemeName(contextPath, theme.getId()), theme.getPath(), theme.getJavascriptPath(), theme.getCssPath());
 	}
 
-	private Unmarshaller createUnmarshaller() throws JAXBException {
-		return JAXBContext.newInstance(MidaiganesTheme.class.getPackage().getName()).createUnmarshaller();
-	}
-
-	private MidaiganesTheme unmarshal(InputStream themeXmlInputStream) throws JAXBException {
-		return (MidaiganesTheme) createUnmarshaller().unmarshal(themeXmlInputStream);
-	}
-
 	public void registerThemes(String contextPath, InputStream themeXmlInputStream) {
 		try {
-			MidaiganesTheme theme = unmarshal(themeXmlInputStream);
+			MidaiganesTheme theme = XmlUtil.unmarshalWithoutJAXBElement(MidaiganesTheme.class, themeXmlInputStream);
 			log.info("contextPath = {}, theme = {}", contextPath, theme);
 			if (theme != null) {
 				contextPath = contextPath.startsWith(StringPool.SLASH) ? contextPath.substring(1) : contextPath;

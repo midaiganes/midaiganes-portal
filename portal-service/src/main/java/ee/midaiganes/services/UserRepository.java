@@ -11,13 +11,16 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Component;
 
+import ee.midaiganes.beans.RootApplicationContext;
 import ee.midaiganes.model.User;
 import ee.midaiganes.services.SingleVmPool.Cache;
 import ee.midaiganes.services.exceptions.DuplicateUsernameException;
 import ee.midaiganes.services.rowmapper.UserRowMapper;
 import ee.midaiganes.util.StringPool;
 
+@Component(value = RootApplicationContext.USER_REPOSITORY)
 public class UserRepository {
 
 	@Autowired

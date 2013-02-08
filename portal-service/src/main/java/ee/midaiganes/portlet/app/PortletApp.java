@@ -7,12 +7,8 @@ import javax.portlet.ActionResponse;
 import javax.portlet.PortletException;
 import javax.portlet.PortletMode;
 import javax.portlet.PortletPreferences;
-import javax.portlet.PortletRequest;
-import javax.portlet.PortletResponse;
 import javax.portlet.RenderResponse;
 import javax.portlet.WindowState;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -33,11 +29,7 @@ import ee.midaiganes.portlet.impl.RenderParameterUtil;
 import ee.midaiganes.portlet.impl.RenderRequestImpl;
 import ee.midaiganes.portlet.impl.RenderResponseImpl;
 import ee.midaiganes.services.PortletPreferencesRepository;
-import ee.midaiganes.servlet.PortletServlet;
 import ee.midaiganes.servlet.http.ByteArrayServletOutputStreamAndWriterResponse;
-import ee.midaiganes.servlet.http.PortletServletRequest;
-import ee.midaiganes.util.ContextUtil;
-import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.ThemeUtil;
 
 public class PortletApp {
@@ -65,19 +57,6 @@ public class PortletApp {
 		this.namespace = new PortletNamespace(portletName, windowID);
 	}
 
-	private void includePortletServlet(HttpServletRequest request, HttpServletResponse response, PortletRequest req, PortletResponse resp, String method)
-			throws ServletException, IOException {
-		getPortletServletDispatcher(request).include(new PortletServletRequest(request, portlet, req, resp, method), response);
-	}
-
-	private RequestDispatcher getPortletServletDispatcher(HttpServletRequest request) {
-		return getPortletContext(request).getNamedDispatcher(PortletServlet.class.getName());
-	}
-
-	private ServletContext getPortletContext(HttpServletRequest request) {
-		return ContextUtil.getServletContext(request, StringPool.SLASH + namespace.getPortletName().getContext());
-	}
-
 	public void doRender(HttpServletRequest request, HttpServletResponse response) {
 		if (MidaiganesWindowState.EXCLUSIVE.equals(windowState)) {
 			doExclusiveRender(request, response);
@@ -90,8 +69,8 @@ public class PortletApp {
 		try {
 			PortletPreferences portletPreferences = getPortletPreferences();
 			RenderRequestImpl renderRequest = getRenderRequest(request, response, portletPreferences);
-			includePortletServlet(request, response, renderRequest, getRenderResponse(response, renderRequest), PortletServlet.PORTLET_METHOD_RENDER);
-		} catch (ServletException | IOException | RuntimeException e) {
+			portlet.render(renderRequest, getRenderResponse(response, renderRequest));
+		} catch (PortletException | IOException | RuntimeException e) {
 			log.error(e.getMessage(), e);
 		}
 	}
@@ -101,9 +80,9 @@ public class PortletApp {
 			ByteArrayServletOutputStreamAndWriterResponse resp = new ByteArrayServletOutputStreamAndWriterResponse(response);
 			PortletPreferences portletPreferences = getPortletPreferences();
 			RenderRequestImpl renderRequest = getRenderRequest(request, resp, portletPreferences);
-			includePortletServlet(request, resp, renderRequest, getRenderResponse(resp, renderRequest), PortletServlet.PORTLET_METHOD_RENDER);
+			portlet.render(renderRequest, getRenderResponse(resp, renderRequest));
 			ThemeUtil.includePortletJsp(request, response, namespace, new String(resp.getBytes(), resp.getCharacterEncoding()));
-		} catch (ServletException | IOException | RuntimeException e) {
+		} catch (ServletException | IOException | RuntimeException | PortletException e) {
 			log.error(e.getMessage(), e);
 		}
 	}
@@ -112,9 +91,9 @@ public class PortletApp {
 		try {
 			PortletPreferences portletPreferences = getPortletPreferences();
 			ActionRequest actionRequest = getActionRequest(request, response, portletPreferences);
-			includePortletServlet(request, response, actionRequest, getActionResponse(response, actionRequest), PortletServlet.PORTLET_METHOD_ACTION);
+			portlet.processAction(actionRequest, getActionResponse(response, actionRequest));
 			return true;
-		} catch (ServletException | IOException | RuntimeException e) {
+		} catch (IOException | RuntimeException | PortletException e) {
 			log.error(e.getMessage(), e);
 		}
 		return false;

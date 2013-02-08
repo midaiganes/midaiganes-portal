@@ -8,7 +8,6 @@ import ee.midaiganes.services.DbInstallService;
 import ee.midaiganes.services.LayoutPortletRepository;
 import ee.midaiganes.services.LayoutRepository;
 import ee.midaiganes.services.LayoutSetRepository;
-import ee.midaiganes.services.PageLayoutRepository;
 import ee.midaiganes.services.RequestParser;
 import ee.midaiganes.services.ThemeVariablesService;
 import ee.midaiganes.services.UserRepository;
@@ -17,11 +16,11 @@ import ee.midaiganes.services.UserRepository;
 public class RootApplicationContext {
 	public static final String LAYOUT_SET_REPOSITORY = "layoutSetRepository";
 	public static final String DB_INSTALL_SERVICE = "dbInstallService";
-	public static final String PAGE_LAYOUT_REPOSITORY = "pageLayoutRepository";
 	public static final String LAYOUT_PORTLET_REPOSITORY = "layoutPortletRepository";
 	public static final String REQUEST_PARSER = "requestParser";
 	public static final String THEME_VARIABLES_SERVICE = "themeVariablesService";
 	public static final String LAYOUT_REPOSITORY = "layoutRepository";
+	public static final String USER_REPOSITORY = "userRepository";
 	public static final String PORTLET_URL_FACTORY = "portletURLFactory";
 
 	@Bean(name = THEME_VARIABLES_SERVICE)
@@ -49,7 +48,7 @@ public class RootApplicationContext {
 		return new LayoutRepository();
 	}
 
-	@Bean(name = "userRepository")
+	@Bean(name = USER_REPOSITORY)
 	public UserRepository userRepository() {
 		return new UserRepository();
 	}
@@ -57,11 +56,6 @@ public class RootApplicationContext {
 	@Bean(name = DB_INSTALL_SERVICE)
 	public DbInstallService dbInstallService() {
 		return new DbInstallService();
-	}
-
-	@Bean(name = PAGE_LAYOUT_REPOSITORY)
-	public PageLayoutRepository pageLayoutRepository() {
-		return new PageLayoutRepository();
 	}
 
 	@Bean(name = LAYOUT_PORTLET_REPOSITORY)

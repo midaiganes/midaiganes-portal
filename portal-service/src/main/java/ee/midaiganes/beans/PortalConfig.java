@@ -12,13 +12,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
 import ee.midaiganes.services.LanguageRepository;
+import ee.midaiganes.services.PageLayoutRepository;
 import ee.midaiganes.services.PortletInstanceRepository;
 import ee.midaiganes.services.PortletPreferencesRepository;
 import ee.midaiganes.services.PortletRepository;
 import ee.midaiganes.services.ThemeRepository;
 
 @Configuration
-@PropertySource(value = "classpath:/META-INF/portal.properties")
+@PropertySource(value = "classpath:portal.properties")
 @EnableLoadTimeWeaving(aspectjWeaving = AspectJWeaving.ENABLED)
 // @EnableAspectJAutoProxy(proxyTargetClass = true)
 public class PortalConfig {
@@ -27,6 +28,7 @@ public class PortalConfig {
 	public static final String PORTLET_PREFERENCES_REPOSITORY = "portletPreferencesRepository";
 	public static final String PORTLET_INSTANCE_REPOSITORY = "portletInstanceRepository";
 	public static final String LANGUAGE_REPOSITORY = "languageRepository";
+	public static final String PAGE_LAYOUT_REPOSITORY = "pageLayoutRepository";
 	@Deprecated
 	public static final String SERVLET_CONTEXT_RESOURCE_REPOSITORY = "servletContextResourceRepository";
 	public static final String THEME_REPOSITORY = "themeRepository";
@@ -109,6 +111,11 @@ public class PortalConfig {
 	@Bean(name = LANGUAGE_REPOSITORY)
 	public LanguageRepository LanguageRepository() {
 		return new LanguageRepository();
+	}
+
+	@Bean(name = PAGE_LAYOUT_REPOSITORY)
+	public PageLayoutRepository pageLayoutRepository() {
+		return new PageLayoutRepository();
 	}
 
 	@Deprecated

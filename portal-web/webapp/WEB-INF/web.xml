@@ -161,15 +161,6 @@
 	</servlet>
 	
 	<servlet>
-		<description>ee.midaiganes.servlet.PortletServlet</description>
-		<display-name>ee.midaiganes.servlet.PortletServlet</display-name>
-		<servlet-name>ee.midaiganes.servlet.PortletServlet</servlet-name>
-		<servlet-class>ee.midaiganes.servlet.PortletServlet</servlet-class>
-		<load-on-startup>30</load-on-startup>
-		<async-supported>true</async-supported>
-	</servlet>
-	
-	<servlet>
 		<description>ee.midaiganes.servlet.LayoutPortletServlet</description>
 		<display-name>ee.midaiganes.servlet.LayoutPortletServlet</display-name>
 		<servlet-name>ee.midaiganes.servlet.LayoutPortletServlet</servlet-name>
@@ -217,11 +208,6 @@
 	<servlet-mapping>
 		<servlet-name>ee.midaiganes.servlet.PageLayoutServlet</servlet-name>
 		<url-pattern>/WEB-INF/page-layout</url-pattern>
-	</servlet-mapping>
-	
-	<servlet-mapping>
-		<servlet-name>ee.midaiganes.servlet.PortletServlet</servlet-name>
-		<url-pattern>/WEB-INF/portlet-servlet</url-pattern>
 	</servlet-mapping>
 	
 	<servlet-mapping>

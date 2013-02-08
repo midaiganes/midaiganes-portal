@@ -13,6 +13,7 @@ import javax.management.ObjectName;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.Portlet;
+import javax.portlet.PortletConfig;
 import javax.portlet.PortletException;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
@@ -25,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import ee.midaiganes.model.PortletName;
 
-public class MidaiganesPortlet implements MidaiganesPortletMBean {
+public class MidaiganesPortlet implements MidaiganesPortletMBean, Portlet {
 	private static final Logger log = LoggerFactory.getLogger(MidaiganesPortlet.class);
 	private final Portlet portlet;
 	private final AtomicLong successRenderCount = new AtomicLong();
@@ -47,6 +48,12 @@ public class MidaiganesPortlet implements MidaiganesPortletMBean {
 		}
 	}
 
+	@Override
+	public void init(PortletConfig config) throws PortletException {
+		portlet.init(config);
+	}
+
+	@Override
 	public synchronized void destroy() {
 		destroy = true;
 		checkDestroy();
@@ -94,6 +101,7 @@ public class MidaiganesPortlet implements MidaiganesPortletMBean {
 		((ResourceServingPortlet) portlet).serveResource(request, response);
 	}
 
+	@Override
 	public void render(RenderRequest request, RenderResponse response) throws PortletException, IOException {
 		try {
 			incrementActiveRequestCount();
@@ -107,6 +115,7 @@ public class MidaiganesPortlet implements MidaiganesPortletMBean {
 		}
 	}
 
+	@Override
 	public void processAction(ActionRequest request, ActionResponse response) throws PortletException, IOException {
 		try {
 			incrementActiveRequestCount();

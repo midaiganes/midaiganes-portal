@@ -14,6 +14,10 @@ public class XmlUtil {
 		return clazz.cast(JAXBElement.class.cast(getUnmarshaller(clazz).unmarshal(in)).getValue());
 	}
 
+	public static <A> A unmarshalWithoutJAXBElement(Class<A> clazz, InputStream in) throws JAXBException {
+		return clazz.cast(getUnmarshaller(clazz).unmarshal(in));
+	}
+
 	public static void marshal(Object o, OutputStream os) throws JAXBException {
 		getMarshaller(o.getClass()).marshal(o, os);
 	}

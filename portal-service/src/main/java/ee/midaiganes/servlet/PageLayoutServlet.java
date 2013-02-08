@@ -13,16 +13,17 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.beans.RootApplicationContext;
+import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.model.PageLayout;
 import ee.midaiganes.services.PageLayoutRepository;
 import ee.midaiganes.util.ContextUtil;
 import ee.midaiganes.util.RequestUtil;
+import ee.midaiganes.util.StringPool;
 
 public class PageLayoutServlet extends HttpServlet {
 	private static final Logger log = LoggerFactory.getLogger(PageLayoutServlet.class);
 
-	@Resource(name = RootApplicationContext.PAGE_LAYOUT_REPOSITORY)
+	@Resource(name = PortalConfig.PAGE_LAYOUT_REPOSITORY)
 	private PageLayoutRepository pageLayoutRepository;
 
 	@Override
@@ -54,10 +55,10 @@ public class PageLayoutServlet extends HttpServlet {
 	}
 
 	private String getPath(PageLayout pageLayout) {
-		return pageLayout.getLayoutPath() + pageLayout.getPageLayoutName().getName() + ".jsp";
+		return pageLayout.getLayoutPath() + StringPool.SLASH + pageLayout.getPageLayoutName().getName() + ".jsp";
 	}
 
 	private ServletContext getServletContext(HttpServletRequest request, PageLayout pageLayout) {
-		return ContextUtil.getServletContext(request, "/" + pageLayout.getPageLayoutName().getContext());
+		return ContextUtil.getServletContext(request, pageLayout.getPageLayoutName().getContextWithSlash());
 	}
 }

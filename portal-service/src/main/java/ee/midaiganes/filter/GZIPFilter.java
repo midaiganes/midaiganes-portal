@@ -19,7 +19,6 @@ public class GZIPFilter extends HttpFilter {
 		if (acceptEncoding != null && acceptEncoding.contains(GZIP)) {
 			GZIPResponse gzipresponse = new GZIPResponse(response);
 			gzipresponse.setHeader(HttpHeaders.CONTENT_TYPE, GZIP);
-
 			chain.doFilter(request, gzipresponse);
 			gzipresponse.flushBuffer(true);
 		} else {

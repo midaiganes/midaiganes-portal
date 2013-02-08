@@ -1,5 +1,5 @@
-<!DOCTYPE aspectj PUBLIC "-//AspectJ//DTD 1.5.0//EN" "http://www.eclipse.org/aspectj/dtd/aspectj_1_5_0.dtd">
-<aspectj>
+<!-- DOCTYPE aspectj PUBLIC "-//AspectJ//DTD 1.5.0//EN" "http://www.eclipse.org/aspectj/dtd/aspectj_1_5_0.dtd">
+<aspectj TODO -->
 	<!-- weaver options="-verbose -showWeaveInfo">
 		<include within="ee.*"/>
 		<exclude within="ee.midaiganes.aspects"/>
@@ -7,4 +7,4 @@
 	<aspects>
 		<aspect name="ee.midaiganes.aspects.XXX" />
 	</aspects -->
-</aspectj>
+<!-- /aspectj -->

@@ -1,9 +1,11 @@
 package ee.midaiganes.portlets.pagelayout;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.annotation.Resource;
 import javax.portlet.ActionRequest;
+import javax.portlet.ActionResponse;
 import javax.portlet.PortletRequest;
 import javax.portlet.RenderRequest;
 
@@ -22,6 +24,7 @@ import ee.midaiganes.model.Layout;
 import ee.midaiganes.model.PageLayout;
 import ee.midaiganes.services.LayoutRepository;
 import ee.midaiganes.services.PageLayoutRepository;
+import ee.midaiganes.util.PortalURLUtil;
 import ee.midaiganes.util.RequestUtil;
 
 @Controller("pageLayoutController")
@@ -45,11 +48,12 @@ public class PageLayoutController {
 	}
 
 	@ActionMapping(params = { "pageLayoutId" })
-	public void setPageLayout(ActionRequest request, @RequestParam("pageLayoutId") String pageLayoutId) {
+	public void setPageLayout(ActionRequest request, ActionResponse response, @RequestParam("pageLayoutId") String pageLayoutId) throws IOException {
 		if (ContextAndName.isValidFullName(pageLayoutId)) {
 			PageLayout pageLayout = pageLayoutRepository.getPageLayout(pageLayoutId);
 			if (pageLayout != null) {
 				layoutRepository.updatePageLayout(getLayout(request).getId(), pageLayout.getPageLayoutName());
+				response.sendRedirect(PortalURLUtil.getFullURLByFriendlyURL(RequestUtil.getPageDisplay(request).getLayout().getFriendlyUrl()));
 			} else {
 				log.warn("page layout not found; pageLayoutId = '{}'", pageLayoutId);
 			}

@@ -15,6 +15,7 @@ import org.testng.Assert;
 
 import ee.midaiganes.model.PortletLifecycle;
 import ee.midaiganes.model.PortletName;
+import ee.midaiganes.model.PortletNamespace;
 
 public class PortletURLImplTest {
 	private final String URL = "http://localhost";
@@ -29,7 +30,7 @@ public class PortletURLImplTest {
 	@Test
 	public void toStringWitPortletRequestAndWithoutPortletName() {
 		PortletRequestImpl req = mock(PortletRequestImpl.class);
-		when(req.getWindowID()).thenReturn("fafafa_w_daaaa_1234");
+		when(req.getPortletNamespace()).thenReturn(new PortletNamespace("fafafa_w_daaaa_1234"));
 		when(req.getHttpServletRequest()).thenReturn(new MockHttpServletRequest());
 		Assert.assertEquals(new PortletURLImpl(req, PortletLifecycle.RENDER).toString(), URL + "?p_l=0&p_id=1234");
 	}

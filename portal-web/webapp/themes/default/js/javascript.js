@@ -76,7 +76,7 @@ window.SPortal = {
 				jQuery('#add-portlet .draggable-portlet-name').draggable({
 					revert: "invalid",
 					start: function() {
-						jQuery('.portlet-box').css('background', 'yellow').css('padding', '10px');
+						jQuery('.portlet-box').css('background', 'yellow').css('padding', '10px 0 10px 0');
 					},
 					stop: function() {
 						jQuery('.portlet-box').css('background', '').css('padding', '');

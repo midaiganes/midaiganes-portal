@@ -21,9 +21,21 @@ public class GZIPResponse extends HttpServletResponseWrapper {
 	private ServletOutputStream os;
 	private PrintWriter pw;
 	private GZIPOutputStream gos;
+	private boolean sendRedirectCalled;
 
 	public GZIPResponse(HttpServletResponse response) {
 		super(response);
+	}
+
+	@Override
+	public void sendRedirect(String location) throws IOException {
+		super.sendRedirect(location);
+		sendRedirectCalled = true;
+	}
+
+	@Override
+	public boolean isCommitted() {
+		return sendRedirectCalled || super.isCommitted();
 	}
 
 	@Override
@@ -32,17 +44,20 @@ public class GZIPResponse extends HttpServletResponseWrapper {
 	}
 
 	public void flushBuffer(boolean finish) throws IOException {
-		if (writerCalled) {
-			pw.flush();
-		}
-		if (gos != null) {
-			if (finish) {
-				gos.finish();
-			} else {
-				gos.flush();
+		log.debug("flushBuffer; finish = {}; sendRedirectCalled = {}", finish, sendRedirectCalled);
+		if (!sendRedirectCalled) {
+			if (writerCalled) {
+				pw.flush();
 			}
+			if (gos != null) {
+				if (finish) {
+					gos.finish();
+				} else {
+					gos.flush();
+				}
+			}
+			super.flushBuffer();
 		}
-		super.flushBuffer();
 	}
 
 	@Override
@@ -68,12 +83,6 @@ public class GZIPResponse extends HttpServletResponseWrapper {
 		}
 		log.info("use getOutputStream");
 		return pw;
-	}
-
-	public void finish() throws IOException {
-		if (gos != null) {
-			gos.finish();
-		}
 	}
 
 	private void initOutputStream() throws IOException {

@@ -1,5 +1,6 @@
 package ee.midaiganes.util;
 
+
 public class PortalURLUtil {
 
 	/**
@@ -7,6 +8,6 @@ public class PortalURLUtil {
 	 * @return root context path + friendly URL
 	 */
 	public static String getFullURLByFriendlyURL(String friendlyURL) {
-		return PortalUtil.getPortalContextPath() + friendlyURL;
+		return PropsValues.PORTAL_CONTEXT + friendlyURL;
 	}
 }

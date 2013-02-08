@@ -12,6 +12,8 @@ public class Theme implements Serializable {
 	private final String cssPath;
 	private final String cssDir;
 	private final String javascriptDir;
+	private final String portalNormalPath;
+	private final String portletPath;
 
 	public Theme(ThemeName themeName, String themePath, String javascriptPath, String cssPath) {
 		this.themePath = themePath;
@@ -20,6 +22,8 @@ public class Theme implements Serializable {
 		this.themeName = themeName;
 		this.cssDir = themeName.getContextWithSlash() + themePath + StringPool.SLASH + cssPath;
 		this.javascriptDir = themeName.getContextWithSlash() + themePath + StringPool.SLASH + javascriptPath;
+		this.portalNormalPath = themePath + "/portal_normal.jsp";
+		this.portletPath = themePath + "/portlet.jsp";
 	}
 
 	public ThemeName getThemeName() {
@@ -46,8 +50,17 @@ public class Theme implements Serializable {
 		return javascriptDir;
 	}
 
+	public String getPortalNormalPath() {
+		return portalNormalPath;
+	}
+
+	public String getPortletPath() {
+		return portletPath;
+	}
+
 	@Override
 	public String toString() {
-		return "Theme [themeName=" + themeName + ", themePath=" + themePath + ", javascriptPath=" + javascriptPath + ", cssPath=" + cssPath + "]";
+		return "Theme [themeName=" + themeName + ", themePath=" + themePath + ", javascriptPath=" + javascriptPath + ", cssPath=" + cssPath + ", cssDir="
+				+ cssDir + ", javascriptDir=" + javascriptDir + ", portalNormalPath=" + portalNormalPath + ", portletPath=" + portletPath + "]";
 	}
 }

@@ -21,8 +21,8 @@ public class RequestUtil {
 	}
 
 	public static String getFriendlyURL(String requestURI) {
-		int length = PortalUtil.getPortalContextPath().length();
-		if (length > 0 && requestURI.startsWith(PortalUtil.getPortalContextPath() + StringPool.SLASH)) {
+		int length = PropsValues.PORTAL_CONTEXT.length();
+		if (length > 0 && requestURI.startsWith(PropsValues.PORTAL_CONTEXT + StringPool.SLASH)) {
 			return requestURI.substring(length);
 		}
 		return requestURI;

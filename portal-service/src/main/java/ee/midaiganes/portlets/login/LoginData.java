@@ -2,6 +2,8 @@ package ee.midaiganes.portlets.login;
 
 import java.io.Serializable;
 
+import ee.midaiganes.util.StringUtil;
+
 public class LoginData implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -22,5 +24,10 @@ public class LoginData implements Serializable {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	@Override
+	public String toString() {
+		return "LoginData [username='" + username + "', password='" + (password == null ? null : StringUtil.repeat("*", password.length())) + "']";
 	}
 }

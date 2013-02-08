@@ -14,6 +14,7 @@ import javax.portlet.Portlet;
 import javax.portlet.PortletConfig;
 import javax.portlet.PortletException;
 import javax.portlet.PortletMode;
+import javax.portlet.ResourceServingPortlet;
 import javax.portlet.WindowState;
 import javax.servlet.ServletContext;
 import javax.xml.bind.JAXBException;
@@ -33,6 +34,7 @@ import ee.midaiganes.model.PortletInitParameter;
 import ee.midaiganes.model.PortletInitParameter.Description;
 import ee.midaiganes.model.PortletName;
 import ee.midaiganes.portlet.MidaiganesPortlet;
+import ee.midaiganes.portlet.MidaiganesResourcePortlet;
 import ee.midaiganes.portlet.app.PortletApp;
 import ee.midaiganes.portlet.impl.PortletConfigImpl;
 import ee.midaiganes.util.StringPool;
@@ -87,7 +89,6 @@ public class PortletRepository {
 						lock.writeLock().unlock();
 					}
 					if (conf != null) {
-						// conf.getPortlet().destroy();
 						conf.getMidaiganesPortlet().destroy();
 						log.info("portlet destroyed: {}", entry);
 					}
@@ -152,6 +153,19 @@ public class PortletRepository {
 		}
 	}
 
+	private static <A extends Portlet & ResourceServingPortlet> A castToResourceServingPortlet(Portlet portlet) {
+		@SuppressWarnings("unchecked")
+		A obj = (A) portlet;
+		return obj;
+	}
+
+	private MidaiganesPortlet getMidaiganesPortlet(Portlet portlet, Class<?> obj, PortletName portletName) {
+		if (ResourceServingPortlet.class.isAssignableFrom(obj)) {
+			return new MidaiganesResourcePortlet(castToResourceServingPortlet(portlet), portletName);
+		}
+		return new MidaiganesPortlet(portlet, portletName);
+	}
+
 	private PortletName initializePortlet(ServletContext servletContext, PortletType portletType) throws ClassNotFoundException, InstantiationException,
 			IllegalAccessException {
 		Class<?> obj = Class.forName(portletType.getPortletClass());
@@ -159,11 +173,13 @@ public class PortletRepository {
 			Portlet portlet = (Portlet) obj.newInstance();
 			try {
 				PortletConfig portletConfig = getPortletConfig(servletContext, portletType);
-				portlet.init(portletConfig);
 				PortletName portletName = new PortletName(getContextPathName(servletContext), portletType.getPortletName().getValue());
+				MidaiganesPortlet midaiganesPortlet = getMidaiganesPortlet(portlet, obj, portletName);
+				midaiganesPortlet.init(portletConfig);
+				PortletAndConfiguration portletAndConfiguration = new PortletAndConfiguration(midaiganesPortlet, portletConfig, portletType);
 				lock.writeLock().lock();
 				try {
-					portlets.put(portletName, new PortletAndConfiguration(new MidaiganesPortlet(portlet, portletName), portletConfig, portletType));
+					portlets.put(portletName, portletAndConfiguration);
 				} finally {
 					lock.writeLock().unlock();
 				}

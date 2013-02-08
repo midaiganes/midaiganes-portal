@@ -42,7 +42,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import ee.midaiganes.javax.servlet.PortalPluginListener;
-import ee.midaiganes.servlet.PortletServlet;
 import ee.midaiganes.util.CharsetPool;
 import ee.midaiganes.util.IOUtil;
 import ee.midaiganes.util.StringPool;
@@ -159,13 +158,10 @@ public class AutoDeployer implements Runnable {
 
 				NodeList filters = doc.getElementsByTagName("filter");
 				NodeList servlets = doc.getElementsByTagName("servlet");
-				NodeList servletMappings = doc.getElementsByTagName("servlet-mapping");
 
 				Node listenerPosition = filters.getLength() != 0 ? filters.item(0) : servlets.item(0);
 
 				webapp.insertBefore(createListenerElement(doc, PortalPluginListener.class.getName()), listenerPosition);
-				webapp.insertBefore(createServletElement(doc, PortletServlet.class.getName()), servlets.item(0));
-				webapp.insertBefore(createServletMappingElement(doc, PortletServlet.class.getName(), "/WEB-INF/portlet-servlet"), servletMappings.item(0));
 
 				//
 				DOMSource source = new DOMSource(doc);
@@ -184,24 +180,6 @@ public class AutoDeployer implements Runnable {
 		} catch (/* JAXBException | */IOException e) {
 			log.error(e.getMessage(), e);
 		}
-	}
-
-	private static Element createServletElement(Document doc, String name) {
-		Element servlet = doc.createElement("servlet");
-		servlet.appendChild(createTextNode(doc, "description", name));
-		servlet.appendChild(createTextNode(doc, "display-name", name));
-		servlet.appendChild(createTextNode(doc, "servlet-name", name));
-		servlet.appendChild(createTextNode(doc, "servlet-class", name));
-		servlet.appendChild(createTextNode(doc, "load-on-startup", "1"));
-		servlet.appendChild(createTextNode(doc, "async-supported", "true"));
-		return servlet;
-	}
-
-	private static Element createServletMappingElement(Document doc, String name, String pattern) {
-		Element servletMapping = doc.createElement("servlet-mapping");
-		servletMapping.appendChild(createTextNode(doc, "servlet-name", name));
-		servletMapping.appendChild(createTextNode(doc, "url-pattern", pattern));
-		return servletMapping;
 	}
 
 	private static Element createListenerElement(Document doc, String listenerClass) {

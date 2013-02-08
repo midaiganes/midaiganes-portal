@@ -11,7 +11,7 @@ public class ContextUtil {
 	}
 
 	public static ServletContext getPortalServletContext(HttpServletRequest request) {
-		return getServletContext(request, PortalUtil.getPortalContextPath());
+		return getServletContext(request, PropsValues.PORTAL_CONTEXT);
 	}
 
 	public static RequestDispatcher getRequestDispatcher(HttpServletRequest request, String uriPath, String path) {

@@ -12,15 +12,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public interface PropsValues {
-	String PORTAL_PROPERTIES = "/META-INF/portal.properties";
+	String PORTAL_PROPERTIES = "/portal.properties";
 	String PORTAL_CONTEXT = PropsUtil.getString(PropsKeys.PORTAL_CONTEXT);
 	String AUTODEPLOY_DIR = PropsUtil.getString(PropsKeys.AUTODEPLOY_DIR);
 	String WEBAPPS_DIR = PropsUtil.getString(PropsKeys.WEBAPPS_DIR);
+	boolean AUTODEPLOY_ENABLED = Boolean.parseBoolean(PropsUtil.getString(PropsKeys.AUTODEPLOY_ENABLED));
 
 	interface PropsKeys {
 		String PORTAL_CONTEXT = "portal.context";
 		String AUTODEPLOY_DIR = "autodeploy.dir";
 		String WEBAPPS_DIR = "webapps.dir";
+		String AUTODEPLOY_ENABLED = "autodeploy.enabled";
 	}
 
 	static class PropsUtil {

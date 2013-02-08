@@ -12,7 +12,6 @@ import ee.midaiganes.model.Theme;
 import ee.midaiganes.servlet.http.ThemePortletJspRequest;
 
 public class ThemeUtil {
-	private static final String PORTLET_JSP = "/portlet.jsp";
 
 	public static void includePortletJsp(HttpServletRequest request, HttpServletResponse response, PortletNamespace namespace, String portletContent)
 			throws ServletException, IOException {
@@ -21,6 +20,6 @@ public class ThemeUtil {
 	}
 
 	private static RequestDispatcher getRequestDispatcher(Theme theme, HttpServletRequest request) {
-		return ContextUtil.getRequestDispatcher(request, theme.getThemeName().getContextWithSlash(), theme.getThemePath() + PORTLET_JSP);
+		return ContextUtil.getRequestDispatcher(request, theme.getThemeName().getContextWithSlash(), theme.getPortletPath());
 	}
 }

@@ -21,9 +21,11 @@ public class PortalServletContextListener implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 		try {
-			autoDeployer = new AutoDeployer(Paths.get(PropsValues.AUTODEPLOY_DIR), Paths.get(PropsValues.WEBAPPS_DIR));// TODO
-			autoDeploy = new Thread(autoDeployer, AutoDeployer.class.getName());
-			autoDeploy.start();
+			if (PropsValues.AUTODEPLOY_ENABLED) {
+				autoDeployer = new AutoDeployer(Paths.get(PropsValues.AUTODEPLOY_DIR), Paths.get(PropsValues.WEBAPPS_DIR));// TODO
+				autoDeploy = new Thread(autoDeployer, AutoDeployer.class.getName());
+				autoDeploy.start();
+			}
 		} catch (IOException e) {
 			log.error(e.getMessage(), e);
 		}

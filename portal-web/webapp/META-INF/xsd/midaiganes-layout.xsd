@@ -6,7 +6,7 @@
 		xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
 		xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
 		jaxb:extensionBindingPrefixes="xjc"
-  		jaxb:version="1.0"
+  		jaxb:version="2.0"
 
 		elementFormDefault="qualified"
 		version="1.0">
@@ -28,13 +28,6 @@
 				<element name="layout" minOccurs="0" maxOccurs="unbounded">
 					<complexType>
 						<sequence>
-							<element name="name" minOccurs="1" maxOccurs="1" type="string">
-								<annotation>
-									<documentation>
-										Layout name
-									</documentation>
-								</annotation>
-							</element>
 							<element name="path" minOccurs="1" maxOccurs="1" type="string" />
 						</sequence>
 						<attribute name="id" type="string" use="required" />
@@ -42,5 +35,9 @@
 				</element>
 			</sequence>
 		</complexType>
+		<unique name="UniqueLayoutId">
+			<selector xpath="layout" />
+			<field xpath="@id" />
+		</unique>
 	</element>
 </schema>

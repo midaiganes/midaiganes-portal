@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import ee.midaiganes.beans.PortalConfig;
+import ee.midaiganes.services.PageLayoutRepository;
 import ee.midaiganes.services.PortletRepository;
 import ee.midaiganes.services.ThemeRepository;
 
@@ -25,12 +26,16 @@ public class PortalPluginListener implements ServletContextListener {
 	@Resource(name = PortalConfig.THEME_REPOSITORY)
 	private ThemeRepository themeRepository;
 
+	@Resource(name = PortalConfig.PAGE_LAYOUT_REPOSITORY)
+	private PageLayoutRepository pageLayoutRepository;
+
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 		ServletContext sc = sce.getServletContext();
 		autowire(sc);
 		initPortlets(sc);
 		initThemes(sc);
+		initPageLayouts(sc);
 	}
 
 	@Override
@@ -38,6 +43,7 @@ public class PortalPluginListener implements ServletContextListener {
 		ServletContext sc = sce.getServletContext();
 		unregisterThemes(sc);
 		unregisterPortlets(sc);
+		unregisterPageLayouts(sc);
 	}
 
 	private void unregisterPortlets(ServletContext sc) {
@@ -56,14 +62,39 @@ public class PortalPluginListener implements ServletContextListener {
 		}
 	}
 
+	private void unregisterPageLayouts(ServletContext sc) {
+		try {
+			pageLayoutRepository.unregisterPageLayouts(sc.getContextPath());
+		} catch (RuntimeException e) {
+			log.error(e.getMessage(), e);
+		}
+	}
+
 	private void autowire(ServletContext sc) {
-		WebApplicationContextUtils.getRequiredWebApplicationContext(sc).getAutowireCapableBeanFactory().autowireBean(this);
+		WebApplicationContextUtils.getRequiredWebApplicationContext(getPortalServletContext(sc)).getAutowireCapableBeanFactory().autowireBean(this);
+	}
+
+	private ServletContext getPortalServletContext(ServletContext sc) {
+		// return sc.getContext(PropsValues.PORTAL_CONTEXT);TODO
+		return sc;
 	}
 
 	private void initThemes(ServletContext sc) {
 		try (InputStream themeXmlInputStream = sc.getResourceAsStream("/WEB-INF/midaiganes-theme.xml")) {
 			log.debug("midaiganes-theme.xml exists ? {}", themeXmlInputStream != null);
-			themeRepository.registerThemes(sc.getContextPath(), themeXmlInputStream);
+			if (themeXmlInputStream != null) {
+				themeRepository.registerThemes(sc.getContextPath(), themeXmlInputStream);
+			}
+		} catch (RuntimeException | IOException e) {
+			log.error(e.getMessage(), e);
+		}
+	}
+
+	private void initPageLayouts(ServletContext sc) {
+		try (InputStream pageLayoutInputStream = sc.getResourceAsStream("/WEB-INF/midaiganes-layout.xml")) {
+			if (pageLayoutInputStream != null) {
+				pageLayoutRepository.registerPageLayouts(sc.getContextPath(), pageLayoutInputStream);
+			}
 		} catch (RuntimeException | IOException e) {
 			log.error(e.getMessage(), e);
 		}

@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="portal" default="deploy" xmlns:ivy="antlib:org.apache.ivy.ant">
-	<property file="portal.properties" />
+	<property name="project.basedir" location="${basedir}" />
+
+	<property file="conf/portal.properties" />
 		
-	<property name="project.basedir" value="${basedir}" />
-	<property name="ivy.version" value="2.2.0" />
-	<property name="build.dir" value="build" />
-	<property name="tomcat.lib.dir" value="${tomcat.home.dir}\lib"/>
-	<property name="deploy.dir" value="${tomcat.home.dir}\webapps" />
 	
 	<property name="liquibase.changeLogFile" value="portal-db/liquibase/master.xml" />
 	
@@ -39,13 +36,27 @@
     			source="1.7"
     			target="1.7"
     			srcdir="@{srcdir}"
-    			/>
+    			>
+    			<compilerarg value="-Xlint:serial"/>
+    		</javac>
         </sequential>
     </macrodef>
+	
+	<macrodef name="compile-basedir">
+		<attribute name="basedir"/>
+		<attribute name="destdir" default="@{basedir}/build/classes"/>
+		<attribute name="classpathref" default="empty.path"/>
+		<sequential>
+			<compile srcdir="@{basedir}/src/main/java" destdir="@{destdir}" classpathref="@{classpathref}"/>
+		</sequential>
+	</macrodef>
 
 	
 	<target name="clean">
-		<delete dir="${build.dir}" />
+		<delete dir="dist"/>
+		<delete dir="portal-gen/build"/>
+		<delete dir="portal-service/build"/>
+		<delete dir="portal-web/webapp/WEB-INF/lib"/>
 	</target>
 	
 	<target name="init-ivy">
@@ -57,20 +68,23 @@
 			uri="antlib:org.apache.ivy.ant"
 			classpathref="ivy.lib.path" />
 	</target>
+
 	
 	<target name="init" depends="init-ivy" />
 	
-	<target name="build-compile-classpath" depends="jar-gen">
-		<ivy:cachepath pathid="compile.ivy.path" conf="compile" />
-		<path id="compile.classpath">
-			<fileset file="${build.dir}/webapp/WEB-INF/lib/portal-gen.jar"/>
-			<path refid="compile.ivy.path" />
-		</path>
+	<target name="ivy-retrieve" depends="init">
+		<ivy:retrieve />
+	</target>
+
+	<target name="ivy-path" depends="init">
+		<ivy:cachepath pathid="ivy.runtime.path" conf="runtime"/>
+		<ivy:cachepath pathid="ivy.gen.path" conf="gen"/>
+		<ivy:cachepath pathid="ivy.compile.path" conf="compile"/>
 	</target>
 	
-	<target name="init-jaxb-xjc" depends="init">
-		<ivy:cachepath pathid="jaxb-xjc.path" conf="gen"/>
-		<taskdef name="xjc" classname="com.sun.tools.xjc.XJCTask" classpathref="jaxb-xjc.path" />
+	
+	<target name="init-jaxb-xjc" depends="ivy-path">
+		<taskdef name="xjc" classname="com.sun.tools.xjc.XJCTask" classpathref="ivy.gen.path" />
 	</target>
 	
 	<target name="get-web-xml-xsds">
@@ -90,69 +104,64 @@
 		<xjc extension="false" schema="portal-web/webapp/META-INF/xsd/portlet-app_2_0.xsd" destdir="portal-gen/src/main/java" target="2.0" package="ee.midaiganes.generated.xml.portlet">
 			<produces dir="portal-gen/src/main/java/ee/midaiganes/generated/xml/portlet"/>
 		</xjc>
+		<xjc extension="true" schema="portal-web/webapp/META-INF/xsd/midaiganes-layout.xsd" destdir="portal-gen/src/main/java" target="2.0" package="ee.midaiganes.generated.xml.pagelayout">
+			<produces dir="portal-gen/src/main/java/ee/midaiganes/generated/xml/pagelayout"/>
+		</xjc>
 	</target>
 	
+	
+	
 	<target name="compile-gen" depends="gen">
-		<compile srcdir="portal-gen/src/main/java" destdir="${build.dir}/gen/classes"/>
+		<compile-basedir basedir="portal-gen"/>
 	</target>
 	
 	<target name="jar-gen" depends="compile-gen">
-		<mkdir dir="${build.dir}/webapp/WEB-INF/lib" />
-		<jar basedir="${build.dir}/gen/classes" destfile="${build.dir}/webapp/WEB-INF/lib/portal-gen.jar" encoding="UTF-8" />
+		<jar basedir="portal-gen/build/classes" destfile="portal-gen/build/portal-gen.jar" encoding="UTF-8" />
 	</target>
 	
-	<target name="compile" depends="build-compile-classpath">
-		<compile srcdir="portal-service/src/main/java" destdir="${build.dir}/webapp/WEB-INF/classes" classpathref="compile.classpath"/>
+	<target name="compile-service-classpath" depends="jar-gen">
+		<path id="compile.classpath">
+			<fileset file="portal-gen/build/portal-gen.jar" />
+			<path refid="ivy.compile.path" />
+		</path>
 	</target>
 	
-	<target name="war" depends="build">
-		<war destfile="${build.dir}/${project.war.name}.war" basedir="${build.dir}/webapp" encoding="UTF-8" webxml="${build.dir}/webapp/WEB-INF/web.xml" />
+	<target name="compile-service" depends="compile-service-classpath">
+		<compile-basedir basedir="portal-service" classpathref="compile.classpath"/>
 	</target>
 	
-    <target name="build" depends="compile" description="build">
-    	<mkdir dir="${build.dir}" />
-		<copy
-			encoding="UTF-8"
-			outputencoding="UTF-8"
-			todir="${build.dir}"
-			includeEmptyDirs="false"
-			overwrite="true">
-			<fileset dir="portal-web" excludes="**/web.xml"/>
-		</copy>
-    	<copy
-			encoding="UTF-8"
-			outputencoding="UTF-8"
-			tofile="${build.dir}/webapp/WEB-INF/web.xml"
-			overwrite="true"
-    		filtering="true"
-    		file="portal-web/webapp/WEB-INF/web.xml">
-    		<filterset begintoken="@" endtoken="@" filtersfile="portal.properties" />
-		</copy>
-    	<copy
-    		encoding="UTF-8"
-    		outputencoding="UTF-8"
-    		todir="${build.dir}/webapp/WEB-INF/classes"
-    		includeemptydirs="false"
-    		overwrite="true"
-    		filtering="true">
-    		<fileset dir="portal-service/src/main/java" excludes="*.java" />
-    		<filterset begintoken="@" endtoken="@" filtersfile="portal.properties" />
-    	</copy>
-    	<copy file="portal.properties" todir="${build.dir}/webapp/WEB-INF/classes/META-INF/" />
+	<target name="jar-service" depends="compile-service">
+		<jar destfile="portal-service/build/portal-service.jar" encoding="UTF-8">
+			<fileset dir="portal-service/build/classes" />
+			<fileset dir="portal-service/src/main/java" excludes="**/*.java" />
+		</jar>
+	</target>
+	
+    <target name="build" depends="jar-service" description="build">
     	<!-- jstl.jar doesn't work without version -->
-    	<ivy:retrieve pattern="${build.dir}/webapp/WEB-INF/lib/[artifact]-[version].[ext]" sync="false" type="jar,bundle" conf="runtime" file="ivy.xml"/>
+		<ivy:retrieve pattern="portal-web/webapp/WEB-INF/lib/[artifact]-[revision].[ext]" sync="false" type="jar,bundle" conf="runtime" file="ivy.xml"/>
     </target>
 	
-	<target name="deploy" depends="clean,war,deploy-spring-tomcat-weaver" description="deploy">
-		<copy file="${build.dir}/${project.war.name}.war" todir="${deploy.dir}" overwrite="true" />
+	<target name="war" depends="build">
+		<mkdir dir="dist"/>
+		<zip destfile="dist/${project.war.name}.war" encoding="UTF-8">
+			<fileset dir="portal-web/webapp" />
+			<zipfileset file="portal-gen/build/portal-gen.jar" prefix="WEB-INF/lib"/>
+			<zipfileset file="portal-service/build/portal-service.jar" prefix="WEB-INF/lib"/>
+		</zip>
 	</target>
 	
-	<target name="deploy-spring-tomcat-weaver" depends="init">
+	
+	<target name="deploy" depends="war" description="deploy">
+		<copy file="dist/${project.war.name}.war" todir="${deploy.dir}" overwrite="true" />
+	</target>
+	
+	<!-- target name="deploy-spring-tomcat-weaver" depends="init">
 		<ivy:resolve file="ivy-tomcat-lib.xml"/>
 		<ivy:retrieve pattern="${tomcat.lib.dir}/[artifact]-[revision].[ext]" sync="false" type="jar" conf="runtime" transitive="false" />
-	</target>
+	</target -->
 	
-	<target name="set-liquibase-path" depends="init">
+	<!-- target name="set-liquibase-path" depends="init">
 		<ivy:resolve/>
 		<ivy:cachepath pathid="ivy.liquibase.path" conf="dbupdate"/>
 		<path id="liquibase.path">
@@ -178,5 +187,30 @@
 			dropFirst="false"
 			classpathref="liquibase.path"
 		/>
+	</target -->
+	
+	<target name="retrieve-aspectjweaver" depends="init">
+		<ivy:retrieve pattern="${jetty.run.dir}/[artifact].[ext]" sync="false" type="jar" conf="aspect" transitive="false" />
+	</target>
+	
+	<target name="prepare-start-jetty" depends="retrieve-aspectjweaver">
+		<ivy:cachepath pathid="server-jetty.ivy.path" conf="server-jetty" />
+		<ivy:cachepath pathid="portal.global.ivy.path" conf="global"/>
+		<compile-basedir basedir="portal-server-jetty" classpathref="server-jetty.ivy.path" />
+		<path id="server-jetty.run.classpath">
+			<pathelement location="${project.basedir}/conf"/>
+			<path refid="server-jetty.ivy.path" />
+			<pathelement location="portal-server-jetty/build/classes"/>
+			<path refid="portal.global.ivy.path" />
+		</path>
+		<property name="javaweaver.path" location="${jetty.run.dir}/spring-instrument.jar" />
+	</target>
+	
+	<target name="start-jetty" depends="prepare-start-jetty">
+		<java classname="ee.midaiganes.launcher.JettyLauncher" fork="true" classpathref="server-jetty.run.classpath">
+			<sysproperty key="project.basedir" value="${project.basedir}"/>
+			<sysproperty key="deploy.dir" value="${deploy.dir}"/>
+			<jvmarg line="-javaagent:${javaweaver.path}"/>
+		</java>
 	</target>
 </project>
