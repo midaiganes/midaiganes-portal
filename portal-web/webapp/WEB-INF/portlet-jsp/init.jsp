@@ -3,3 +3,4 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="portal-ui" uri="http://midaiganes.ee/portal-tags/ui" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%-- @ taglib prefix="portal-ui" tagdir="/META-INF/tags" --%>

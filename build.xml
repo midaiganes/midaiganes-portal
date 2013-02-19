@@ -131,10 +131,17 @@
 	</target>
 	
 	<target name="jar-service" depends="compile-service">
-		<jar destfile="portal-service/build/portal-service.jar" encoding="UTF-8">
+		<jar destfile="portal-service/build/portal-service.jar" encoding="UTF-8" whenempty="fail">
 			<fileset dir="portal-service/build/classes" />
 			<fileset dir="portal-service/src/main/java" excludes="**/*.java" />
 		</jar>
+	</target>
+	
+	<target name="jar-taglib">
+		<zip destfile="portal-web/webapp/WEB-INF/lib/midaiganes-taglib.jar" encoding="UTF-8" whenempty="fail">
+			<zipfileset dir="portal-web/webapp/META-INF/tags" prefix="META-INF/tags" />
+			<zipfileset file="portal-web/webapp/WEB-INF/portal-ui-taglib.tld" prefix="META-INF" />
+		</zip>
 	</target>
 	
     <target name="build" depends="jar-service" description="build">
@@ -145,7 +152,7 @@
 	<target name="war" depends="build">
 		<mkdir dir="dist"/>
 		<zip destfile="dist/${project.war.name}.war" encoding="UTF-8">
-			<fileset dir="portal-web/webapp" />
+			<fileset dir="portal-web/webapp" excludes="WEB-INF/portal-ui-taglib.tld;META-INF/tags"/>
 			<zipfileset file="portal-gen/build/portal-gen.jar" prefix="WEB-INF/lib"/>
 			<zipfileset file="portal-service/build/portal-service.jar" prefix="WEB-INF/lib"/>
 		</zip>
@@ -196,11 +203,12 @@
 	<target name="prepare-start-jetty" depends="retrieve-aspectjweaver">
 		<ivy:cachepath pathid="server-jetty.ivy.path" conf="server-jetty" />
 		<ivy:cachepath pathid="portal.global.ivy.path" conf="global"/>
+		<delete dir="portal-server-jetty/build/classes" />
 		<compile-basedir basedir="portal-server-jetty" classpathref="server-jetty.ivy.path" />
 		<path id="server-jetty.run.classpath">
 			<pathelement location="${project.basedir}/conf"/>
-			<path refid="server-jetty.ivy.path" />
 			<pathelement location="portal-server-jetty/build/classes"/>
+			<path refid="server-jetty.ivy.path" />
 			<path refid="portal.global.ivy.path" />
 		</path>
 		<property name="javaweaver.path" location="${jetty.run.dir}/spring-instrument.jar" />
@@ -210,7 +218,14 @@
 		<java classname="ee.midaiganes.launcher.JettyLauncher" fork="true" classpathref="server-jetty.run.classpath">
 			<sysproperty key="project.basedir" value="${project.basedir}"/>
 			<sysproperty key="deploy.dir" value="${deploy.dir}"/>
+			<sysproperty key="java.security.policy" value="${project.basedir}/conf/catalina.policy"/>
 			<jvmarg line="-javaagent:${javaweaver.path}"/>
 		</java>
+	</target>
+	
+	<target name="report" depends="init">
+	    <mkdir dir="report" />
+	    <ivy:resolve />
+	    <ivy:report todir="report" />
 	</target>
 </project>

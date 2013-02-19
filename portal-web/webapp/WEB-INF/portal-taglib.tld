@@ -6,7 +6,6 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd"
 	version="2.1">
 	<description>portal taglib</description>
-	<display-name>portal taglib</display-name>
 	<tlib-version>0.1</tlib-version>
 	<short-name>portal-taglib</short-name>
 	<uri>http://midaiganes.ee/portal-tags</uri>

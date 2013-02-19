@@ -9,6 +9,9 @@
 
 	<property name="jetty.version" value="9.0.0.M5" override="true"/>
 	<property name="spring.version" value="${ivy.spring.version}" override="true"/>
+	<property name="jsp-api.version" value="2.2" />
+	<property name="el-api.version" value="${jsp-api.version}" />
+	<property name="jstl.version" value="1.2" />
 	<properties file="${ivy.settings.dir}/conf/portal.properties" />
 	
 	

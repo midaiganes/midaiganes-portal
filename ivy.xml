@@ -20,14 +20,22 @@
 	
 	<!-- http://ant.apache.org/ivy/history/2.1.0/ivyfile/dependency.html -->
 	<dependencies>
-		<dependency org="javax.servlet" name="javax.servlet-api" rev="3.0.1" conf="compile->default"/>
-		<dependency org="javax.servlet" name="jsp-api" rev="2.0" conf="compile->default"/>
-		<dependency org="javax.servlet" name="jstl" rev="1.2" conf="runtime->default"/>
+		<dependency org="javax.servlet" name="javax.servlet-api" rev="3.0.1" conf="compile->default;server-jetty->default"/>
+
+		<dependency org="javax.servlet.jsp" name="jsp-api" rev="${jsp-api.version}" conf="server->default">
+			<exclude module="javax.servlet"/>
+			<exclude module="el-api"/>
+		</dependency>
+		<dependency org="javax.el" name="el-api" rev="${el-api.version}" conf="server->default"/>
+		<dependency org="javax.servlet" name="jstl" rev="${jstl.version}" conf="runtime->default">
+			<exclude module="jsp-api"/>
+		</dependency>
+
 		<dependency org="javax.portlet" name="portlet-api" rev="2.0" conf="global->default"/>
 
 		<dependency org="commons-dbcp" name="commons-dbcp" rev="1.4" conf="server->default" />
 		<dependency org="mysql" name="mysql-connector-java" rev="5.1.18" conf="server->default;dbupdate->default" />
-		<dependency org="ch.qos.logback" name="logback-classic" rev="1.0.9" conf="global->default">
+		<dependency org="ch.qos.logback" name="logback-classic" rev="1.0.9" conf="server->default">
 			<exclude module="servlet-api"/>
 			<exclude module="groovy-all"/>
 			<exclude module="janino"/>
@@ -39,6 +47,8 @@
 			<exclude module="geronimo-jms_1.1_spec"/>
 			<exclude module="mysql-connector-java" />
 		</dependency>
+		<dependency org="org.slf4j" name="slf4j-api" rev="1.7.2" conf="server->default"/>
+		<dependency org="org.slf4j" name="jcl-over-slf4j" rev="1.7.2" conf="server->default"/>
 
 		<dependency org="org.springframework" name="spring-jdbc" rev="${spring.version}" conf="global->default" />
 		<dependency org="org.springframework" name="spring-web" rev="${spring.version}" conf="global->default" />
@@ -58,42 +68,30 @@
 		<dependency org="org.mockito" name="mockito-all" rev="1.9.5-rc1" conf="test->default"/>
 		<dependency org="org.aspectj" name="aspectjweaver" rev="1.7.0" conf="server->default" />
 		
-		<dependency org="org.thymeleaf" name="thymeleaf" rev="2.0.13" conf="global->default"/>
+		<dependency org="org.thymeleaf" name="thymeleaf" rev="2.0.15" conf="global->default">
+			<exclude module="servlet-api"/>
+			<exclude module="junit"/>
+			<exclude module="log4j"/>
+			<exclude module="slf4j-api"/>
+			<exclude module="slf4j-log4j12"/>
+		</dependency>
 		<dependency org="org.liquibase" name="liquibase-core" rev="latest.release" conf="dbupdate->default"/>
 		
 		<!-- jetty -->
 		<dependency org="org.eclipse.jetty" name="jetty-server" rev="${jetty.version}" conf="server-jetty->default"/>
 		<dependency org="org.eclipse.jetty" name="jetty-webapp" rev="${jetty.version}" conf="server-jetty->default"/>
 		<dependency org="org.eclipse.jetty" name="jetty-deploy" rev="${jetty.version}" conf="server-jetty->default"/>
-		<dependency org="org.eclipse.jetty.orbit" name="javax.servlet" rev="3.0.0.v201112011016" conf="server-jetty->default">
-			<artifact name="javax.servlet" type="orbit" ext="jar"/>
-		</dependency>
-		
-		<!-- jetty jsp dependencies -->
-		<dependency org="org.eclipse.jetty.orbit" name="com.sun.el" rev="2.2.0.v201108011116" conf="server-jetty->default">
-			<artifact name="com.sun.el" type="orbit" ext="jar"/>
-		</dependency>
-		<dependency org="org.eclipse.jetty.orbit" name="javax.el" rev="2.2.0.v201108011116" conf="server-jetty->default">
-			<artifact name="javax.el" type="orbit" ext="jar"/>
-		</dependency>
-		<dependency org="org.eclipse.jetty.orbit" name="javax.servlet.jsp" rev="2.2.0.v201112011158" conf="server-jetty->default">
-			<artifact name="javax.servlet.jsp" type="orbit" ext="jar"/>
-		</dependency>
-		<dependency org="org.eclipse.jetty.orbit" name="javax.servlet.jsp.jstl" rev="1.2.0.v201105211821" conf="server-jetty->default">
-			<artifact name="javax.servlet.jsp.jstl" type="orbit" ext="jar"/>
-		</dependency>
-		<dependency org="org.eclipse.jetty.orbit" name="org.apache.jasper.glassfish" rev="2.2.2.v201112011158" conf="server-jetty->default">
-			<artifact name="org.apache.jasper.glassfish" type="orbit" ext="jar"/>
-		</dependency>
-		<dependency org="org.eclipse.jetty.orbit" name="org.apache.taglibs.standard.glassfish" rev="1.2.0.v201112081803" conf="server-jetty->default">
-			<artifact name="org.apache.taglibs.standard.glassfish" type="orbit" ext="jar"/>
-		</dependency>
-		<dependency org="org.eclipse.jetty.orbit" name="org.eclipse.jdt.core" rev="3.7.1" conf="server-jetty->default">
-			<artifact name="org.eclipse.jdt.core" type="orbit" ext="jar"/>
-		</dependency>
-		<!-- jetty jsp / -->
-		
-		<dependency org="org.eclipse.jetty" name="jetty-jsp" rev="${jetty.version}" conf="server-jetty->default" />
-		<!-- /jetty -->
+		        
+        <dependency org="org.eclipse.jdt" name="core" rev="3.1.1" conf="server-jetty->default"/>
+        <!-- dependency org="org.eclipse.jdt.core.compiler" name="ecj" rev="4.2.1" conf="server-jetty->default"/ -->
+
+        <dependency org="org.mortbay.jetty" name="jsp-2.1-glassfish" rev="9.1.02.B04.p0" conf="server-jetty->default">
+        	<exclude module="jsp-api-2.1-glassfish"/>
+        	<exclude module="ant"/>
+        	<exclude module="core"/>
+        </dependency>
+        
+        
+        <exclude org="org.eclipse.jetty.orbit" module="javax.servlet"/>
 	</dependencies>
 </ivy-module>
