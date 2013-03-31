@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import ee.midaiganes.util.PropsValues;
+
 public class SingleVmPool {
 	public static Cache getCache(String name) {
 		return new Cache();
@@ -14,9 +16,11 @@ public class SingleVmPool {
 
 		public static class Element {
 			private final Object value;
+			private final long destroyTime;
 
 			private Element(Object value) {
 				this.value = value;
+				destroyTime = value == null ? System.currentTimeMillis() + 60000 : 0;
 			}
 
 			public <T> T get() {
@@ -36,33 +40,34 @@ public class SingleVmPool {
 		private final CacheMap cache = new CacheMap();
 
 		public void put(String key, Object value) {
-			lock.writeLock().lock();
-			try {
-				cache.put(key, new Element(value));
-			} finally {
-				lock.writeLock().unlock();
+			if (!PropsValues.CACHE_DISABLED) {
+				lock.writeLock().lock();
+				try {
+					cache.put(key, new Element(value));
+				} finally {
+					lock.writeLock().unlock();
+				}
 			}
 		}
 
 		public <T> T get(String key) {
-			try {
-				lock.readLock().lock();
-				Element el = cache.get(key);
-				@SuppressWarnings("unchecked")
-				T value = el != null ? (T) el.get() : null;
-				return value;
-			} finally {
-				lock.readLock().unlock();
-			}
+			Element el = getElement(key);
+			return el != null ? el.<T> get() : null;
 		}
 
 		public Element getElement(String key) {
+			Element el = null;
 			try {
 				lock.readLock().lock();
-				return cache.get(key);
+				el = cache.get(key);
 			} finally {
 				lock.readLock().unlock();
 			}
+			if (el != null && el.destroyTime != 0 && el.destroyTime < System.currentTimeMillis()) {
+				remove(key);
+				return null;
+			}
+			return el;
 		}
 
 		public Element remove(String key) {
@@ -83,5 +88,4 @@ public class SingleVmPool {
 			}
 		}
 	}
-
 }

@@ -53,8 +53,11 @@ a {
 	border: 1px solid #999;
 	border-radius:5px;
 }
+/* menu */
 ul.menu {
-	width:100px;
+	width:200px;
+	text-align:left;
+	margin-left: 20px;
 }
 ul.menu a {
 	color: #8F8F8F;
@@ -67,6 +70,17 @@ ul.menu li:hover > ul {
 	display:block;
 	border:1px solid black;
 }
+ul.menu > li > ul > li {
+	padding:0 5px 0 5px;
+	border-top:1px solid #999;
+}
+ul.menu > li > ul > li:first-child {
+	border-top:0 none;
+}
+ul.menu > li > ul > li:hover {
+	background-color: #EEE;
+}
+/* menu end */
 .content-box {
 	color: #777;
 	border: 1px solid #999;/* #E5E5E5; */
@@ -119,4 +133,68 @@ ul.menu li:hover > ul {
 	margin-left: -200px;
 	border: 1px solid #999;
 	background:white;
+}
+.m-ui-dialog .close-dialog {
+	float:right;
+}
+.m-ui-dialog > .m-ui-content {
+	padding: 0 10px;
+}
+/* dialog general */
+.m-ui-dialog h2 {
+	margin-top:10px;
+}
+/* dialog general end*/
+
+/* add portlet dialog */
+#add-portlet {
+	text-align:left;
+}
+#add-portlet a {
+	font-size:12px;
+}
+/* add portlet dialog end */
+
+/* change page layout */
+.m-ui-dialog #page-layout ul {
+	text-align:left;
+	font-size:12px;
+}
+/* change page layout end */
+
+.action-menu-button li > ul {
+/* 	display:none; */
+	visibility: hidden;
+	margin-left: -1px;
+	margin-right: -1px;
+}
+.action-menu-button li:hover > ul {
+/* 	display:block; */
+	visibility:visible;
+	position: relative;
+/* 	left: -1px; */
+}
+.action-menu-button > li:hover > ul ul {
+	position: relative;
+	left: 100%;
+	top: -25px;
+}
+.action-menu-button ul {
+	min-width: 100px;
+}
+.action-menu-button li {
+	border: 1px solid black;
+	float:left;
+	height: 25px;
+	z-index: 100;
+	width:100%;
+	background: white;
+}
+.action-menu-button li + li {
+	border-top: 0 none;
+}
+
+/* */
+.clear {
+	clear: both;
 }

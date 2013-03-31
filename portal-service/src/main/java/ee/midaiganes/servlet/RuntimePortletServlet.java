@@ -14,10 +14,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ee.midaiganes.beans.PortalConfig;
+import ee.midaiganes.model.PageDisplay;
+import ee.midaiganes.model.PortletInstance;
 import ee.midaiganes.model.PortletName;
 import ee.midaiganes.model.RequestInfo.PortletURL;
 import ee.midaiganes.portlet.app.PortletApp;
-import ee.midaiganes.services.PortletRepository;
+import ee.midaiganes.secureservices.SecurePortletRepository;
+import ee.midaiganes.services.PortletInstanceRepository;
+import ee.midaiganes.services.exceptions.PrincipalException;
 import ee.midaiganes.util.RequestUtil;
 import ee.midaiganes.util.StringPool;
 
@@ -25,8 +29,11 @@ public class RuntimePortletServlet extends HttpServlet {
 	private static final Logger log = LoggerFactory.getLogger(RuntimePortletServlet.class);
 	public static final String PORTLET_NAME = RuntimePortletServlet.class.getName() + ".PORTLET_NAME";
 
-	@Resource(name = PortalConfig.PORTLET_REPOSITORY)
-	private PortletRepository portletRepository;
+	@Resource(name = PortalConfig.SECURE_PORTLET_REPOSITORY)
+	private SecurePortletRepository portletRepository;
+
+	@Resource
+	private PortletInstanceRepository portletInstanceRepository;
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -41,32 +48,38 @@ public class RuntimePortletServlet extends HttpServlet {
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		PortletName portletName = (PortletName) request.getAttribute(PORTLET_NAME);
-		PortletURL portletURL = RequestUtil.getPageDisplay(request).getPortletURL();
-		PortletApp portletApp = getPortletApp(portletName, portletURL);
-		if (portletApp != null) {
-			portletApp.doRender(request, response);
-		} else {
-			log.debug("portletApp = null");
+		PageDisplay pageDisplay = RequestUtil.getPageDisplay(request);
+		PortletURL portletURL = pageDisplay.getPortletURL();
+		try {
+			PortletApp portletApp = getPortletApp(pageDisplay, portletName, portletURL);
+			if (portletApp != null) {
+				portletApp.doRender(request, response);
+			} else {
+				log.debug("portletApp = null");
+			}
+		} catch (PrincipalException e) {
+			log.debug(e.getMessage(), e);
 		}
 	}
 
-	private PortletApp getPortletApp(PortletName portletName, PortletURL portletURL) {
+	private PortletApp getPortletApp(PageDisplay pageDisplay, PortletName portletName, PortletURL portletURL) throws PrincipalException {
 		log.debug("portletName = '{}'; portletURL = '{}'", portletName, portletURL);
 		if (portletURL != null && StringPool.DEFAULT_PORTLET_WINDOWID.equals(portletURL.getWindowID()) && portletName.equals(portletURL.getPortletName())) {
-			return getPortletApp(portletURL);
+			return getPortletApp(pageDisplay, portletURL);
 		} else {
-			return getPortletApp(portletName);
+			return getPortletApp(pageDisplay, portletName);
 		}
 	}
 
-	private PortletApp getPortletApp(PortletName portletName) {
+	private PortletApp getPortletApp(PageDisplay pageDisplay, PortletName portletName) throws PrincipalException {
 		log.debug("get portletApp by name '{}'", portletName);
-		return portletRepository.getPortletApp(portletName, StringPool.DEFAULT_PORTLET_WINDOWID, PortletMode.VIEW, WindowState.NORMAL);
+		PortletInstance portletInstance = portletInstanceRepository.getDefaultPortletInstance(portletName);
+		return portletRepository.getPortletApp(pageDisplay.getUser().getId(), portletInstance, PortletMode.VIEW, WindowState.NORMAL);
 	}
 
-	private PortletApp getPortletApp(PortletURL portletURL) {
+	private PortletApp getPortletApp(PageDisplay pageDisplay, PortletURL portletURL) throws PrincipalException {
 		log.debug("get portletApp by portletURL '{}'", portletURL);
-		return portletRepository.getPortletApp(portletURL.getPortletName(), StringPool.DEFAULT_PORTLET_WINDOWID, portletURL.getPortletMode(),
-				portletURL.getWindowState());
+		PortletInstance portletInstance = portletInstanceRepository.getDefaultPortletInstance(portletURL.getPortletName());
+		return portletRepository.getPortletApp(pageDisplay.getUser().getId(), portletInstance, portletURL.getPortletMode(), portletURL.getWindowState());
 	}
 }

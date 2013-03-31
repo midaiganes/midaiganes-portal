@@ -21,6 +21,7 @@ import javax.xml.bind.JAXBException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.generated.xml.portlet.DescriptionType;
@@ -32,6 +33,7 @@ import ee.midaiganes.model.LayoutPortlet;
 import ee.midaiganes.model.PortletAndConfiguration;
 import ee.midaiganes.model.PortletInitParameter;
 import ee.midaiganes.model.PortletInitParameter.Description;
+import ee.midaiganes.model.PortletInstance;
 import ee.midaiganes.model.PortletName;
 import ee.midaiganes.portlet.MidaiganesPortlet;
 import ee.midaiganes.portlet.MidaiganesResourcePortlet;
@@ -40,6 +42,7 @@ import ee.midaiganes.portlet.impl.PortletConfigImpl;
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.XmlUtil;
 
+@Component(value = PortalConfig.PORTLET_REPOSITORY)
 public class PortletRepository {
 	private static final Logger log = LoggerFactory.getLogger(PortletRepository.class);
 	private final ConcurrentHashMap<PortletName, PortletAndConfiguration> portlets = new ConcurrentHashMap<>();
@@ -99,19 +102,18 @@ public class PortletRepository {
 		}
 	}
 
-	public PortletApp getPortletApp(PortletName portletName, String windowID, PortletMode portletMode, WindowState windowState) {
-		if (portletName != null) {
-			PortletAndConfiguration portlet = getPortlet(portletName);
+	public PortletApp getPortletApp(PortletInstance portletInstance, PortletMode portletMode, WindowState windowState) {
+		if (portletInstance != null) {
+			PortletAndConfiguration portlet = getPortlet(portletInstance.getPortletNamespace().getPortletName());
 			if (portlet != null) {
-				return new PortletApp(windowID, portletName, portletMode, windowState, portletPreferencesRepository, portlet);
+				return new PortletApp(portletInstance, portletMode, windowState, portletPreferencesRepository, portlet);
 			}
 		}
 		return null;
 	}
 
 	public PortletApp getPortletApp(LayoutPortlet layoutPortlet, PortletMode portletMode, WindowState windowState) {
-		return getPortletApp(layoutPortlet.getPortletInstance().getPortletNamespace().getPortletName(), layoutPortlet.getPortletInstance()
-				.getPortletNamespace().getWindowID(), portletMode, windowState);
+		return getPortletApp(layoutPortlet.getPortletInstance(), portletMode, windowState);
 	}
 
 	private PortletAndConfiguration getPortlet(PortletName portletName) {

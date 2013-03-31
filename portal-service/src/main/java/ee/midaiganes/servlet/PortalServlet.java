@@ -18,14 +18,17 @@ import ee.midaiganes.beans.RootApplicationContext;
 import ee.midaiganes.model.LayoutPortlet;
 import ee.midaiganes.model.MidaiganesWindowState;
 import ee.midaiganes.model.PageDisplay;
+import ee.midaiganes.model.PortletInstance;
 import ee.midaiganes.model.PortletLifecycle;
 import ee.midaiganes.model.RequestInfo;
 import ee.midaiganes.model.Theme;
 import ee.midaiganes.portlet.app.PortletApp;
+import ee.midaiganes.secureservices.SecurePortletRepository;
 import ee.midaiganes.services.DbInstallService;
 import ee.midaiganes.services.LayoutPortletRepository;
-import ee.midaiganes.services.PortletRepository;
+import ee.midaiganes.services.PortletInstanceRepository;
 import ee.midaiganes.services.exceptions.DbInstallFailedException;
+import ee.midaiganes.services.exceptions.PrincipalException;
 import ee.midaiganes.servlet.http.ThemeServletRequest;
 import ee.midaiganes.util.ContextUtil;
 import ee.midaiganes.util.PortalUtil;
@@ -42,8 +45,11 @@ public class PortalServlet extends HttpServlet {
 	@Resource(name = RootApplicationContext.LAYOUT_PORTLET_REPOSITORY)
 	private LayoutPortletRepository layoutPortletRepository;
 
-	@Resource(name = PortalConfig.PORTLET_REPOSITORY)
-	private PortletRepository portletRepository;
+	@Resource(name = PortalConfig.SECURE_PORTLET_REPOSITORY)
+	private SecurePortletRepository portletRepository;
+
+	@Resource(name = PortalConfig.PORTLET_INSTANCE_REPOSITORY)
+	private PortletInstanceRepository portletInstanceRepository;
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -63,55 +69,67 @@ public class PortalServlet extends HttpServlet {
 		RequestInfo.PortletURL portletURL = pageDisplay.getRequestInfo().getPortletURL();
 		log.debug("portletURL = {}", portletURL);
 		if (portletURL != null) {
-			if (PortletLifecycle.ACTION.equals(portletURL.getLifecycle())) {
-				PortletApp portletApp = getPortletApp(pageDisplay, portletURL);
-				if (portletApp != null) {
-					boolean success = portletApp.processAction(request, response);
-					if (response.isCommitted()) {
-						return;
-					}
-					if (success) {
-						if (MidaiganesWindowState.EXCLUSIVE.equals(portletURL.getWindowState())) {
-							portletApp.doRender(request, response);
-							return;
-						}
-					} else {
-
-						// TODO
-						log.error("action failed");
-					}
-				}
-			} else if (PortletLifecycle.RESOURCE.equals(portletURL.getLifecycle())) {
-				PortletApp portletApp = getPortletApp(pageDisplay, portletURL);
-				if (portletApp != null) {
-					portletApp.serveResource(request, response);
+			try {
+				if (processPortletRequest(request, response, pageDisplay, portletURL)) {
 					return;
 				}
-			} else if (MidaiganesWindowState.EXCLUSIVE.equals(portletURL.getWindowState())) {
-				PortletApp portletApp = getPortletApp(pageDisplay, portletURL);
-				log.debug("portletApp = {}", portletApp);
-				if (portletApp != null) {
-					portletApp.doRender(request, response);
-					return;
-				}
+			} catch (PrincipalException e) {
+				log.debug(e.getMessage(), e);
 			}
 		}
 		getAndIncludeTheme(request, response, pageDisplay);
 	}
 
-	private PortletApp getPortletApp(PageDisplay pageDisplay, RequestInfo.PortletURL portletURL) {
+	private boolean processPortletRequest(HttpServletRequest request, HttpServletResponse response, PageDisplay pageDisplay, RequestInfo.PortletURL portletURL)
+			throws PrincipalException {
+		if (PortletLifecycle.ACTION.equals(portletURL.getLifecycle())) {
+			PortletApp portletApp = getPortletApp(pageDisplay, portletURL);
+			if (portletApp != null) {
+				boolean success = portletApp.processAction(request, response);
+				if (response.isCommitted()) {
+					return true;
+				}
+				if (success) {
+					if (MidaiganesWindowState.EXCLUSIVE.equals(portletURL.getWindowState())) {
+						portletApp.doRender(request, response);
+						return true;
+					}
+				} else {
+
+					// TODO
+					log.error("action failed");
+				}
+			}
+		} else if (PortletLifecycle.RESOURCE.equals(portletURL.getLifecycle())) {
+			PortletApp portletApp = getPortletApp(pageDisplay, portletURL);
+			if (portletApp != null) {
+				portletApp.serveResource(request, response);
+				return true;
+			}
+		} else if (MidaiganesWindowState.EXCLUSIVE.equals(portletURL.getWindowState())) {
+			PortletApp portletApp = getPortletApp(pageDisplay, portletURL);
+			log.debug("portletApp = {}", portletApp);
+			if (portletApp != null) {
+				portletApp.doRender(request, response);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private PortletApp getPortletApp(PageDisplay pageDisplay, RequestInfo.PortletURL portletURL) throws PrincipalException {
 		// TODO
 		if (StringPool.DEFAULT_PORTLET_WINDOWID.equals(portletURL.getWindowID())) {
 			if (portletURL.getPortletName() != null) {
-				return portletRepository.getPortletApp(portletURL.getPortletName(), portletURL.getWindowID(), portletURL.getPortletMode(),
-						portletURL.getWindowState());
+				PortletInstance instance = portletInstanceRepository.getDefaultPortletInstance(portletURL.getPortletName());
+				return portletRepository.getPortletApp(pageDisplay.getUser().getId(), instance, portletURL.getPortletMode(), portletURL.getWindowState());
 			} else {
 				log.debug("portletURL.getPortletName is empty");
 			}
 		} else {
 			LayoutPortlet layoutPortlet = getLayoutPortlet(pageDisplay, portletURL);
 			if (layoutPortlet != null) {
-				return portletRepository.getPortletApp(layoutPortlet, portletURL.getPortletMode(), portletURL.getWindowState());
+				return portletRepository.getPortletApp(pageDisplay.getUser().getId(), layoutPortlet, portletURL.getPortletMode(), portletURL.getWindowState());
 			} else {
 				log.debug("layoutPortlet = null");
 			}

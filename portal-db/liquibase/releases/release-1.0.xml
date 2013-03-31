@@ -43,7 +43,7 @@
 					pageLayoutId VARCHAR(100) NOT NULL,
 					nr INTEGER UNSIGNED NOT NULL DEFAULT 1,
 					parentId INTEGER UNSIGNED DEFAULT NULL,
-					defaultLayoutTitleLanguageId VARCHAR(5) NOT NULL,
+					defaultLayoutTitleLanguageId INTEGER UNSIGNED NOT NULL,
 					CONSTRAINT fk_LAYOUT_parentId_layout_id 
 						FOREIGN KEY fk_LAYOUT_parentId_layout_id (parentId) 
 							REFERENCES Layout (id) 
@@ -59,6 +59,11 @@
 							REFERENCES Theme(id)
 								ON DELETE SET NULL
 								ON UPDATE SET NULL,
+					CONSTRAINT fk_LAYOUT_dltlid_language_id
+						FOREIGN KEY fk_LAYOUT_dltlid_language_id(defaultLayoutTitleLanguageId)
+							REFERENCES Language(id)
+								ON DELETE CASCADE
+								ON UPDATE CASCADE,
 					CONSTRAINT uq_LAYOUT_parentId_nr 
 						UNIQUE uq_LAYOUT_parentId_nr (parentId, nr),
 					CONSTRAINT uq_LAYOUT_layoutSetId_friendlyUrl 
@@ -141,91 +146,185 @@
 	<changeSet id="2" author="-" runOnChange="false" runAlways="false" dbms="mysql" failOnError="true">
 		<sql>
 			<![CDATA[
-				CREATE TABLE IF NOT EXISTS WebContentStructure (
-					id INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
-					name VARCHAR(100) NOT NULL UNIQUE)
-					ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
-					
-				CREATE  TABLE IF NOT EXISTS WebContentStructureField (
-					id INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
-					structureId INT UNSIGNED NOT NULL ,
-					fieldName VARCHAR(100) NOT NULL ,
-					fieldType VARCHAR(16) NOT NULL ,
-					CONSTRAINT fk_wcsf_sid_wcs_id
-						FOREIGN KEY (structureId)
-							REFERENCES WebContentStructure (id )
-								ON DELETE CASCADE
-								ON UPDATE CASCADE,
-					INDEX ix_wcsf_id_sid (id, structureId))
-					ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
-					
-				CREATE  TABLE IF NOT EXISTS WebContentTemplate (
-					`id` INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY ,
-					`name` VARCHAR(100) NOT NULL UNIQUE,
-					`structureId` INT UNSIGNED NOT NULL ,
-					`templateContent` LONGTEXT NOT NULL ,
-					CONSTRAINT `fk_wct_sid_wcs_id`
-				    	FOREIGN KEY (`structureId` )
-				    		REFERENCES `WebContentStructure` (`id` )
-				    			ON DELETE CASCADE
-				    			ON UPDATE CASCADE,
-				    INDEX ix_wct_id_wcsid (id, structureId))
-				    ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
-				
 				CREATE TABLE IF NOT EXISTS WebContent (
 					id INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
-					defaultLanguageId VARCHAR(5) NOT NULL ,
+					layoutSetId INT UNSIGNED NOT NULL,
 					title VARCHAR(100) NOT NULL UNIQUE,
-					templateId INT UNSIGNED NOT NULL,
-					structureId INT UNSIGNED NOT NULL,
+					content VARCHAR(4096) NOT NULL,
 					createDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-					CONSTRAINT fk_wc_tid_wct_id
-						FOREIGN KEY (templateId , structureId)
-							REFERENCES WebContentTemplate (id , structureId)
-								ON DELETE RESTRICT
-								ON UPDATE CASCADE,
-					CONSTRAINT fk_wc_sid_wcs_id
-						FOREIGN KEY (structureId)
-							REFERENCES WebContentStructure (id)
-								ON DELETE RESTRICT
-								ON UPDATE CASCADE,
-					INDEX ix_wc_id_structureId (id, structureId))
-					ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
-				
-				CREATE TABLE IF NOT EXISTS WebContentField (
-					id INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
-					webContentId INT UNSIGNED NOT NULL,
-					languageId VARCHAR(5) NOT NULL,
-					structureId INT UNSIGNED NOT NULL,
-					structureFieldId INT UNSIGNED NOT NULL,
-					fieldValue VARCHAR(4000) NOT NULL,
-					CONSTRAINT fk_wcf_wcid_wc_id
-						FOREIGN KEY (webContentId)
-							REFERENCES WebContent (id)
-								ON DELETE CASCADE
-								ON UPDATE CASCADE,
-					CONSTRAINT fk_wcf_wcid_sid_wc_id_sid
-						FOREIGN KEY (webContentId, structureId)
-							REFERENCES WebContent (id, structureId)
-								ON DELETE CASCADE
-								ON UPDATE CASCADE,
-					CONSTRAINT fk_wcf_sid_wcs_id
-						FOREIGN KEY (structureId)
-							REFERENCES WebContentStructure (id)
-								ON DELETE RESTRICT
-								ON UPDATE CASCADE,
-					CONSTRAINT fk_wcf_sfid_wcsf_id
-						FOREIGN KEY (structureFieldId)
-							REFERENCES WebContentStructureField (id)
-								ON DELETE RESTRICT
-								ON UPDATE CASCADE,
-					CONSTRAINT fk_wcf_sfid_sid_wcsf_id_sid
-						FOREIGN KEY (structureFieldId, structureId)
-							REFERENCES WebContentStructureField (id, structureId)
+					CONSTRAINT fk_lsid_layoutset_id
+						FOREIGN KEY (layoutSetId)
+							REFERENCES LayoutSet (id)
 								ON DELETE RESTRICT
 								ON UPDATE CASCADE)
+					ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
+			]]>
+		</sql>
+	</changeSet>
+	
+	<changeSet id="3" author="-" runAlways="false" runOnChange="false" dbms="mysql" failOnError="true">
+		<comment>Permissions</comment>
+		<sql>
+			<![CDATA[
+				CREATE TABLE IF NOT EXISTS Resource (
+					id INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
+					resource VARCHAR(128) NOT NULL UNIQUE
+				)
+				ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
+				
+				CREATE TABLE IF NOT EXISTS ResourceAction (
+					id INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
+					resourceId INT UNSIGNED NOT NULL,
+					action VARCHAR(32) NOT NULL,
+					permission INT UNSIGNED NOT NULL,
+					CONSTRAINT fk_ra_rarid_resource_id
+						FOREIGN KEY (resourceId)
+							REFERENCES Resource (id)
+								ON DELETE CASCADE
+								ON UPDATE CASCADE,
+					CONSTRAINT uq_resourceaction_rid_a_p
+						UNIQUE uq_resourceaction_rid_a_p (resourceId, action, permission)
+				)
+				ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
+				
+				CREATE TABLE IF NOT EXISTS ResourceInstance (
+					id INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
+					resourceId INT UNSIGNED NOT NULL,
+					resourcePrimKey INT UNSIGNED NOT NULL,
+					CONSTRAINT fk_resourceinstance_rid_resource_id
+						FOREIGN KEY (resourceId)
+							REFERENCES Resource (id)
+								ON DELETE CASCADE
+								ON UPDATE CASCADE,
+					CONSTRAINT uq_resourceinstance_rid_rprimKey
+						UNIQUE uq_resourceinstance_rid_rprimKey (resourcePrimKey, resourceId)
+				)
+				ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
+				
+				CREATE TABLE IF NOT EXISTS ResourceInstance_Resource (
+					id INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
+					resourceInstanceId INT UNSIGNED NOT NULL,
+					resourceId INT UNSIGNED NOT NULL,
+					CONSTRAINT fk_resourceinstanceresource_rid_resource_id
+						FOREIGN KEY (resourceId)
+							REFERENCES Resource (id)
+								ON DELETE CASCADE
+								ON UPDATE CASCADE,
+					CONSTRAINT fk_resourceinstanceresource_riid_resource_id
+						FOREIGN KEY (resourceInstanceId)
+							REFERENCES ResourceInstance (id)
+								ON DELETE CASCADE
+								ON UPDATE CASCADE,
+					CONSTRAINT uq_resourceinstance_rid_rprimKey
+						UNIQUE uq_resourceinstance_rid_rprimKey (resourceInstanceId, resourceId)
+				)
+				ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
+				
+				CREATE TABLE IF NOT EXISTS ResourceInstance_ResourceInstancePermission (
+					id INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
+					resourceInstanceResourceId INT UNSIGNED NOT NULL,
+					resourcePrimKey INT UNSIGNED NOT NULL,
+					permissions INT UNSIGNED NOT NULL,
+					CONSTRAINT fk_resinsresinsperm_ririd_rir_id
+						FOREIGN KEY (resourceInstanceResourceId)
+							REFERENCES ResourceInstance_Resource (id)
+								ON DELETE CASCADE
+								ON UPDATE CASCADE,
+					CONSTRAINT uq_resinsresinsperm_ririd_rprimKey
+						UNIQUE uq_resinsresinsperm_ririd_rprimKey (resourceInstanceResourceId, resourcePrimKey)
+				)
+				ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
+				
+				CREATE TABLE IF NOT EXISTS Permission (
+					id INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
+					resourceId INT UNSIGNED NOT NULL,
+					resourcePrimKey INT UNSIGNED NOT NULL,
+					resource2Id INT UNSIGNED NOT NULL,
+					resource2PrimKey INT UNSIGNED NOT NULL,
+					permission INT UNSIGNED NOT NULL,
+					CONSTRAINT fk_permission_rid_resource_id
+						FOREIGN KEY (resourceId)
+							REFERENCES Resource (id)
+								ON DELETE CASCADE
+								ON UPDATE CASCADE,
+					CONSTRAINT fk_permission_r2id_resource_id
+						FOREIGN KEY (resourceId)
+							REFERENCES Resource (id)
+								ON DELETE CASCADE
+								ON UPDATE CASCADE,
+					CONSTRAINT uq_permission_rid_rprim_r2id_r2prim
+						UNIQUE uq_permission_rid_rprim_r2id_r2prim (resourcePrimKey, resource2PrimKey, resourceId, resource2Id)
+				)
 				ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
 			]]>
 		</sql>
 	</changeSet>
+	<changeSet id="4" author="-" runAlways="false" runOnChange="false" dbms="mysql" failOnError="true">
+		<comment>Add PortletInstance resource and actions</comment>
+		<sql>
+			<![CDATA[
+				INSERT INTO Resource(resource) VALUES('ee.midaiganes.model.PortletInstance');
+				INSERT INTO Resource(resource) VALUES('ee.midaiganes.model.User');
+				INSERT INTO Resource(resource) VALUES('ee.midaiganes.model.Group');
+				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.PortletInstance'), 'VIEW', 1);
+				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.PortletInstance'), 'EDIT', 2);
+				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.PortletInstance'), 'PERMISSIONS', 4);
+			]]>
+		</sql>
+	</changeSet>
+	<changeSet id="5" author="-" runAlways="false" runOnChange="false" dbms="mysql" failOnError="true">
+		<comment>Add layout resource and actions</comment>
+		<sql>
+			<![CDATA[
+				INSERT INTO Resource(resource) VALUES('ee.midaiganes.model.Layout');
+				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.Layout'), 'VIEW', 1);
+				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.Layout'), 'EDIT', 2);
+				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.Layout'), 'ADD_PORTLET', 4);
+				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.Layout'), 'PERMISSIONS', 8);
+			]]>
+		</sql>
+	</changeSet>
+	<changeSet id="6" author="-" runAlways="false" runOnChange="false" dbms="mysql" failOnError="true">
+		<sql>
+			<![CDATA[
+				CREATE TABLE IF NOT EXISTS Group_ (
+					id INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,
+					name VARCHAR(128) NOT NULL UNIQUE,
+					userGroup TINYINT(1) NOT NULL DEFAULT 1
+				)
+				ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
+				
+				CREATE TABLE IF NOT EXISTS UserGroup (
+					userId INT UNSIGNED NOT NULL,
+					groupId INT UNSIGNED NOT NULL,
+					CONSTRAINT fk_ug_userId_user_id
+						FOREIGN KEY (userId)
+							REFERENCES User (id)
+								ON DELETE CASCADE
+								ON UPDATE CASCADE,
+					CONSTRAINT fk_ug_groupId_group_id
+						FOREIGN KEY (groupId)
+							REFERENCES Group_ (id)
+								ON DELETE CASCADE
+								ON UPDATE CASCADE,
+					CONSTRAINT uq_usergroup_uid_gid
+						UNIQUE uq_usergroup_uid_gid (userId, groupId)
+				)
+				ENGINE = InnoDB, CHARACTER SET = utf8, COLLATE = utf8_unicode_ci;
+			]]>
+		</sql>
+	</changeSet>
+	<changeSet id="7" author="-" runAlways="false" runOnChange="false" dbms="mysql" failOnError="true">
+		<comment>Add layoutSet resource and actions</comment>
+		<sql>
+			<![CDATA[
+				INSERT INTO Resource(resource) VALUES('ee.midaiganes.model.LayoutSet');
+				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.LayoutSet'), 'VIEW', 1);
+				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.LayoutSet'), 'EDIT', 2);
+				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.LayoutSet'), 'PERMISSIONS', 4);
+			]]>
+		</sql>
+	</changeSet>
+	
+	<include file="default-data-1.0.xml"/>
 </databaseChangeLog>

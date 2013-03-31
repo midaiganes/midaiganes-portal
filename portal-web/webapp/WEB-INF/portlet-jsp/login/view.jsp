@@ -1,4 +1,4 @@
-<%@ page pageEncoding="UTF-8" language="java" session="false" %>
+<%@ page pageEncoding="UTF-8" language="java" session="false" trimDirectiveWhitespaces="true" %>
 <%@ include file="../init.jsp" %>
 
 <portlet:actionURL var="loginUrl" />
@@ -13,6 +13,6 @@
 		<form:password path="password" id="password" />
 	</div>
 	<div>
-		<button type="button" class="ajax-submit"></button>
+		<button type="button" class="ajax-submit">Login</button>
 	</div>
 </form:form>

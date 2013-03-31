@@ -1,5 +1,12 @@
 package ee.midaiganes.launcher;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.eclipse.jetty.deploy.DeploymentManager;
 import org.eclipse.jetty.deploy.PropertiesConfigurationManager;
 import org.eclipse.jetty.deploy.providers.WebAppProvider;
@@ -16,10 +23,11 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
 public class JettyLauncher {
 	public static void main(String... args) throws Exception {
-		QueuedThreadPool threadPool = new QueuedThreadPool();
-		threadPool.setMinThreads(10);
-		threadPool.setMaxThreads(200);
+		QueuedThreadPool threadPool = new QueuedThreadPool(7, 2, 60000);
+		// threadPool.setMinThreads(10);
+		// threadPool.setMaxThreads(200);
 		threadPool.setDetailedDump(false);
+		threadPool.setName("jetty-server-thread-");
 		Server server = new Server(threadPool);
 
 		HttpConfiguration httpConfig = new HttpConfiguration();
@@ -41,7 +49,15 @@ public class JettyLauncher {
 		server.setDumpAfterStart(false);
 		server.setDumpBeforeStop(false);
 
-		ServerConnector serverConnector = new ServerConnector(server, new ConnectionFactory[] { new HttpConnectionFactory(httpConfig) });
+		int acceptors = 2;
+		int selectors = 3;
+		int requests = 5;
+		int maxPoolSize = acceptors + selectors + requests;
+		Executor serverConnectorExecutor = new ThreadPoolExecutor(maxPoolSize, maxPoolSize, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(100),
+				new SimpleThreadFactory("server-connector"));
+		serverConnectorExecutor.hashCode();
+		ServerConnector serverConnector = new ServerConnector(server, serverConnectorExecutor, null, null, acceptors, selectors,
+				new ConnectionFactory[] { new HttpConnectionFactory(httpConfig) });
 		serverConnector.setHost("0.0.0.0");
 		serverConnector.setPort(8080);
 		serverConnector.setIdleTimeout(30000);
@@ -78,5 +94,30 @@ public class JettyLauncher {
 
 		server.start();
 		server.join();
+	}
+
+	private static final class SimpleThreadFactory implements ThreadFactory {
+		private static final AtomicInteger poolNumber = new AtomicInteger(1);
+		private final ThreadGroup group;
+		private final AtomicInteger threadNumber = new AtomicInteger(1);
+		private final String namePrefix;
+
+		public SimpleThreadFactory(String namePrefix) {
+			SecurityManager s = System.getSecurityManager();
+			group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
+			this.namePrefix = namePrefix + "-pool-" + poolNumber.getAndIncrement() + "-thread-";
+		}
+
+		@Override
+		public Thread newThread(Runnable r) {
+			Thread t = new Thread(group, r, namePrefix + threadNumber.getAndIncrement(), 0);
+			if (t.isDaemon()) {
+				t.setDaemon(false);
+			}
+			if (t.getPriority() != Thread.NORM_PRIORITY) {
+				t.setPriority(Thread.NORM_PRIORITY);
+			}
+			return t;
+		}
 	}
 }

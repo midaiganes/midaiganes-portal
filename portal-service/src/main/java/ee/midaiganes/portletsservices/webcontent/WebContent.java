@@ -1,49 +1,53 @@
 package ee.midaiganes.portletsservices.webcontent;
 
-public class WebContent {
-	private long id;
-	private String defaultLanguageId;
-	private String title;
-	private long templateId;
-	private long structureId;
+import java.io.Serializable;
+import java.util.Date;
+
+import ee.midaiganes.util.StringPool;
+
+public class WebContent implements Serializable {
+	private static final long serialVersionUID = 1L;
+
+	private static final String BR = "<br />";
+	private static final String TWO_SPACE = "  ";
+	private static final String TWO_NBSP = "&nbsp;&nbsp;";
+
+	private final long id;
+	private final long layoutSetId;
+	private final String title;
+	private final String content;
+	private final Date createDate;
+
+	public WebContent(long id, long layoutSetId, String title, String content, Date createDate) {
+		this.id = id;
+		this.layoutSetId = layoutSetId;
+		this.title = title;
+		this.content = content;
+		this.createDate = createDate;
+	}
 
 	public long getId() {
 		return id;
 	}
 
-	public void setId(long id) {
-		this.id = id;
-	}
-
-	public String getDefaultLanguageId() {
-		return defaultLanguageId;
-	}
-
-	public void setDefaultLanguageId(String defaultLanguageId) {
-		this.defaultLanguageId = defaultLanguageId;
+	public long getLayoutSetId() {
+		return layoutSetId;
 	}
 
 	public String getTitle() {
 		return title;
 	}
 
-	public void setTitle(String title) {
-		this.title = title;
+	public String getContent() {
+		return content;
 	}
 
-	public long getTemplateId() {
-		return templateId;
+	public Date getCreateDate() {
+		return createDate;
 	}
 
-	public void setTemplateId(long templateId) {
-		this.templateId = templateId;
-	}
-
-	public long getStructureId() {
-		return structureId;
-	}
-
-	public void setStructureId(long structureId) {
-		this.structureId = structureId;
+	public String getHtmlContent() {
+		return content.replace(StringPool.LINE_ENDING_RN, BR).replace(StringPool.LINE_ENDING_N, BR).replace(StringPool.LINE_ENDING_N, BR)
+				.replace(TWO_SPACE, TWO_NBSP);
 	}
 }

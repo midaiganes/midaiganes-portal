@@ -1,4 +1,4 @@
-<%@ page pageEncoding="UTF-8" language="java" session="false" %>
+<%@ page pageEncoding="UTF-8" language="java" session="false" trimDirectiveWhitespaces="true" %>
 <%@ include file="../init.jsp" %>
 
 <h2>Change page layout</h2>

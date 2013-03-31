@@ -2,13 +2,14 @@ package ee.midaiganes.model;
 
 import java.io.Serializable;
 
-public class LayoutSet implements Serializable {
+public class LayoutSet implements Serializable, PortalResource {
 	private static final long serialVersionUID = 1L;
 
 	private long id;
 	private String virtualHost;
 	private ThemeName themeName;
 
+	@Override
 	public long getId() {
 		return id;
 	}
@@ -37,4 +38,8 @@ public class LayoutSet implements Serializable {
 		this.themeName = themeName;
 	}
 
+	@Override
+	public String getResource() {
+		return LayoutSet.class.getName();
+	}
 }

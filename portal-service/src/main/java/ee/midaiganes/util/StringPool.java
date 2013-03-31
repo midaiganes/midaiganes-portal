@@ -9,4 +9,7 @@ public interface StringPool {
 	String ID = "id";
 	String COMMA = ",";
 	String UTF_8 = "UTF-8";
+	String LINE_ENDING_RN = "\r\n";
+	String LINE_ENDING_R = "\r";
+	String LINE_ENDING_N = "\n";
 }

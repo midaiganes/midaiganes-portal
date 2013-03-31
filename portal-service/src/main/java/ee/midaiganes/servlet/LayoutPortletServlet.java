@@ -21,8 +21,9 @@ import ee.midaiganes.model.PortletInstance;
 import ee.midaiganes.model.PortletNamespace;
 import ee.midaiganes.model.RequestInfo.PortletURL;
 import ee.midaiganes.portlet.app.PortletApp;
+import ee.midaiganes.secureservices.SecurePortletRepository;
 import ee.midaiganes.services.LayoutPortletRepository;
-import ee.midaiganes.services.PortletRepository;
+import ee.midaiganes.services.exceptions.PrincipalException;
 import ee.midaiganes.util.RequestUtil;
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.ThemeUtil;
@@ -34,8 +35,8 @@ public class LayoutPortletServlet extends HttpServlet {
 	@Resource(name = RootApplicationContext.LAYOUT_PORTLET_REPOSITORY)
 	private LayoutPortletRepository layoutPortletRepository;
 
-	@Resource(name = PortalConfig.PORTLET_REPOSITORY)
-	private PortletRepository portletRepository;
+	@Resource(name = PortalConfig.SECURE_PORTLET_REPOSITORY)
+	private SecurePortletRepository portletRepository;
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -62,28 +63,32 @@ public class LayoutPortletServlet extends HttpServlet {
 
 	private void getPortletAppAndRenderPortlet(HttpServletRequest request, HttpServletResponse response, PageDisplay pageDisplay, LayoutPortlet layoutPortlet) {
 		PortletURL portletURL = pageDisplay.getPortletURL();
-		PortletApp portletApp = getPortletApp(layoutPortlet, portletURL, layoutPortlet.getPortletInstance());
-		if (portletApp != null) {
-			portletApp.doRender(request, response);
-		} else {
-			log.info("portlet app not found for layout portlet: {}", layoutPortlet);
-			includePortletJsp(request, response, layoutPortlet.getPortletInstance());
+		try {
+			PortletApp portletApp = getPortletApp(pageDisplay.getUser().getId(), layoutPortlet, portletURL, layoutPortlet.getPortletInstance());
+			if (portletApp != null) {
+				portletApp.doRender(request, response);
+			} else {
+				log.info("portlet app not found for layout portlet: {}", layoutPortlet);
+				includePortletJsp(request, response, layoutPortlet.getPortletInstance());
+			}
+		} catch (PrincipalException e) {
+			log.debug(e.getMessage(), e);
 		}
 	}
 
 	private void includePortletJsp(HttpServletRequest request, HttpServletResponse response, PortletInstance portletInstance) {
 		try {
-			ThemeUtil.includePortletJsp(request, response, portletInstance.getPortletNamespace(), "portlet is undeployed");
+			ThemeUtil.includePortletJsp(request, response, portletInstance, "portlet is undeployed");
 		} catch (ServletException | IOException e) {
 			log.error(e.getMessage(), e);
 		}
 	}
 
-	private PortletApp getPortletApp(LayoutPortlet layoutPortlet, PortletURL portletURL, PortletInstance pi) {
+	private PortletApp getPortletApp(long userId, LayoutPortlet layoutPortlet, PortletURL portletURL, PortletInstance pi) throws PrincipalException {
 		if (portletURL != null && isCurrentPortletInUrl(portletURL, pi.getPortletNamespace(), portletURL.getWindowID())) {
-			return portletRepository.getPortletApp(layoutPortlet, portletURL.getPortletMode(), portletURL.getWindowState());
+			return portletRepository.getPortletApp(userId, layoutPortlet, portletURL.getPortletMode(), portletURL.getWindowState());
 		}
-		return portletRepository.getPortletApp(layoutPortlet, PortletMode.VIEW, WindowState.NORMAL);
+		return portletRepository.getPortletApp(userId, layoutPortlet, PortletMode.VIEW, WindowState.NORMAL);
 	}
 
 	private boolean isCurrentPortletInUrl(PortletURL portletURL, PortletNamespace pn, String urlWindowId) {

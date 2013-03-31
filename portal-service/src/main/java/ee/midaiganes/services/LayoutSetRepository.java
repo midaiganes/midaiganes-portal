@@ -5,14 +5,18 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
+import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Component;
 
+import ee.midaiganes.beans.PortalConfig;
+import ee.midaiganes.beans.RootApplicationContext;
 import ee.midaiganes.model.DefaultLayoutSet;
 import ee.midaiganes.model.LayoutSet;
 import ee.midaiganes.services.SingleVmPool.Cache;
@@ -20,17 +24,19 @@ import ee.midaiganes.services.SingleVmPool.Cache.Element;
 import ee.midaiganes.services.rowmapper.LayoutSetRowMapper;
 import ee.midaiganes.util.StringPool;
 
+@Component(value = RootApplicationContext.LAYOUT_SET_REPOSITORY)
 public class LayoutSetRepository {
 	private static final Logger log = LoggerFactory.getLogger(LayoutSetRepository.class);
 	private static final String GET_LAYOUT_SET_BY_VIRTUAL_HOST = "SELECT LayoutSet.id, LayoutSet.virtualHost, Theme.name, Theme.context FROM LayoutSet LEFT JOIN Theme ON (LayoutSet.themeId = Theme.id) WHERE virtualHost = ?";
 	private static final String GET_LAYOUT_SETS = "SELECT LayoutSet.id, LayoutSet.virtualHost, Theme.name, Theme.context FROM LayoutSet LEFT JOIN Theme ON (LayoutSet.themeId = Theme.id)";
 	private static final String ADD_LAYOUT_SET = "INSERT INTO LayoutSet(virtualHost, themeId) VALUES(?, ?)";
+	private static final String QRY_UPDATE_LAYOUT_SET = "UPDATE LayoutSet SET virtualHost = ?, themeId = ? WHERE id = ?";
 	private static final String GET_LAYOUT_SETS_CACHE_KEY = "getLayoutSets";
 	private static final String GET_LAYOUT_SET_BY_VIRTUAL_HOST_CACHE_KEY_PREFIX = "getLayoutSet#";
 	private static final LayoutSetRowMapper layoutSetRowMapper = new LayoutSetRowMapper();
 	private static final String[] ID_ARRAY = new String[] { StringPool.ID };
 
-	@Autowired
+	@Resource(name = PortalConfig.PORTAL_JDBC_TEMPLATE)
 	private JdbcTemplate jdbcTemplate;
 
 	private final Cache cache;
@@ -62,6 +68,15 @@ public class LayoutSetRepository {
 		return layoutSet;
 	}
 
+	public LayoutSet getLayoutSet(long id) {
+		for (LayoutSet ls : getLayoutSets()) {
+			if (ls.getId() == id) {
+				return ls;
+			}
+		}
+		return null;
+	}
+
 	public long addLayoutSet(final String virtualHost, final String themeId) {
 		try {
 			KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -75,6 +90,14 @@ public class LayoutSetRepository {
 				}
 			}, keyHolder);
 			return keyHolder.getKey().longValue();
+		} finally {
+			cache.clear();
+		}
+	}
+
+	public void updateLayoutSet(long id, String virtualHost, String themeId) {
+		try {
+			jdbcTemplate.update(QRY_UPDATE_LAYOUT_SET, virtualHost, themeId, id);
 		} finally {
 			cache.clear();
 		}

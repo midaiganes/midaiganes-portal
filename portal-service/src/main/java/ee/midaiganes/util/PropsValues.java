@@ -16,13 +16,25 @@ public interface PropsValues {
 	String PORTAL_CONTEXT = PropsUtil.getString(PropsKeys.PORTAL_CONTEXT);
 	String AUTODEPLOY_DIR = PropsUtil.getString(PropsKeys.AUTODEPLOY_DIR);
 	String WEBAPPS_DIR = PropsUtil.getString(PropsKeys.WEBAPPS_DIR);
+	long[] SUPERADMIN_USER_IDS = ArrayUtil.toPrimitiveLongArray(PropsUtil.getString(PropsKeys.SUPERADMIN_USER_IDS));
 	boolean AUTODEPLOY_ENABLED = Boolean.parseBoolean(PropsUtil.getString(PropsKeys.AUTODEPLOY_ENABLED));
+	boolean CACHE_DISABLED = Boolean.parseBoolean(PropsUtil.getString(PropsKeys.CACHE_DISABLED));
+	String GUEST_GROUP_NAME = PropsUtil.getString(PropsKeys.GUEST_GROUP_NAME);
+	String LOGGED_IN_GROUP_NAME = PropsUtil.getString(PropsKeys.LOGGED_IN_GROUP_NAME);
+	String NOT_LOGGED_IN_GROUP_NAME = PropsUtil.getString(PropsKeys.NOT_LOGGED_IN_GROUP_NAME);
+	String PERMISSIONS_RESOURCE_NAME = PropsUtil.getString(PropsKeys.PERMISSIONS_RESOURCE_NAME);
 
 	interface PropsKeys {
 		String PORTAL_CONTEXT = "portal.context";
 		String AUTODEPLOY_DIR = "autodeploy.dir";
 		String WEBAPPS_DIR = "webapps.dir";
 		String AUTODEPLOY_ENABLED = "autodeploy.enabled";
+		String SUPERADMIN_USER_IDS = "superadmin.user.ids";
+		String CACHE_DISABLED = "cache.disabled";
+		String GUEST_GROUP_NAME = "guest.group.name";
+		String LOGGED_IN_GROUP_NAME = "logged.in.group.name";
+		String NOT_LOGGED_IN_GROUP_NAME = "not.logged.in.group.name";
+		String PERMISSIONS_RESOURCE_NAME = "permissions.resource.name";
 	}
 
 	static class PropsUtil {

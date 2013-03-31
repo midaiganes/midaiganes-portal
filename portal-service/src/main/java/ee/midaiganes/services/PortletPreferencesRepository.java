@@ -6,47 +6,53 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.annotation.Resource;
+
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import ee.midaiganes.model.PortletName;
+import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.services.SingleVmPool.Cache;
 import ee.midaiganes.services.rowmapper.PortletPreferencesResultSetExtractor;
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.StringUtil;
 
+@Component(value = PortalConfig.PORTLET_PREFERENCES_REPOSITORY)
 public class PortletPreferencesRepository {
-	@Autowired
+
+	@Resource(name = PortalConfig.PORTAL_JDBC_TEMPLATE)
 	private JdbcTemplate jdbcTemplate;
 
-	private static final String GET_PORTLET_PREFERENCES = "SELECT pp.preferenceName, ppv.preferenceValue FROM PortletInstance pi JOIN PortletPreference pp ON (pi.id = pp.portletInstanceId) JOIN PortletPreferenceValue ppv ON (pp.id = ppv.portletPreferenceId) WHERE portletName = ? AND windowID = ? AND portletContext = ?";
-	private static final String INSERT_INTO_PORTLETPREFERENCE = "INSERT INTO PortletPreference(portletInstanceId, preferenceName) VALUES((SELECT id FROM PortletInstance WHERE portletName = ? AND windowID = ? AND portletContext = ?), ?)";
-	private static final String INSERT_INTO_PORTLETPREFERENCEVALUES = "INSERT INTO PortletPreferenceValue (portletPreferenceId, preferenceValue) VALUES ((SELECT id FROM PortletPreference WHERE preferenceName = ? AND portletInstanceId = (SELECT id FROM portletInstance WHERE portletName = ? AND windowID = ? AND portletContext = ?)), ?)";
+	private static final String GET_PORTLET_PREFERENCES = "SELECT pp.preferenceName, ppv.preferenceValue FROM PortletPreference pp JOIN PortletPreferenceValue ppv ON (pp.id = ppv.portletPreferenceId) WHERE pp.portletInstanceId = ?";
+	private static final String INSERT_INTO_PORTLETPREFERENCE = "INSERT INTO PortletPreference(portletInstanceId, preferenceName) VALUES(?, ?)";
+	private static final String INSERT_INTO_PORTLETPREFERENCEVALUES = "INSERT INTO PortletPreferenceValue (portletPreferenceId, preferenceValue) VALUES ((SELECT id FROM PortletPreference WHERE preferenceName = ? AND portletInstanceId = ?), ?)";
 
 	private final Cache cache = SingleVmPool.getCache(PortletPreferencesRepository.class.getName());
 	private static final PortletPreferencesResultSetExtractor getPortletPreferencesExtractor = new PortletPreferencesResultSetExtractor();
 
-	public Map<String, String[]> getPortletPreferences(PortletName portletName, String windowID) {
-		String key = portletName.getFullName() + "#" + windowID;
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true, isolation = Isolation.DEFAULT)
+	public Map<String, String[]> getPortletPreferences(long portletInstanceId) {
+		String key = Long.toString(portletInstanceId);
 		SingleVmPool.Cache.Element element = cache.getElement(key);
 		if (element != null) {
 			return element.get();
 		}
-		Map<String, String[]> preferences = loadPortletPreferences(portletName, windowID);
-		cache.put(key, preferences);
+
+		Map<String, String[]> preferences = null;
+		try {
+			preferences = loadPortletPreferences(portletInstanceId);
+		} finally {
+			cache.put(key, preferences);
+		}
 		return preferences;
 	}
 
-	private Map<String, String[]> loadPortletPreferences(PortletName portletName, String windowID) {
-		return jdbcTemplate.query(GET_PORTLET_PREFERENCES, getPortletPreferencesExtractor, portletName.getName(), windowID, portletName.getContext());
-	}
-
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = false, isolation = Isolation.DEFAULT)
-	public void savePortletPreferences(final PortletName portletName, final String windowID, Map<String, String[]> preferences) {
+	public void savePortletPreferences(long portletInstanceId, Map<String, String[]> preferences) {
 		List<String> keys = new ArrayList<String>(preferences.keySet());
 		List<String[]> values = new ArrayList<String[]>();
 		for (String key : keys) {
@@ -55,33 +61,33 @@ public class PortletPreferencesRepository {
 			}
 		}
 		try {
-			savePortletPreferences(portletName, windowID, keys, values);
+			savePortletPreferences(portletInstanceId, keys, values);
 		} finally {
-			cache.remove(portletName.getFullName() + "#" + windowID);
+			cache.remove(Long.toString(portletInstanceId));
 		}
 	}
 
-	private void savePortletPreferences(final PortletName portletName, final String windowID, final List<String> keys, final List<String[]> values) {
+	private Map<String, String[]> loadPortletPreferences(long portletInstanceId) {
+		return jdbcTemplate.query(GET_PORTLET_PREFERENCES, getPortletPreferencesExtractor, portletInstanceId);
+	}
+
+	private void savePortletPreferences(final long portletInstanceId, final List<String> keys, final List<String[]> values) {
 		if (keys.size() > 0) {
-			Object[] arguments = new String[keys.size() + 3];
-			arguments[0] = portletName.getName();
-			arguments[1] = windowID;
-			arguments[2] = portletName.getContext();
+			Object[] arguments = new Object[keys.size() + 1];
+			arguments[0] = portletInstanceId;
 			for (int i = 0; i < keys.size(); i++) {
-				arguments[3 + i] = keys.get(i);
+				arguments[1 + i] = keys.get(i);
 			}
-			jdbcTemplate
-					.update("DELETE FROM PortletPreference WHERE portletInstanceId = (SELECT id FROM PortletInstance WHERE portletName = ? AND windowID = ? AND portletContext = ?) AND preferenceName IN ("
+			jdbcTemplate.update(
+					"DELETE FROM PortletPreference WHERE portletInstanceId = ? AND preferenceName IN ("
 							+ StringUtil.repeat(StringPool.QUESTION, StringPool.COMMA, keys.size()) + ")", arguments);
 
 		}
 		jdbcTemplate.batchUpdate(INSERT_INTO_PORTLETPREFERENCE, new BatchPreparedStatementSetter() {
 			@Override
 			public void setValues(PreparedStatement ps, int i) throws SQLException {
-				ps.setString(1, portletName.getName());
-				ps.setString(2, windowID);
-				ps.setString(3, portletName.getContext());
-				ps.setString(4, keys.get(i));
+				ps.setLong(1, portletInstanceId);
+				ps.setString(2, keys.get(i));
 			}
 
 			@Override
@@ -94,10 +100,8 @@ public class PortletPreferencesRepository {
 			@Override
 			public void setValues(PreparedStatement ps, int i) throws SQLException {
 				ps.setString(1, values.get(i)[0]);
-				ps.setString(2, portletName.getName());
-				ps.setString(3, windowID);
-				ps.setString(4, portletName.getContext());
-				ps.setString(5, values.get(i)[1]);
+				ps.setLong(2, portletInstanceId);
+				ps.setString(3, values.get(i)[1]);
 			}
 
 			@Override

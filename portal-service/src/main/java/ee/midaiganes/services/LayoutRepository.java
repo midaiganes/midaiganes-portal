@@ -1,9 +1,6 @@
 package ee.midaiganes.services;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -12,13 +9,13 @@ import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Component;
 
 import ee.midaiganes.beans.PortalConfig;
+import ee.midaiganes.beans.RootApplicationContext;
 import ee.midaiganes.model.DefaultLayout;
 import ee.midaiganes.model.Layout;
 import ee.midaiganes.model.LayoutTitle;
@@ -30,24 +27,28 @@ import ee.midaiganes.services.SingleVmPool.Cache.Element;
 import ee.midaiganes.services.exceptions.IllegalFriendlyUrlException;
 import ee.midaiganes.services.exceptions.IllegalLanguageIdException;
 import ee.midaiganes.services.exceptions.IllegalPageLayoutException;
+import ee.midaiganes.services.rowmapper.LayoutResultSetExtractor;
 import ee.midaiganes.services.rowmapper.LayoutRowMapper;
 import ee.midaiganes.services.rowmapper.LayoutTitleRowMapper;
+import ee.midaiganes.services.statementcreator.AddLayoutPreparedStatementCreator;
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.StringUtil;
 
+@Component(value = RootApplicationContext.LAYOUT_REPOSITORY)
 public class LayoutRepository {
 	private static final Logger log = LoggerFactory.getLogger(LayoutRepository.class);
-	private static final String GET_LAYOUT_BY_LAYOUTSETID = "SELECT Layout.id, Layout.layoutSetId, Layout.friendlyUrl, Layout.pageLayoutId, Theme.name, Theme.context FROM Layout LEFT JOIN Theme ON (Layout.themeId = Theme.id) WHERE layoutSetId = ?";
-	private static final String ADD_LAYOUT = "INSERT INTO Layout(layoutSetId, friendlyUrl, themeId, pageLayoutId, parentId, nr, defaultLayoutTitleLanguageId) VALUES(?, ?, (SELECT id FROM Theme WHERE name = ? AND context = ?), ?, ?, (SELECT c FROM (SELECT COUNT(1) AS c FROM Layout WHERE layoutSetId = ? AND parentId = ?) AS t), ?)";
-	private static final String DELETE_LAYOUT = "DELETE FROM Layout WHERE id = ?";
-	private static final String GET_LAYOUT_TITLES = "SELECT LayoutTitle.id, LayoutTitle.languageId, LayoutTitle.layoutId, LayoutTitle.title FROM LayoutTitle";
-	private static final String UPDATE_PAGE_LAYOUT = "UPDATE Layout SET pageLayoutId = ? WHERE id = ?";
+	private static final String QRY_GET_LAYOUT_BY_LAYOUTSETID = "SELECT Layout.id, Layout.layoutSetId, Layout.friendlyUrl, Layout.pageLayoutId, Theme.name, Theme.context, Layout.parentId, Layout.nr, Layout.defaultLayoutTitleLanguageId FROM Layout LEFT JOIN Theme ON (Layout.themeId = Theme.id) WHERE layoutSetId = ?";
+	private static final String QRY_DELETE_LAYOUT = "DELETE FROM Layout WHERE id = ?";
+	private static final String QRY_GET_LAYOUT_TITLES = "SELECT LayoutTitle.id, LayoutTitle.languageId, LayoutTitle.layoutId, LayoutTitle.title FROM LayoutTitle WHERE LayoutTitle.layoutId = ?";
+	private static final String QRY_GET_LAYOUT_BY_ID = "SELECT Layout.id, Layout.layoutSetId, Layout.friendlyUrl, Layout.pageLayoutId, Theme.name, Theme.context, Layout.parentId, Layout.nr, Layout.defaultLayoutTitleLanguageId FROM Layout LEFT JOIN Theme ON (Layout.themeId = Theme.id) WHERE Layout.id = ?";
+	private static final String QRY_UPDATE_PAGE_LAYOUT = "UPDATE Layout SET pageLayoutId = ? WHERE id = ?";
+	private static final String QRY_UPDATE_LAYOUT = "UPDATE Layout SET friendlyUrl = ?, pageLayoutId = ?, parentId = ?, defaultLayoutTitleLanguageId = ? WHERE id = ?";
 	private static final Pattern FRIENDLY_URL_PATTERN = Pattern.compile("^\\/[a-zA-Z0-9_\\-]+$");
 	private static final LayoutRowMapper layoutRowMapper = new LayoutRowMapper();
 	private static final LayoutTitleRowMapper layoutTitleRowMapper = new LayoutTitleRowMapper();
-	private static final String[] ID_ARRAY = { StringPool.ID };
+	private static final LayoutResultSetExtractor layoutResultSetExtractor = new LayoutResultSetExtractor();
 
-	@Autowired
+	@Resource(name = PortalConfig.PORTAL_JDBC_TEMPLATE)
 	private JdbcTemplate jdbcTemplate;
 
 	@Resource(name = PortalConfig.LANGUAGE_REPOSITORY)
@@ -56,27 +57,86 @@ public class LayoutRepository {
 	@Resource(name = PortalConfig.THEME_REPOSITORY)
 	private ThemeRepository themeRepository;
 
-	@Resource
+	@Resource(name = PortalConfig.PAGE_LAYOUT_REPOSITORY)
 	private PageLayoutRepository pageLayoutRepository;
 
 	private final Cache cache;
+	private final Cache layoutTitleCache;
+	private final Cache layoutCache;
 
 	public LayoutRepository() {
 		cache = SingleVmPool.getCache(LayoutRepository.class.getName());
+		layoutTitleCache = SingleVmPool.getCache(LayoutRepository.class.getName() + ".LayoutTitle");
+		layoutCache = SingleVmPool.getCache(LayoutRepository.class.getName() + ".Layout");
 	}
 
-	public List<LayoutTitle> getLayoutTitles() {
-		return jdbcTemplate.query(GET_LAYOUT_TITLES, layoutTitleRowMapper);
+	public List<LayoutTitle> getLayoutTitles(long layoutId) {
+		Element el = layoutTitleCache.getElement(Long.toString(layoutId));
+		if (el != null) {
+			return el.get();
+		}
+
+		List<LayoutTitle> list = null;
+		try {
+			list = Collections.unmodifiableList(jdbcTemplate.query(QRY_GET_LAYOUT_TITLES, layoutTitleRowMapper, layoutId));
+		} finally {
+			list = list == null ? Collections.<LayoutTitle> emptyList() : list;
+			layoutTitleCache.put(Long.toString(layoutId), list);
+		}
+		return list;
+	}
+
+	public Layout getLayout(long layoutId) {
+		Element el = layoutCache.getElement(Long.toString(layoutId));
+		if (el != null) {
+			return el.get();
+		}
+		Layout layout = null;
+		try {
+			layout = jdbcTemplate.query(QRY_GET_LAYOUT_BY_ID, layoutResultSetExtractor, layoutId);
+			if (layout != null) {
+				layout.setLayoutTitles(getLayoutTitles(layoutId));
+			}
+		} finally {
+			layoutCache.put(Long.toString(layoutId), layout);
+		}
+		return layout;
+	}
+
+	public List<Layout> getLayouts(long[] layoutIds) {
+		if (layoutIds != null) {
+			List<Layout> list = new ArrayList<>(layoutIds.length);
+			for (long id : layoutIds) {
+				list.add(getLayout(id));
+			}
+			return list;
+		}
+		return Collections.emptyList();
 	}
 
 	public List<Layout> getLayouts(long layoutSetId) {
 		String cacheKey = Long.toString(layoutSetId);
 		Element el = cache.getElement(cacheKey);
 		if (el != null) {
-			return el.get();
+			return getLayouts(el.<long[]> get());
 		}
-		List<Layout> layouts = Collections.unmodifiableList(jdbcTemplate.query(GET_LAYOUT_BY_LAYOUTSETID, layoutRowMapper, layoutSetId));
-		cache.put(cacheKey, layouts);
+		List<Layout> layouts = null;
+		try {
+			layouts = Collections.unmodifiableList(jdbcTemplate.query(QRY_GET_LAYOUT_BY_LAYOUTSETID, layoutRowMapper, layoutSetId));
+			long[] layoutIds = new long[layouts.size()];
+			int i = 0;
+			for (Layout layout : layouts) {
+				layout.setLayoutTitles(getLayoutTitles(layout.getId()));
+				layoutCache.put(Long.toString(layout.getId()), layout);
+				layoutIds[i++] = layout.getId();
+			}
+			cache.put(cacheKey, layoutIds);
+		} catch (RuntimeException e) {
+			cache.put(cacheKey, null);
+		} finally {
+			layouts = layouts == null ? Collections.<Layout> emptyList() : layouts;
+		}
+
 		return layouts;
 	}
 
@@ -89,51 +149,61 @@ public class LayoutRepository {
 		return null;
 	}
 
-	public long addLayout(final long layoutSetId, final String friendlyUrl, final ThemeName themeName, final PageLayoutName pageLayoutName,
-			final Long parentId, final String defaultLayoutTitleLanguageId) throws IllegalFriendlyUrlException, IllegalLanguageIdException,
-			IllegalPageLayoutException {
-		validateLayoutData(friendlyUrl, pageLayoutName, defaultLayoutTitleLanguageId);
+	public long addLayout(long layoutSetId, String friendlyUrl, ThemeName themeName, PageLayoutName pageLayoutName, Long parentId,
+			long defaultLayoutTitleLanguageId) throws IllegalFriendlyUrlException, IllegalLanguageIdException, IllegalPageLayoutException {
+		validateLayoutData(friendlyUrl, pageLayoutName);
 		try {
 			KeyHolder keyHolder = new GeneratedKeyHolder();
-			jdbcTemplate.update(new PreparedStatementCreator() {
-				@Override
-				public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-					PreparedStatement ps = con.prepareStatement(ADD_LAYOUT, ID_ARRAY);
-					ps.setLong(1, layoutSetId);
-					ps.setString(2, friendlyUrl);
-					if (themeName != null) {
-						ps.setString(3, themeName.getName());
-						ps.setString(4, themeName.getContext());
-					} else {
-						ps.setNull(3, Types.VARCHAR);
-						ps.setNull(4, Types.VARCHAR);
-					}
-					ps.setString(5, pageLayoutName.getFullName());
-					if (parentId != null) {
-						ps.setLong(6, parentId);
-						ps.setLong(8, parentId);
-					} else {
-						ps.setNull(6, Types.INTEGER);
-						ps.setNull(8, Types.INTEGER);
-					}
-					ps.setLong(7, layoutSetId);
-					ps.setString(9, defaultLayoutTitleLanguageId);
-					return ps;
-				}
-			}, keyHolder);
+			jdbcTemplate.update(new AddLayoutPreparedStatementCreator(layoutSetId, friendlyUrl, themeName, pageLayoutName, parentId,
+					defaultLayoutTitleLanguageId), keyHolder);
 			return keyHolder.getKey().longValue();
 		} finally {
 			cache.clear();
 		}
 	}
 
-	private void validateLayoutData(final String friendlyUrl, final PageLayoutName pageLayoutName, final String defaultLayoutTitleLanguageId)
+	public void updateLayout(String friendlyUrl, PageLayoutName pageLayoutName, Long parentId, long defaultLayoutTitleLanguageId, long id)
 			throws IllegalFriendlyUrlException, IllegalLanguageIdException, IllegalPageLayoutException {
+		validateLayoutData(friendlyUrl, pageLayoutName);
+		try {
+			jdbcTemplate.update(QRY_UPDATE_LAYOUT, friendlyUrl, pageLayoutName.getFullName(), parentId, defaultLayoutTitleLanguageId, id);
+		} finally {
+			cache.clear();
+			layoutCache.remove(Long.toString(id));
+		}
+	}
+
+	public void addLayoutTitle(long layoutId, long languageId, String title) {
+		try {
+			jdbcTemplate.update("INSERT INTO LayoutTitle(layoutId, languageId, title) VALUES(?, ?, ?)", layoutId, languageId, title);
+		} finally {
+			layoutCache.remove(Long.toString(layoutId));
+			layoutTitleCache.remove(Long.toString(layoutId));
+		}
+	}
+
+	public void updateLayoutTitle(long layoutId, long languageId, String title) {
+		try {
+			jdbcTemplate.update("UPDATE LayoutTitle SET languageId = ?, title = ? WHERE layoutId = ?", languageId, title, layoutId);
+		} finally {
+			layoutTitleCache.remove(Long.toString(layoutId));
+			layoutCache.remove(Long.toString(layoutId));
+		}
+	}
+
+	public void deleteLayoutTitle(long layoutId, long languageId) {
+		try {
+			jdbcTemplate.update("DELETE LayoutTitle WHERE languageId = ? AND layoutId = ?", languageId, layoutId);
+		} finally {
+			layoutTitleCache.remove(Long.toString(layoutId));
+			layoutCache.remove(Long.toString(layoutId));
+		}
+	}
+
+	private void validateLayoutData(final String friendlyUrl, final PageLayoutName pageLayoutName) throws IllegalFriendlyUrlException,
+			IllegalPageLayoutException {
 		if (!isFriendlyUrlValid(friendlyUrl)) {
 			throw new IllegalFriendlyUrlException(friendlyUrl);
-		}
-		if (!languageRepository.isLanguageIdSupported(defaultLayoutTitleLanguageId)) {
-			throw new IllegalLanguageIdException(defaultLayoutTitleLanguageId);
 		}
 		if (pageLayoutName == null) {
 			throw new IllegalPageLayoutException("pageLayoutId is null");
@@ -142,17 +212,19 @@ public class LayoutRepository {
 
 	public void updatePageLayout(long layoutId, PageLayoutName pageLayoutName) {
 		try {
-			jdbcTemplate.update(UPDATE_PAGE_LAYOUT, pageLayoutName.getFullName(), layoutId);
+			jdbcTemplate.update(QRY_UPDATE_PAGE_LAYOUT, pageLayoutName.getFullName(), layoutId);
 		} finally {
-			cache.clear();
+			layoutCache.remove(Long.toString(layoutId));
 		}
 	}
 
 	public void deleteLayout(long layoutId) {
 		try {
-			jdbcTemplate.update(DELETE_LAYOUT, layoutId);
+			jdbcTemplate.update(QRY_DELETE_LAYOUT, layoutId);
 		} finally {
 			cache.clear();
+			layoutTitleCache.remove(Long.toString(layoutId));
+			layoutCache.remove(Long.toString(layoutId));
 		}
 	}
 

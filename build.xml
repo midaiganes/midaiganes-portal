@@ -3,8 +3,6 @@
 	<property name="project.basedir" location="${basedir}" />
 
 	<property file="conf/portal.properties" />
-		
-	
 	<property name="liquibase.changeLogFile" value="portal-db/liquibase/master.xml" />
 	
 	<condition property="ivy.home" value="${env.IVY_HOME}">
@@ -80,6 +78,7 @@
 		<ivy:cachepath pathid="ivy.runtime.path" conf="runtime"/>
 		<ivy:cachepath pathid="ivy.gen.path" conf="gen"/>
 		<ivy:cachepath pathid="ivy.compile.path" conf="compile"/>
+		<ivy:cachepath pathid="ivy.dbupdate.path" conf="dbupdate"/>
 	</target>
 	
 	
@@ -168,11 +167,9 @@
 		<ivy:retrieve pattern="${tomcat.lib.dir}/[artifact]-[revision].[ext]" sync="false" type="jar" conf="runtime" transitive="false" />
 	</target -->
 	
-	<!-- target name="set-liquibase-path" depends="init">
-		<ivy:resolve/>
-		<ivy:cachepath pathid="ivy.liquibase.path" conf="dbupdate"/>
+	<target name="set-liquibase-path" depends="ivy-path">
 		<path id="liquibase.path">
-			<path refid="ivy.liquibase.path" />
+			<path refid="ivy.dbupdate.path" />
 			<dirset dir="portal-db/liquibase" />
 		</path>
 	</target>
@@ -193,8 +190,12 @@
 			promptOnNonLocalDatabase="false"
 			dropFirst="false"
 			classpathref="liquibase.path"
-		/>
-	</target -->
+		>
+			<changeLogProperty name="insert.default.data" value="${insert.default.data}"/>
+			<changeLogProperty name="guest.group.name" value="${guest.group.name}" />
+			<changeLogProperty name="portal.context.withoutslash" value="${portal.context.withoutslash}"/>
+		</updateDatabase>
+	</target>
 	
 	<target name="retrieve-aspectjweaver" depends="init">
 		<ivy:retrieve pattern="${jetty.run.dir}/[artifact].[ext]" sync="false" type="jar" conf="aspect" transitive="false" />
@@ -220,6 +221,8 @@
 			<sysproperty key="deploy.dir" value="${deploy.dir}"/>
 			<sysproperty key="java.security.policy" value="${project.basedir}/conf/catalina.policy"/>
 			<jvmarg line="-javaagent:${javaweaver.path}"/>
+			<jvmarg line="-Xmx32M"/>
+			<jvmarg line="-Xms32M"/>
 		</java>
 	</target>
 	

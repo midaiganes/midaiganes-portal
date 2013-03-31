@@ -12,7 +12,7 @@ public class LayoutTitleRowMapper implements RowMapper<LayoutTitle> {
 	public LayoutTitle mapRow(ResultSet rs, int rowNum) throws SQLException {
 		LayoutTitle layoutTitle = new LayoutTitle();
 		layoutTitle.setId(rs.getLong(1));
-		layoutTitle.setLanguageId(rs.getString(2));
+		layoutTitle.setLanguageId(rs.getLong(2));
 		layoutTitle.setLayoutId(rs.getLong(3));
 		layoutTitle.setTitle(rs.getString(4));
 		return layoutTitle;

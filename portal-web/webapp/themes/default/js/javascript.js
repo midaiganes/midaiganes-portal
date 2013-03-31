@@ -167,4 +167,26 @@ jQuery(function() {
 	jQuery('body').on('click', '.m-ui-dialog .close-dialog', function() {
 		SPortal.UI.Dialog.close();
 	});
+	jQuery('body').on('click', 'a.ajax-replace', function(e) {
+		e.preventDefault();
+		var _url = jQuery(this).attr('href');
+		var replaceElem = jQuery(this).data('replace-el');
+		var replaceBody = jQuery(this).data('replace-body');
+		jQuery.ajax({
+			type: 'GET',
+			url: _url,
+			dataType: 'html',
+			success: function(data) {
+				if(replaceElem) {
+					jQuery(replaceElem).replaceWith(data);
+				}
+				else if(replaceBody) {
+					jQuery(replaceBody).html(data);
+				}
+			},
+			error: function() {
+				// TODO
+			}
+		});
+	});
 });

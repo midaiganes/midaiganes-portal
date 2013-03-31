@@ -1,6 +1,5 @@
 package ee.midaiganes.services;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -9,16 +8,33 @@ import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
 
+import ee.midaiganes.beans.PortalConfig;
+import ee.midaiganes.services.rowmapper.LongResultSetExtractor;
+import ee.midaiganes.services.rowmapper.StringRowMapper;
 import ee.midaiganes.util.StringUtil;
 
+// TODO caching
+@Component(value = PortalConfig.LANGUAGE_REPOSITORY)
 public class LanguageRepository {
 	private static final Logger log = LoggerFactory.getLogger(LanguageRepository.class);
-	@Resource
+
+	@Resource(name = PortalConfig.PORTAL_JDBC_TEMPLATE)
 	private JdbcTemplate jdbcTemplate;
 
 	public List<String> getSupportedLanguageIds() {
-		return Arrays.asList(getLanguageId(Locale.ENGLISH));
+		return jdbcTemplate.query("SELECT languageId FROM Language", new StringRowMapper());// TODO
+		// return Arrays.asList(getLanguageId(Locale.US));
+	}
+
+	public Long getId(String languageId) {
+		return jdbcTemplate.query("SELECT id FROM Language WHERE languageId = ?", new LongResultSetExtractor(), languageId);
+	}
+
+	public String getLanguageId(long id) {
+		List<String> l = jdbcTemplate.query("SELECT languageId FROM Language WHERE id = ?", new StringRowMapper(), id);
+		return l.isEmpty() ? null : l.get(0);
 	}
 
 	public String getLanguageId(Locale locale) {

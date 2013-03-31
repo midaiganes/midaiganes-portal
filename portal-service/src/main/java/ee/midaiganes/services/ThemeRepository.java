@@ -12,7 +12,9 @@ import javax.xml.bind.JAXBException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
+import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.generated.xml.theme.MidaiganesTheme;
 import ee.midaiganes.model.Theme;
 import ee.midaiganes.model.ThemeName;
@@ -20,6 +22,7 @@ import ee.midaiganes.util.CollectionUtil;
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.XmlUtil;
 
+@Component(value = PortalConfig.THEME_REPOSITORY)
 public class ThemeRepository {
 	private static final Logger log = LoggerFactory.getLogger(ThemeRepository.class);
 	private final Map<ThemeName, Theme> themes = new ConcurrentHashMap<>();

@@ -4,19 +4,22 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
 
+import ee.midaiganes.beans.PortalConfig;
+import ee.midaiganes.beans.RootApplicationContext;
 import ee.midaiganes.model.LayoutPortlet;
 import ee.midaiganes.model.PortletName;
 import ee.midaiganes.services.SingleVmPool.Cache;
 import ee.midaiganes.services.rowmapper.LayoutPortletRowMapper;
 
+@Component(value = RootApplicationContext.LAYOUT_PORTLET_REPOSITORY)
 public class LayoutPortletRepository {
-	@Autowired
+	@Resource(name = PortalConfig.PORTAL_JDBC_TEMPLATE)
 	private JdbcTemplate jdbcTemplate;
 
-	@Resource
+	@Resource(name = PortalConfig.PORTLET_INSTANCE_REPOSITORY)
 	private PortletInstanceRepository portletInstanceRepository;
 
 	private static final String GET_LAYOUT_PORTLETS = "SELECT LayoutPortlet.id, LayoutPortlet.layoutId, LayoutPortlet.rowId, LayoutPortlet.portletInstanceId, PortletInstance.id, PortletInstance.portletContext, PortletInstance.portletName, PortletInstance.windowID FROM LayoutPortlet JOIN PortletInstance ON (LayoutPortlet.portletInstanceId = PortletInstance.id) WHERE layoutId = ?";

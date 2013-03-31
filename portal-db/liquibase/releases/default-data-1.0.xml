@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+	<changeSet id="1" author="-" runAlways="false" runOnChange="false" dbms="mysql" failOnError="true">
+		<preConditions onFail="HALT">
+			<and>
+				<changeLogPropertyDefined property="insert.default.data" value="true"/>
+				<changeLogPropertyDefined property="guest.group.name"/>
+				<changeLogPropertyDefined property="portal.context.withoutslash"/>
+			</and>
+		</preConditions>
+		<comment>default data</comment>
+		<sql>
+			<![CDATA[
+				INSERT INTO Language(languageId) VALUES('en_US');
+				INSERT INTO User(username, password) VALUES('test', 'test');
+				INSERT INTO LayoutSet(virtualHost, themeId) VALUES('localhost', NULL);
+				INSERT INTO Layout(layoutSetId, friendlyUrl, themeId, pageLayoutId, defaultLayoutTitleLanguageId) VALUES((SELECT id FROM LayoutSet WHERE virtualHost = 'localhost'), '/test', NULL, '${portal.context.withoutslash}_w_default', (SELECT id FROM Language WHERE languageId = 'en_US'));
+				INSERT INTO PortletInstance(portletContext, portletName, windowID) VALUES('${portal.context.withoutslash}', 'login', '0000');
+				INSERT INTO Group_(name) VALUES('${guest.group.name}');
+				INSERT INTO Permission(resourceId, resourcePrimKey, resource2Id, resource2PrimKey, permission) 
+							VALUES(
+								(SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.Group'),
+								(SELECT id FROM Group_ WHERE name = 'GUEST'),
+								(SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.PortletInstance'),
+								(SELECT id FROM PortletInstance WHERE portletContext = '${portal.context.withoutslash}' AND portletName = 'login' AND windowID = '0000'),
+								1
+								);
+			]]>
+		</sql>
+	</changeSet>
+</databaseChangeLog>

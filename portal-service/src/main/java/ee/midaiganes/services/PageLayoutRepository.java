@@ -12,13 +12,16 @@ import javax.xml.bind.JAXBException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
+import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.generated.xml.pagelayout.MidaiganesLayout;
 import ee.midaiganes.model.PageLayout;
 import ee.midaiganes.model.PageLayoutName;
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.XmlUtil;
 
+@Component(value = PortalConfig.PAGE_LAYOUT_REPOSITORY)
 public class PageLayoutRepository {
 	private static final Logger log = LoggerFactory.getLogger(PageLayoutRepository.class);
 	private final ConcurrentHashMap<PageLayoutName, PageLayout> pageLayouts = new ConcurrentHashMap<>();

@@ -2,12 +2,13 @@ package ee.midaiganes.model;
 
 import java.io.Serializable;
 
-public class PortletInstance implements Serializable {
+public class PortletInstance implements Serializable, PortalResource {
 	private static final long serialVersionUID = 1L;
 
 	private long id;
 	private PortletNamespace portletNamespace;
 
+	@Override
 	public long getId() {
 		return id;
 	}
@@ -22,6 +23,11 @@ public class PortletInstance implements Serializable {
 
 	public void setPortletNamespace(PortletNamespace portletNamespace) {
 		this.portletNamespace = portletNamespace;
+	}
+
+	@Override
+	public String getResource() {
+		return PortletInstance.class.getName();
 	}
 
 	@Override

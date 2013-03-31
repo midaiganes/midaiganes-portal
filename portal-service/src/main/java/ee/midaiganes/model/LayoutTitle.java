@@ -6,13 +6,20 @@ public class LayoutTitle implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private long id;
 	private long layoutId;
-	private String languageId;
+	private long languageId;
 	private String title;
+
+	public LayoutTitle(LayoutTitle layoutTitle) {
+		id = layoutTitle.id;
+		layoutId = layoutTitle.layoutId;
+		languageId = layoutTitle.languageId;
+		title = layoutTitle.title;
+	}
 
 	public LayoutTitle() {
 	}
 
-	public LayoutTitle(long layoutId, String languageId, String title) {
+	public LayoutTitle(long layoutId, long languageId, String title) {
 		this.layoutId = layoutId;
 		this.languageId = languageId;
 		this.title = title;
@@ -34,11 +41,11 @@ public class LayoutTitle implements Serializable {
 		this.layoutId = layoutId;
 	}
 
-	public String getLanguageId() {
+	public long getLanguageId() {
 		return languageId;
 	}
 
-	public void setLanguageId(String languageId) {
+	public void setLanguageId(long languageId) {
 		this.languageId = languageId;
 	}
 

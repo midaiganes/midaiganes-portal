@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import ee.midaiganes.model.MidaiganesWindowState;
 import ee.midaiganes.model.PortletAndConfiguration;
-import ee.midaiganes.model.PortletName;
+import ee.midaiganes.model.PortletInstance;
 import ee.midaiganes.model.PortletNamespace;
 import ee.midaiganes.portlet.MidaiganesPortlet;
 import ee.midaiganes.portlet.impl.ActionRequestImpl;
@@ -40,12 +40,10 @@ public class PortletApp {
 	private final WindowState windowState;
 	private final PortletPreferencesRepository portletPreferencesRepository;
 	private final PortletAndConfiguration portletConfiguration;
+	private final PortletInstance portletInstance;
 
-	public PortletApp(String windowID, PortletName portletName, PortletMode portletMode, WindowState windowState,
+	public PortletApp(PortletInstance portletInstance, PortletMode portletMode, WindowState windowState,
 			PortletPreferencesRepository portletPreferencesRepository, PortletAndConfiguration portletConfiguration) {
-		if (windowID == null) {
-			throw new IllegalArgumentException("windowID is null");
-		}
 		this.portlet = portletConfiguration.getMidaiganesPortlet();
 		if (portlet == null) {
 			throw new IllegalArgumentException("portlet is null");
@@ -54,7 +52,8 @@ public class PortletApp {
 		this.windowState = windowState;
 		this.portletPreferencesRepository = portletPreferencesRepository;
 		this.portletConfiguration = portletConfiguration;
-		this.namespace = new PortletNamespace(portletName, windowID);
+		this.portletInstance = portletInstance;
+		this.namespace = portletInstance.getPortletNamespace();
 	}
 
 	public void doRender(HttpServletRequest request, HttpServletResponse response) {
@@ -81,7 +80,7 @@ public class PortletApp {
 			PortletPreferences portletPreferences = getPortletPreferences();
 			RenderRequestImpl renderRequest = getRenderRequest(request, resp, portletPreferences);
 			portlet.render(renderRequest, getRenderResponse(resp, renderRequest));
-			ThemeUtil.includePortletJsp(request, response, namespace, new String(resp.getBytes(), resp.getCharacterEncoding()));
+			ThemeUtil.includePortletJsp(request, response, portletInstance, new String(resp.getBytes(), resp.getCharacterEncoding()));
 		} catch (ServletException | IOException | RuntimeException | PortletException e) {
 			log.error(e.getMessage(), e);
 		}
@@ -113,7 +112,7 @@ public class PortletApp {
 	}
 
 	private PortletPreferences getPortletPreferences() {
-		return new PortletPreferencesImpl(namespace, portletPreferencesRepository);
+		return new PortletPreferencesImpl(portletInstance.getId(), portletPreferencesRepository);
 	}
 
 	private ActionRequest getActionRequest(HttpServletRequest request, HttpServletResponse response, PortletPreferences portletPreferences) {

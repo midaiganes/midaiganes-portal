@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<taglib 
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd"
+	version="2.1">
+	<description>portal service taglib</description>
+	<tlib-version>0.1</tlib-version>
+	<short-name>portalservice</short-name>
+	<uri>http://midaiganes.ee/portal-service-tags</uri>
+	
+	<function>
+		<name>hasUserPermission</name>
+		<function-class>ee.midaiganes.services.util.PermissionUtil</function-class>
+		<function-signature>boolean hasUserPermission(long, java.lang.String, long, java.lang.String)</function-signature>
+	</function>
+	
+	<function>
+		<name>hasUserResourcePermission</name>
+		<function-class>ee.midaiganes.services.util.PermissionUtil</function-class>
+		<function-signature>boolean hasUserResourcePermission(long, ee.midaiganes.model.PortalResource, java.lang.String)</function-signature>
+	</function>
+	
+	<function>
+		<name>getPortletInstance</name>
+		<function-class>ee.midaiganes.services.util.PortletInstanceUtil</function-class>
+		<function-signature>ee.midaiganes.model.PortletInstance getPortletInstance(javax.portlet.PortletResponse)</function-signature>
+	</function>
+	
+	<function>
+		<name>getPageDisplay</name>
+		<function-class>ee.midaiganes.util.RequestUtil</function-class>
+		<function-signature>ee.midaiganes.model.PageDisplay getPageDisplay(javax.servlet.http.HttpServletRequest)</function-signature>
+	</function>
+
+	<function>
+		<name>getLayoutTitle</name>
+		<function-class>ee.midaiganes.util.LayoutUtil</function-class>
+		<function-signature>java.lang.String getLayoutTitle(ee.midaiganes.model.Layout, javax.servlet.http.HttpServletRequest)</function-signature>
+	</function>
+</taglib>

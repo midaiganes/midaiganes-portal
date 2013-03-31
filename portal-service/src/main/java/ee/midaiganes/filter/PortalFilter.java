@@ -10,8 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
+import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.beans.RootApplicationContext;
 import ee.midaiganes.model.DefaultUser;
 import ee.midaiganes.model.Layout;
@@ -34,16 +34,16 @@ public class PortalFilter extends HttpFilter {
 	@Resource(name = RootApplicationContext.LAYOUT_SET_REPOSITORY)
 	private LayoutSetRepository layoutSetRepository;
 
-	@Autowired
+	@Resource(name = RootApplicationContext.LAYOUT_REPOSITORY)
 	private LayoutRepository layoutRepository;
 
-	@Autowired
+	@Resource(name = RootApplicationContext.USER_REPOSITORY)
 	private UserRepository userRepository;
 
 	@Resource(name = RootApplicationContext.REQUEST_PARSER)
 	private RequestParser requestParser;
 
-	@Resource
+	@Resource(name = PortalConfig.THEME_REPOSITORY)
 	private ThemeRepository themeRepository;
 
 	@Override
@@ -91,12 +91,12 @@ public class PortalFilter extends HttpFilter {
 		return layoutRepository.getDefaultLayout(layoutSet.getId(), friendlyUrl);
 	}
 
-	private LayoutSet getLayoutSet(String serverName) {
-		LayoutSet layoutSet = layoutSetRepository.getLayoutSet(serverName);
+	private LayoutSet getLayoutSet(String virtualHost) {
+		LayoutSet layoutSet = layoutSetRepository.getLayoutSet(virtualHost);
 		if (layoutSet != null) {
 			return layoutSet;
 		}
-		return layoutSetRepository.getDefaultLayoutSet(serverName);
+		return layoutSetRepository.getDefaultLayoutSet(virtualHost);
 	}
 
 	private User getUser(HttpServletRequest request) {

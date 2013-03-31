@@ -7,16 +7,16 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import ee.midaiganes.model.PortletNamespace;
+import ee.midaiganes.model.PortletInstance;
 import ee.midaiganes.model.Theme;
 import ee.midaiganes.servlet.http.ThemePortletJspRequest;
 
 public class ThemeUtil {
 
-	public static void includePortletJsp(HttpServletRequest request, HttpServletResponse response, PortletNamespace namespace, String portletContent)
+	public static void includePortletJsp(HttpServletRequest request, HttpServletResponse response, PortletInstance portletInstance, String portletContent)
 			throws ServletException, IOException {
 		Theme theme = RequestUtil.getPageDisplay(request).getTheme();
-		getRequestDispatcher(theme, request).include(new ThemePortletJspRequest(request, portletContent, namespace), response);
+		getRequestDispatcher(theme, request).include(new ThemePortletJspRequest(request, portletContent, portletInstance), response);
 	}
 
 	private static RequestDispatcher getRequestDispatcher(Theme theme, HttpServletRequest request) {

@@ -12,6 +12,10 @@ public class ContextAndName implements Serializable {
 	private final String name;
 	private final String fullName;
 
+	public ContextAndName(ContextAndName contextAndName) {
+		this(contextAndName.context, contextAndName.name);
+	}
+
 	public ContextAndName(String context, String name) {
 		if (context == null || name == null) {
 			throw new IllegalArgumentException("contex='" + context + "'; name='" + name + "'");
@@ -26,11 +30,22 @@ public class ContextAndName implements Serializable {
 	}
 
 	public ContextAndName(String fullName) {
-		this(fullName.split(SEPARATOR, 2));
+		this(validateAndGet(fullName.split(SEPARATOR, 2)));
 	}
 
-	public ContextAndName(String[] fullName) {
+	private ContextAndName(String[] fullName) {
 		this(fullName[0], fullName[1]);
+	}
+
+	private static String[] validateAndGet(String[] fullName) {
+		if (fullName == null) {
+			throw new IllegalArgumentException("Full name is null");
+		} else if (fullName.length == 0) {
+			throw new IllegalArgumentException("Full name lenght is 0");
+		} else if (fullName.length == 1) {
+			throw new IllegalArgumentException("Full name lenght is 1. Full name is '" + fullName[0] + "'");
+		}
+		return fullName;
 	}
 
 	public String getContext() {

@@ -8,6 +8,8 @@ import javax.annotation.Resource;
 import javax.portlet.WindowStateException;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.stereotype.Component;
+
 import ee.midaiganes.beans.RootApplicationContext;
 import ee.midaiganes.factory.PortletURLFactory;
 import ee.midaiganes.model.Layout;
@@ -17,6 +19,7 @@ import ee.midaiganes.model.PageDisplay;
 import ee.midaiganes.util.MidaiganesPortlets;
 import ee.midaiganes.util.RequestUtil;
 
+@Component(value = RootApplicationContext.THEME_VARIABLES_SERVICE)
 public class ThemeVariablesService {
 	private static final String LOG_IN_URL = "logInUrl";
 	private static final String NAV_ITEMS = "navItems";

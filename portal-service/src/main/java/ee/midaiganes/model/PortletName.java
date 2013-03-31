@@ -5,6 +5,10 @@ import ee.midaiganes.util.StringUtil;
 public class PortletName extends ContextAndName {
 	private static final long serialVersionUID = 1L;
 
+	public PortletName(PortletName portletName) {
+		super(portletName);
+	}
+
 	public PortletName(String fullPortletName) {
 		super(fullPortletName);
 	}

@@ -28,8 +28,19 @@
 		<path>/META-INF/tags/ui/form/form-input-row.tag</path>
 	</tag-file>
 	<tag-file>
+		<name>form-input-row-spring</name>
+		<path>/META-INF/tags/ui/form/form-input-row-spring.tag</path>
+	</tag-file>
+	<tag-file>
+		<name>form-select-row</name>
+		<path>/META-INF/tags/ui/form/form-select-row.tag</path>
+	</tag-file>
+	<tag-file>
 		<name>form-textarea-row</name>
 		<path>/META-INF/tags/ui/form/form-textarea-row.tag</path>
 	</tag-file>
-	
+	<tag-file>
+		<name>portlet-paginator</name>
+		<path>/META-INF/tags/ui/portlet-paginator.tag</path>
+	</tag-file>
 </taglib>

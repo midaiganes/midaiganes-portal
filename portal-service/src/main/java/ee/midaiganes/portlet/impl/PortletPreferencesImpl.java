@@ -11,19 +11,19 @@ import javax.portlet.PortletPreferences;
 import javax.portlet.ReadOnlyException;
 import javax.portlet.ValidatorException;
 
-import ee.midaiganes.model.PortletNamespace;
 import ee.midaiganes.services.PortletPreferencesRepository;
 
 public class PortletPreferencesImpl implements PortletPreferences {
 
 	private final Map<String, String[]> preferences;
 	private final PortletPreferencesRepository portletPreferencesRepository;
-	private final PortletNamespace portletNamespace;
 
-	public PortletPreferencesImpl(PortletNamespace portletNamespace, PortletPreferencesRepository portletPreferencesRepository) {
+	private final long portletInstanceId;
+
+	public PortletPreferencesImpl(long portletInstanceId, PortletPreferencesRepository portletPreferencesRepository) {
 		this.portletPreferencesRepository = portletPreferencesRepository;
-		this.portletNamespace = portletNamespace;
-		this.preferences = portletPreferencesRepository.getPortletPreferences(portletNamespace.getPortletName(), portletNamespace.getWindowID());
+		this.portletInstanceId = portletInstanceId;
+		this.preferences = portletPreferencesRepository.getPortletPreferences(portletInstanceId);
 	}
 
 	@Override
@@ -85,7 +85,7 @@ public class PortletPreferencesImpl implements PortletPreferences {
 
 	@Override
 	public void store() throws IOException, ValidatorException {
-		portletPreferencesRepository.savePortletPreferences(portletNamespace.getPortletName(), portletNamespace.getWindowID(), preferences);
+		portletPreferencesRepository.savePortletPreferences(portletInstanceId, preferences);
 	}
 
 	private Map<String, String[]> cloneMap(Map<String, String[]> map) {

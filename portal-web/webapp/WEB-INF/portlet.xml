@@ -167,4 +167,46 @@
 			<keywords>login</keywords>
 		</portlet-info>
 	</portlet>
+	
+	<portlet>
+		<portlet-name>permissions</portlet-name>
+		<display-name>permissions</display-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<init-param>
+			<name>contextConfigLocation</name>
+			<value>/WEB-INF/portlet-context/permissions-portlet.xml</value>
+		</init-param>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+			<window-state>normal</window-state>
+			<window-state>exclusive</window-state>
+		</supports>
+		<portlet-info>
+			<title>permissions</title>
+			<short-title>permissions</short-title>
+			<keywords>permissions</keywords>
+		</portlet-info>
+	</portlet>
+	
+	<portlet>
+		<portlet-name>users-groups</portlet-name>
+		<display-name>users-groups</display-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<init-param>
+			<name>contextConfigLocation</name>
+			<value>/WEB-INF/portlet-context/users-groups-portlet.xml</value>
+		</init-param>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+			<window-state>normal</window-state>
+			<window-state>exclusive</window-state>
+		</supports>
+		<portlet-info>
+			<title>users-groups</title>
+			<short-title>users-groups</short-title>
+			<keywords>users-groups</keywords>
+		</portlet-info>
+	</portlet>
 </portlet-app>
