@@ -3,15 +3,9 @@
 
 <portlet:actionURL var="loginUrl" />
 
-<form:form method="post" action="${loginUrl}" modelAttribute="loginData">
-	<div>
-		<label for="username">Username:</label>
-		<form:input path="username" id="username" />
-	</div>
-	<div>
-		<label for="password">Password:</label>
-		<form:password path="password" id="password" />
-	</div>
+<form:form method="post" action="${loginUrl}" modelAttribute="loginData" cssClass="form">
+	<portal-ui:form-input-row-spring message="Username:" path="username"/>
+	<portal-ui:form-input-row-spring message="Password:" path="password"/>
 	<div>
 		<button type="button" class="ajax-submit">Login</button>
 	</div>

@@ -23,7 +23,7 @@
 			<div id="dockbar">
 				<ul class="menu">
 					<li>
-						<a href="#">Actions</a>
+						<a href="#">Actions &#9660;</a>
 						<ul>
 							<c:if test="${addPagePermission}">
 								<li><a href="${addLayoutUrl}" class="open-dialog">Add page</a></li>
@@ -54,14 +54,29 @@
 						<a href="${loginUrl}" class="open-dialog">Log in</a>
 					</c:when>
 					<c:otherwise>
-						Username: ${pageDisplay.user.username}
+						<span>Username: ${pageDisplay.user.username}</span>
+						<portal-taglib:portlet-action-url portletName="midaiganes_w_login" var="logoutUrl">
+							<portlet:param name="action" value="logout"/>
+						</portal-taglib:portlet-action-url>
+						<a href="${logoutUrl}">log out</a>
 					</c:otherwise>
 				</c:choose>
 			</div>
 			<div id="site-menu">
-				<c:forEach items="${navItems}" var="navItem">
-					<a href="${navItem.url}">${portalservice:getLayoutTitle(navItem.layout, pageContext.request)}</a>
-				</c:forEach>
+				<ul>
+					<c:forEach items="${navItems}" var="navItem">
+						<li>
+							<c:choose>
+								<c:when test="${navItem.layout.id == pageDisplay.layout.id}">
+									<a href="${navItem.url}" class="active">${portalservice:getLayoutTitle(navItem.layout, pageContext.request)}</a>
+								</c:when>
+								<c:otherwise>
+									<a href="${navItem.url}">${portalservice:getLayoutTitle(navItem.layout, pageContext.request)}</a>
+								</c:otherwise>
+							</c:choose>
+						</li>
+					</c:forEach>
+				</ul>
 			</div>
 			<div id="content">
 				<%-- portal-taglib:runtime-portlet name="midaiganes_w_layout-set" / --%>

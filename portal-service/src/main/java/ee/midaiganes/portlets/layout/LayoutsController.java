@@ -44,7 +44,7 @@ public class LayoutsController {
 
 	@RenderMapping
 	public String addLayoutView(RenderRequest request) {
-		request.setAttribute("layouts", layoutRepository.getLayouts(RequestUtil.getPageDisplay(request).getLayoutSet().getId()));
+		request.setAttribute("layouts", LayoutItem.getLayoutItems(layoutRepository.getLayouts(RequestUtil.getPageDisplay(request).getLayoutSet().getId())));
 		return "layouts/add-page";
 	}
 
@@ -102,6 +102,28 @@ public class LayoutsController {
 			} else {
 				log.warn("Invalid layout id '{}'", id);
 			}
+		}
+	}
+
+	@ActionMapping(params = { "action=move-up", "id" })
+	public void moveUpAction(@RequestParam("id") String id) {
+		if (StringUtil.isNumber(id)) {
+			if (!layoutRepository.moveLayoutUp(Long.parseLong(id))) {
+				log.warn("Layout not moved up: '{}'", id);
+			}
+		} else {
+			log.warn("Can't move layout up: invalid id '{}'", id);
+		}
+	}
+
+	@ActionMapping(params = { "action=move-down", "id" })
+	public void moveDownAction(@RequestParam("id") String id) {
+		if (StringUtil.isNumber(id)) {
+			if (!layoutRepository.moveLayoutDown(Long.parseLong(id))) {
+				log.warn("Layout not moved down: '{}'", id);
+			}
+		} else {
+			log.warn("Can't move layout down: invalid id '{}'", id);
 		}
 	}
 

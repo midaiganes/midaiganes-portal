@@ -16,6 +16,5 @@
 	<portlet:param name="window-id" value="PORTLET_WINDOW_ID" />
 </portlet:actionURL>
 <script type="text/javascript">
-	SPortal.Portlets.AddRemovePortlet.RemovePortletUrl='${removePortletUrl}';
 	SPortal.Portlets.AddRemovePortlet.start();
 </script>

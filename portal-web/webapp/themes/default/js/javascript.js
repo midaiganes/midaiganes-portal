@@ -68,11 +68,6 @@ window.SPortal = {
 			RemovePortletUrl: null,
 			// http://api.jqueryui.com/droppable/
 			start: function() {
-				jQuery('body').on('click', '.remove-portlet', function(e) {
-					e.preventDefault();
-					window.location.href = SPortal.Portlets.AddRemovePortlet.RemovePortletUrl.replace('PORTLET_WINDOW_ID', jQuery(this).data('window-id'));
-					return false;
-				});
 				jQuery('#add-portlet .draggable-portlet-name').draggable({
 					revert: "invalid",
 					start: function() {

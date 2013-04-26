@@ -7,7 +7,11 @@
 <div class="content-box">
 	<div class="content-top">
 		<c:if test="${!portletNamespace.defaultWindowID and portalservice:hasUserPermission(pageDisplay.user.id, pageDisplay.layout.resource, pageDisplay.layout.id, 'EDIT')}">
-			<a href="#" data-window-id="${portletNamespace.windowID}" class="remove-portlet">X</a>
+			<portal-taglib:portlet-action-url portletName="midaiganes_w_add-remove-portlet" var="removePortletUrl">
+				<portlet:param name="action" value="remove-portlet"/>
+				<portlet:param name="window-id" value="${portletNamespace.windowID}" />
+			</portal-taglib:portlet-action-url>
+			<a href="${removePortletUrl}" class="remove-portlet">X</a>
 		</c:if>
 		<c:if test="${portalservice:hasUserPermission(pageDisplay.user.id, portletInstance.resource, portletInstance.id, 'PERMISSIONS')}">
 			<portal-taglib:portlet-render-url portletName="midaiganes_w_permissions" windowState="exclusive" portletMode="view" var="permissionPortletUrl">
