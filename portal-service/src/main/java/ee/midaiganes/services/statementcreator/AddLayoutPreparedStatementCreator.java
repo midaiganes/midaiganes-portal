@@ -13,7 +13,7 @@ import ee.midaiganes.model.ThemeName;
 import ee.midaiganes.util.StringPool;
 
 public class AddLayoutPreparedStatementCreator implements PreparedStatementCreator, SqlProvider {
-	private static final String QRY_ADD_LAYOUT = "INSERT INTO Layout(layoutSetId, friendlyUrl, themeId, pageLayoutId, parentId, nr, defaultLayoutTitleLanguageId) VALUES(?, ?, (SELECT id FROM Theme WHERE name = ? AND context = ?), ?, ?, (SELECT c FROM (SELECT COUNT(1) AS c FROM Layout WHERE layoutSetId = ? AND parentId = ?) AS t), ?)";
+	private static final String QRY_ADD_LAYOUT = "INSERT INTO Layout(layoutSetId, friendlyUrl, themeId, pageLayoutId, parentId, nr, defaultLayoutTitleLanguageId) VALUES(?, ?, (SELECT id FROM Theme WHERE name = ? AND context = ?), ?, ?, (SELECT c FROM (SELECT COUNT(1) AS c FROM Layout WHERE layoutSetId = ? AND (parentId = ? OR ? IS NULL)) AS t), ?)";
 	private static final String[] ID_ARRAY = { StringPool.ID };
 
 	private final long layoutSetId;
@@ -54,12 +54,14 @@ public class AddLayoutPreparedStatementCreator implements PreparedStatementCreat
 		if (parentId != null) {
 			ps.setLong(6, parentId);
 			ps.setLong(8, parentId);
+			ps.setLong(9, parentId);
 		} else {
 			ps.setNull(6, Types.INTEGER);
 			ps.setNull(8, Types.INTEGER);
+			ps.setNull(9, Types.INTEGER);
 		}
 		ps.setLong(7, layoutSetId);
-		ps.setLong(9, defaultLayoutTitleLanguageId);
+		ps.setLong(10, defaultLayoutTitleLanguageId);
 		return ps;
 	}
 }

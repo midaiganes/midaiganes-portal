@@ -8,6 +8,9 @@ body {
 	color: #777;
 	font:normal normal normal 14px/24px Arial,Verdana,sans-serif;
 }
+body > * {
+	text-align: left;
+}
 ul, li {
 	margin:0;
 	padding:0;
@@ -25,6 +28,9 @@ a {
 	color: #DD7A05;
 	text-decoration: none;
 }
+label {
+	display: block;
+}
 #dockbar {
 	position: fixed;
 	top: 0;
@@ -39,6 +45,9 @@ a {
 	border:1px solid black;
 	background: #fff;
 }
+#header {
+	padding: 10px 0 0 10px;
+}
 #dockbar + #page {
 	margin-top:30px;
 }
@@ -47,11 +56,19 @@ a {
 	height: 50px;
 	padding: 18px 0 0 20px;
 }
+#site-menu li {
+	float:left;
+}
 #site-menu a {
 	color: #8F8F8F;
 	padding:5px 15px;
-	border: 1px solid #999;
-	border-radius:5px;
+	border-bottom: 2px solid #999;
+}
+#site-menu a.active {
+	border-bottom-color: #DD7A05;
+}
+#site-menu a:HOVER {
+	border-bottom-color: red;
 }
 /* menu */
 ul.menu {
@@ -194,6 +211,21 @@ ul.menu > li > ul > li:hover {
 	border-top: 0 none;
 }
 
+.form {
+	padding:10px;
+}
+
+.form > div {
+	padding-bottom:5px;
+}
+.form > div > button {
+	height: 30px;
+	padding: 0 10px;
+}
+.form input:focus {
+	outline-offset: 0;
+	outline: #DD7A05 solid 1px;
+}
 /* */
 .clear {
 	clear: both;

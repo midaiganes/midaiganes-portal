@@ -43,7 +43,9 @@ public class LayoutRepository {
 	private static final String QRY_GET_LAYOUT_BY_ID = "SELECT Layout.id, Layout.layoutSetId, Layout.friendlyUrl, Layout.pageLayoutId, Theme.name, Theme.context, Layout.parentId, Layout.nr, Layout.defaultLayoutTitleLanguageId FROM Layout LEFT JOIN Theme ON (Layout.themeId = Theme.id) WHERE Layout.id = ?";
 	private static final String QRY_UPDATE_PAGE_LAYOUT = "UPDATE Layout SET pageLayoutId = ? WHERE id = ?";
 	private static final String QRY_UPDATE_LAYOUT = "UPDATE Layout SET friendlyUrl = ?, pageLayoutId = ?, parentId = ?, defaultLayoutTitleLanguageId = ? WHERE id = ?";
-	private static final Pattern FRIENDLY_URL_PATTERN = Pattern.compile("^\\/[a-zA-Z0-9_\\-]+$");
+	private static final String QRY_MOVE_LAYOUT_UP = "UPDATE Layout AS l1 JOIN Layout AS l2 ON (l1.id = ? AND (l2.parentId = l1.parentId or (l2.parentId is null and l1.parentId is null)) and l2.nr = l1.nr - 1) SET l1.nr = l2.nr, l2.nr = l1.nr";
+	private static final String QRY_MOVE_LAYOUT_DOWN = "UPDATE Layout AS l1 JOIN Layout AS l2 ON (l1.id = ? AND (l2.parentId = l1.parentId or (l2.parentId is null and l1.parentId is null)) and l2.nr = l1.nr + 1) SET l1.nr = l2.nr, l2.nr = l1.nr";
+	private static final Pattern FRIENDLY_URL_PATTERN = Pattern.compile("^\\/[a-zA-Z0-9_\\-]*$");
 	private static final LayoutRowMapper layoutRowMapper = new LayoutRowMapper();
 	private static final LayoutTitleRowMapper layoutTitleRowMapper = new LayoutTitleRowMapper();
 	private static final LayoutResultSetExtractor layoutResultSetExtractor = new LayoutResultSetExtractor();
@@ -225,6 +227,24 @@ public class LayoutRepository {
 			cache.clear();
 			layoutTitleCache.remove(Long.toString(layoutId));
 			layoutCache.remove(Long.toString(layoutId));
+		}
+	}
+
+	public boolean moveLayoutUp(long layoutId) {
+		try {
+			return jdbcTemplate.update(QRY_MOVE_LAYOUT_UP, layoutId) == 2;
+		} finally {
+			cache.clear();
+			layoutCache.clear();
+		}
+	}
+
+	public boolean moveLayoutDown(long layoutId) {
+		try {
+			return jdbcTemplate.update(QRY_MOVE_LAYOUT_DOWN, layoutId) == 2;
+		} finally {
+			cache.clear();
+			layoutCache.clear();
 		}
 	}
 

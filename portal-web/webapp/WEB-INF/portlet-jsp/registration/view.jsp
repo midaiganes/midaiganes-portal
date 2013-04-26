@@ -4,7 +4,12 @@
 <portlet:actionURL var="formAction" />
 
 <form:form modelAttribute="registrationData" action="${formAction}">
-	<div><form:input path="username"/></div>
-	<div><form:password path="password"/></div>
-	<div><input type="submit" value="Register" /></div>
+	<portal-ui:form-content>
+		<portal-ui:form-title title="Registration" />
+		<portal-ui:form-input-row-spring message="Username" path="username"/>
+		<portal-ui:form-input-row-spring message="Password" path="password" isPassword="true"/>
+		<div>
+			<button type="submit">Register</button>
+		</div>
+	</portal-ui:form-content>
 </form:form>

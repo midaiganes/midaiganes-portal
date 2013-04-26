@@ -1,5 +1,7 @@
 package ee.midaiganes.portlets.login;
 
+import java.io.IOException;
+
 import javax.annotation.Resource;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
@@ -49,6 +51,14 @@ public class LoginController {
 		}
 	}
 
+	@ActionMapping(params = { "action=logout" })
+	public void logoutAction(ActionRequest request, ActionResponse response) throws IOException {
+		if (UserUtil.isLoggedIn(request)) {
+			SessionUtil.setUserId(request, null);
+			response.sendRedirect(getAfterLogoutUrl());
+		}
+	}
+
 	@ModelAttribute("loginData")
 	public LoginData getLoginData() {
 		return new LoginData();
@@ -56,6 +66,10 @@ public class LoginController {
 
 	@ModelAttribute("afterLoginUrl")
 	public String getAfterLoginUrl() {
+		return PortalURLUtil.getFullURLByFriendlyURL("");
+	}
+
+	private String getAfterLogoutUrl() {
 		return PortalURLUtil.getFullURLByFriendlyURL("");
 	}
 }
