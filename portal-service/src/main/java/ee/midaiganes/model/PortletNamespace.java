@@ -48,6 +48,6 @@ public class PortletNamespace implements Serializable {
 	}
 
 	private boolean equals(PortletNamespace pn) {
-		return pn != null && windowID.equals(pn.windowID) && portletName.equals(portletName);
+		return pn != null && windowID.equals(pn.windowID) && portletName.equals(pn.portletName);
 	}
 }
