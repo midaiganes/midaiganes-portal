@@ -46,10 +46,10 @@ public class SimpleTag implements Tag {
 	}
 
 	protected HttpServletRequest getHttpServletRequest() {
-		return (HttpServletRequest) this.pageContext.getRequest();
+		return (HttpServletRequest) getPageContext().getRequest();
 	}
 
 	protected HttpServletResponse getHttpServletResponse() {
-		return (HttpServletResponse) this.pageContext.getResponse();
+		return (HttpServletResponse) getPageContext().getResponse();
 	}
 }

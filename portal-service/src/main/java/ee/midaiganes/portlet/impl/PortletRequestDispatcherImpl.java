@@ -47,12 +47,11 @@ public class PortletRequestDispatcherImpl implements PortletRequestDispatcher {
 	@Override
 	public void include(PortletRequest request, PortletResponse response) throws PortletException, IOException {
 		// TODO
-		log.debug("include");
-		if (PortletRequest.RENDER_PHASE.equals(request.getAttribute(PortletRequest.LIFECYCLE_PHASE))) {
+		Object lifecyclePhase = request.getAttribute(PortletRequest.LIFECYCLE_PHASE);
+		if (PortletRequest.RENDER_PHASE.equals(lifecyclePhase) && request instanceof RenderRequest && response instanceof RenderResponse) {
 			include((RenderRequest) request, (RenderResponse) response);
 		} else {
-			log.error("include2");
-			throw new IllegalStateException("not implemented");
+			throw new IllegalStateException("not implemented: lifecyclePhase='" + lifecyclePhase + "'; request='" + request + "';response='" + response + "'");
 		}
 	}
 

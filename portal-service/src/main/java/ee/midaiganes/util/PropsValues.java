@@ -1,5 +1,6 @@
 package ee.midaiganes.util;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +54,7 @@ public interface PropsValues {
 			try (InputStreamReader reader = new InputStreamReader(PropsUtil.class.getResourceAsStream(PropsValues.PORTAL_PROPERTIES), CharsetPool.UTF_8)) {
 				properties.load(reader);
 				return replaceProperties(properties);
-			} catch (Exception e) {
+			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
 		}

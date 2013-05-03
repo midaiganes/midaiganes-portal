@@ -18,7 +18,7 @@ import ee.midaiganes.model.PortletName;
 import ee.midaiganes.model.PortletNamespace;
 
 public class PortletURLImplTest {
-	private final String URL = "http://localhost";
+	private static final String URL = "http://localhost";
 
 	@Test
 	public void toStringTest() {

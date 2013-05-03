@@ -62,7 +62,10 @@ public class ServletContextResourceRepository {
 			CopyOnWriteArrayList<String> list = resources.get(path);
 			if (list == null) {
 				list = new CopyOnWriteArrayList<String>(ctx.getResourcePaths(path));
-				resources.put(path, list);
+				CopyOnWriteArrayList<String> previous = resources.putIfAbsent(path, list);
+				if (previous != null) {
+					previous.addAll(list);
+				}
 			}
 			return list;
 		} finally {

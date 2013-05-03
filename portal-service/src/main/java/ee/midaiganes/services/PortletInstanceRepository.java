@@ -19,13 +19,14 @@ import ee.midaiganes.model.PortletNamespace;
 import ee.midaiganes.services.rowmapper.LongResultSetExtractor;
 import ee.midaiganes.services.rowmapper.PortletInstanceRowMapper;
 import ee.midaiganes.services.statementcreator.AddPortletPreparedStatementCreator;
+import ee.midaiganes.util.CharsetPool;
 import ee.midaiganes.util.CollectionUtil;
 import ee.midaiganes.util.StringPool;
 
 @Component(value = PortalConfig.PORTLET_INSTANCE_REPOSITORY)
 public class PortletInstanceRepository {
 	private static final Logger log = LoggerFactory.getLogger(PortletInstanceRepository.class);
-	private static final SecureRandom random = new SecureRandom(new Object().toString().getBytes());
+	private static final SecureRandom random = new SecureRandom(new Object().toString().getBytes(CharsetPool.UTF_8));
 	private static final PortletInstanceRowMapper rowMapper = new PortletInstanceRowMapper();
 	private static final String DELETE_PORTLET_INSTANCE = "DELETE FROM PortletInstance WHERE windowID = ?";
 	private static final String GET_PORTLET_INSTANCE = "SELECT id, portletContext, portletName, windowID FROM PortletInstance WHERE id = ?";

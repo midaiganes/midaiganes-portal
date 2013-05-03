@@ -30,6 +30,7 @@ public class WebContentRepository {
 
 	private final Cache cache;
 	private final Cache webContentCache;
+	private static final WebContentRowMapper webContentRowMapper = new WebContentRowMapper();
 
 	public WebContentRepository() {
 		cache = SingleVmPool.getCache(WebContentRepository.class.getName());
@@ -43,13 +44,8 @@ public class WebContentRepository {
 		}
 		WebContent webContent = null;
 		try {
-			List<WebContent> wcs = jdbcTemplate.query("SELECT id, layoutSetId, title, content, createDate FROM WebContent WHERE id = ?",
-					new RowMapper<WebContent>() {
-						@Override
-						public WebContent mapRow(ResultSet rs, int rowNum) throws SQLException {
-							return new WebContent(rs.getLong(1), rs.getLong(2), rs.getString(3), rs.getString(4), new Date(rs.getTimestamp(5).getTime()));
-						}
-					}, id);
+			List<WebContent> wcs = jdbcTemplate.query("SELECT id, layoutSetId, title, content, createDate FROM WebContent WHERE id = ?", webContentRowMapper,
+					id);
 			webContent = wcs.isEmpty() ? null : wcs.get(0);
 		} finally {
 			webContentCache.put(Long.toString(id), webContent);
@@ -62,13 +58,8 @@ public class WebContentRepository {
 		List<WebContent> wcs = el != null ? el.<List<WebContent>> get() : null;
 		if (wcs == null) {
 			try {
-				wcs = jdbcTemplate.query("SELECT id, layoutSetId, title, content, createDate FROM WebContent WHERE layoutSetId = ?",
-						new RowMapper<WebContent>() {
-							@Override
-							public WebContent mapRow(ResultSet rs, int rowNum) throws SQLException {
-								return new WebContent(rs.getLong(1), rs.getLong(2), rs.getString(3), rs.getString(4), new Date(rs.getTimestamp(5).getTime()));
-							}
-						}, layoutSetId);
+				wcs = jdbcTemplate.query("SELECT id, layoutSetId, title, content, createDate FROM WebContent WHERE layoutSetId = ?", webContentRowMapper,
+						layoutSetId);
 
 			} finally {
 				wcs = wcs == null ? Collections.<WebContent> emptyList() : wcs;
@@ -106,6 +97,13 @@ public class WebContentRepository {
 		} finally {
 			webContentCache.remove(Long.toString(id));
 			cache.clear();
+		}
+	}
+
+	private static class WebContentRowMapper implements RowMapper<WebContent> {
+		@Override
+		public WebContent mapRow(ResultSet rs, int rowNum) throws SQLException {
+			return new WebContent(rs.getLong(1), rs.getLong(2), rs.getString(3), rs.getString(4), new Date(rs.getTimestamp(5).getTime()));
 		}
 	}
 }

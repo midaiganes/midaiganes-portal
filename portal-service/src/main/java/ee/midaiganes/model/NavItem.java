@@ -35,6 +35,20 @@ public class NavItem implements Serializable, Comparable<NavItem> {
 		return (int) (Math.abs(layout.getNr()) - Math.abs(o.layout.getNr()));
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof NavItem) {
+			NavItem i = (NavItem) o;
+			return layout.equals(i.layout) && childs.equals(i.childs);
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return layout.hashCode();
+	}
+
 	public String getUrl() {
 		return PortalURLUtil.getFullURLByFriendlyURL(getLayout().getFriendlyUrl());
 	}

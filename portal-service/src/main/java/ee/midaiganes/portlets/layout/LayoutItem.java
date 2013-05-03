@@ -46,4 +46,17 @@ public class LayoutItem implements Serializable, Comparable<LayoutItem> {
 	public int compareTo(LayoutItem o) {
 		return (int) (Math.abs(layout.getNr()) - Math.abs(o.layout.getNr()));
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof LayoutItem) {
+			return layout.equals(((LayoutItem) o).layout) && childs.equals(((LayoutItem) o).childs);
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return layout.hashCode();
+	}
 }

@@ -44,7 +44,7 @@ public class StaticContentServlet extends HttpServlet {
 	}
 
 	@Override
-	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void service(HttpServletRequest request, HttpServletResponse response) {
 		try {
 			String requestURI = request.getRequestURI();
 			Map<String, Theme> staticFiles = getThemesStaticContents();
@@ -60,7 +60,7 @@ public class StaticContentServlet extends HttpServlet {
 				log.error("file not found: {}", requestURI);
 			}
 
-		} catch (Exception e) {
+		} catch (IOException | RuntimeException e) {
 			log.error(e.getMessage(), e);
 		}
 	}

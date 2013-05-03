@@ -89,23 +89,24 @@ public class PortletPreferencesImpl implements PortletPreferences {
 	}
 
 	private Map<String, String[]> cloneMap(Map<String, String[]> map) {
-		Map<String, String[]> clone = new HashMap<String, String[]>() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public String toString() {
-				StringBuilder sb = new StringBuilder("PortletPreferences.Map [");
-				for (Map.Entry<String, String[]> e : this.entrySet()) {
-					sb.append(e.getKey() + "=" + Arrays.toString(e.getValue()) + ";");
-				}
-				sb.append("]");
-				return sb.toString();
-			}
-		};
+		Map<String, String[]> clone = new CloneHashMap();
 		for (Map.Entry<String, String[]> entry : map.entrySet()) {
 			clone.put(entry.getKey(), entry.getValue().clone());
 		}
 		return clone;
 	}
 
+	private static class CloneHashMap extends HashMap<String, String[]> {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder("PortletPreferences.Map [");
+			for (Map.Entry<String, String[]> e : this.entrySet()) {
+				sb.append(e.getKey() + "=" + Arrays.toString(e.getValue()) + ";");
+			}
+			sb.append("]");
+			return sb.toString();
+		}
+	}
 }

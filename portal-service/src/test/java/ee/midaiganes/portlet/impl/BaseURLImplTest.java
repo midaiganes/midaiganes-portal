@@ -11,7 +11,7 @@ import org.testng.Assert;
 
 public class BaseURLImplTest {
 	private BaseURLImpl baseURL;
-	private final String URL = "http://localhost/";
+	private static final String URL = "http://localhost/";
 
 	@Before
 	public void beforeMethod() {

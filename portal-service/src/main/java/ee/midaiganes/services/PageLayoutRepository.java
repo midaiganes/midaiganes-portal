@@ -102,7 +102,7 @@ public class PageLayoutRepository {
 			if (pageLayout.getPageLayoutName().getContextWithSlash().equals(contextPath)) {
 				lock.writeLock().lock();
 				try {
-					pageLayouts.remove(pageLayout);
+					pageLayouts.remove(pageLayout.getPageLayoutName());
 				} finally {
 					lock.writeLock().unlock();
 				}

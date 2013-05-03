@@ -53,12 +53,12 @@ public class BasePortletTag implements Tag {
 	}
 
 	protected HttpServletRequest getHttpServletRequest() {
-		return (HttpServletRequest) pageContext.getRequest();
+		return (HttpServletRequest) getPageContext().getRequest();
 	}
 
 	private <A> A getRequestAttribute(String name) {
 		@SuppressWarnings("unchecked")
-		A attr = (A) pageContext.getRequest().getAttribute(name);
+		A attr = (A) getPageContext().getRequest().getAttribute(name);
 		return attr;
 	}
 
@@ -75,6 +75,6 @@ public class BasePortletTag implements Tag {
 	}
 
 	protected JspWriter getOut() {
-		return pageContext.getOut();
+		return getPageContext().getOut();
 	}
 }

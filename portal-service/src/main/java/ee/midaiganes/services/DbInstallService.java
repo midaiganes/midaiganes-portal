@@ -27,14 +27,16 @@ public class DbInstallService {
 	@Resource(name = PortalConfig.PORTAL_JDBC_TEMPLATE)
 	private JdbcTemplate jdbcTemplate;
 
+	private static class BooleanTrueRowMapper implements RowMapper<Boolean> {
+		@Override
+		public Boolean mapRow(ResultSet rs, int rowNum) throws SQLException {
+			return Boolean.TRUE;
+		}
+	}
+
 	public void install(ServletContext sc) throws DbInstallFailedException {
 		try {
-			if (jdbcTemplate.query("show tables like 'LayoutSet'", new RowMapper<Boolean>() {
-				@Override
-				public Boolean mapRow(ResultSet rs, int rowNum) throws SQLException {
-					return Boolean.TRUE;
-				}
-			}).isEmpty()) {
+			if (jdbcTemplate.query("show tables like 'LayoutSet'", new BooleanTrueRowMapper()).isEmpty()) {
 				doInstall(sc.getResourceAsStream("/META-INF/sql/mysql-install.sql"));
 			}
 		} catch (Exception e) {

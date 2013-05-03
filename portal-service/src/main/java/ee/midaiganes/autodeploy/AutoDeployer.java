@@ -195,7 +195,7 @@ public class AutoDeployer implements Runnable {
 	}
 
 	private TempZipFile getTempZipFile(String name) throws FileNotFoundException, IOException {
-		return new TempZipFile(name);
+		return new TempZipFile(name, autodeployDir);
 	}
 
 	public void stop() {
@@ -207,10 +207,10 @@ public class AutoDeployer implements Runnable {
 		}
 	}
 
-	private class TempZipFile {
+	private static class TempZipFile {
 		private final File file;
 
-		public TempZipFile(String name) throws IOException {
+		public TempZipFile(String name, Path autodeployDir) throws IOException {
 			// TODO create file into webapps dir?
 			file = Files.createFile(autodeployDir.getParent().resolve(name)).toFile();
 		}

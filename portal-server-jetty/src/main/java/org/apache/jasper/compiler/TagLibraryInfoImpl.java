@@ -40,6 +40,7 @@ package org.apache.jasper.compiler;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -232,7 +233,7 @@ public class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
 					ZipEntry jarEntry = jarFile.getEntry(location[1]);
 					in = jarFile.getInputStream(jarEntry);
 					parseTLD(ctxt, location[0], in, jarFileUrl);
-				} catch (Exception ex) {
+				} catch (JasperException | IOException ex) {
 					err.jspError("jsp.error.tld.unable_to_read", location[0], location[1], ex.toString());
 				}
 			}
