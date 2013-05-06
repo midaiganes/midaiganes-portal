@@ -96,14 +96,15 @@
 	</target>
 	
 	<target name="gen" depends="init-jaxb-xjc, get-web-xml-xsds">
+		<mkdir dir="portal-gen/src/main/java"/>
 		<!-- http://jaxb.java.net/nonav/2.0.2/docs/xjcTask.html -->
-		<xjc extension="true" schema="portal-web/webapp/META-INF/xsd/midaiganes-theme.xsd" destdir="portal-gen/src/main/java" target="2.0" package="ee.midaiganes.generated.xml.theme">
+		<xjc extension="true" schema="portal-web/webapp/META-INF/xsd/midaiganes-theme.xsd" destdir="portal-gen/src/main/java" target="2.0" package="ee.midaiganes.generated.xml.theme" encoding="utf-8">
 			<produces dir="portal-gen/src/main/java/ee/midaiganes/generated/xml/theme"/>
 		</xjc>
-		<xjc extension="false" schema="portal-web/webapp/META-INF/xsd/portlet-app_2_0.xsd" destdir="portal-gen/src/main/java" target="2.0" package="ee.midaiganes.generated.xml.portlet">
+		<xjc extension="false" schema="portal-web/webapp/META-INF/xsd/portlet-app_2_0.xsd" destdir="portal-gen/src/main/java" target="2.0" package="ee.midaiganes.generated.xml.portlet" encoding="utf-8">
 			<produces dir="portal-gen/src/main/java/ee/midaiganes/generated/xml/portlet"/>
 		</xjc>
-		<xjc extension="true" schema="portal-web/webapp/META-INF/xsd/midaiganes-layout.xsd" destdir="portal-gen/src/main/java" target="2.0" package="ee.midaiganes.generated.xml.pagelayout">
+		<xjc extension="true" schema="portal-web/webapp/META-INF/xsd/midaiganes-layout.xsd" destdir="portal-gen/src/main/java" target="2.0" package="ee.midaiganes.generated.xml.pagelayout" encoding="utf-8">
 			<produces dir="portal-gen/src/main/java/ee/midaiganes/generated/xml/pagelayout"/>
 		</xjc>
 	</target>
