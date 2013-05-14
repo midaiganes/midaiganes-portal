@@ -8,6 +8,10 @@
 	<condition property="ivy.home" value="${env.IVY_HOME}">
 		<isset property="env.IVY_HOME" />
 	</condition>
+	
+	<condition property="clean.generated.perform" value="true">
+		<equals arg1="${clean.generated}" arg2="true"/>
+	</condition>
 	<property name="ivy.home" value="${user.home}/.ant" />
 	
 	<path id="empty.path" />
@@ -49,8 +53,13 @@
 		</sequential>
 	</macrodef>
 
+	<target name="clean-gen" if="clean.generated.perform">
+		<delete verbose="true" includeemptydirs="true">
+			<fileset dir="portal-gen/src/main/java" includes="**/*"/>
+		</delete>
+	</target>
 	
-	<target name="clean">
+	<target name="clean" depends="clean-gen">
 		<delete dir="dist"/>
 		<delete dir="portal-gen/build"/>
 		<delete dir="portal-service/build"/>
@@ -58,13 +67,18 @@
 	</target>
 	
 	<target name="init-ivy">
-		<path id="ivy.lib.path">
+		<classloader name="ivy.lib">
+			<classpath>
+				<fileset dir="portal-lib" includes="ivy-${ivy.version}.jar" />
+			</classpath>
+		</classloader>
+		<!-- path id="ivy.lib.path">
 			<fileset dir="portal-lib" includes="ivy-${ivy.version}.jar" />
-		</path>
+		</path -->
 		<taskdef
 			resource="org/apache/ivy/ant/antlib.xml"
 			uri="antlib:org.apache.ivy.ant"
-			classpathref="ivy.lib.path" />
+			classpathref="ivy.lib.path" loaderref="ivy.lib" />
 	</target>
 
 	
@@ -149,7 +163,7 @@
 		<ivy:retrieve pattern="portal-web/webapp/WEB-INF/lib/[artifact]-[revision].[ext]" sync="false" type="jar,bundle" conf="runtime" file="ivy.xml"/>
     </target>
 	
-	<target name="war" depends="build">
+	<target name="war" depends="build" description="war">
 		<mkdir dir="dist"/>
 		<zip destfile="dist/${project.war.name}.war" encoding="UTF-8">
 			<fileset dir="portal-web/webapp" excludes="WEB-INF/portal-ui-taglib.tld;META-INF/tags"/>
