@@ -6,6 +6,7 @@ public class LayoutSetModel implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private String host;
 	private String id;
+	private String fullThemeName;
 
 	public String getHost() {
 		return host;
@@ -21,5 +22,13 @@ public class LayoutSetModel implements Serializable {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public String getFullThemeName() {
+		return fullThemeName;
+	}
+
+	public void setFullThemeName(String fullThemeName) {
+		this.fullThemeName = fullThemeName;
 	}
 }

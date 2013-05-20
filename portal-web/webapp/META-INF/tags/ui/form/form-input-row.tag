@@ -4,5 +4,5 @@
 
 <div>
 	<label for="${path}">${message}</label>
-	<input type="text" name="${path}" />
+	<input type="text" name="${path}" id="${path}"/>
 </div>

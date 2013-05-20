@@ -11,6 +11,10 @@ public class ThemeName extends ContextAndName {
 		super(context, name);
 	}
 
+	public ThemeName(String fullName) {
+		super(fullName);
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		return o instanceof ThemeName && super.equals(o);

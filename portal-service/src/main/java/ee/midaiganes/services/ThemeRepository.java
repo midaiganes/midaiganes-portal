@@ -8,10 +8,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import javax.annotation.Resource;
 import javax.xml.bind.JAXBException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import ee.midaiganes.beans.PortalConfig;
@@ -27,6 +29,9 @@ public class ThemeRepository {
 	private static final Logger log = LoggerFactory.getLogger(ThemeRepository.class);
 	private final Map<ThemeName, Theme> themes = new ConcurrentHashMap<>();
 	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+
+	@Resource(name = PortalConfig.PORTAL_JDBC_TEMPLATE)
+	private JdbcTemplate jdbcTemplate;
 
 	public Theme getTheme(ThemeName themeName) {
 		lock.readLock().lock();
@@ -93,6 +98,8 @@ public class ThemeRepository {
 		lock.writeLock().lock();
 		try {
 			themes.put(theme.getThemeName(), theme);
+			ThemeName themeName = theme.getThemeName();
+			jdbcTemplate.update("INSERT IGNORE INTO Theme(context, name) VALUES(?, ?)", themeName.getContext(), themeName.getName());
 		} finally {
 			lock.writeLock().unlock();
 		}

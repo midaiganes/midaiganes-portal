@@ -86,17 +86,40 @@ ul.menu ul {
 ul.menu li:hover > ul {
 	display:block;
 	border:1px solid black;
+	animation: openmenu 0.2s;
+	animation-iteration-count: 1;
+	-webkit-animation: openmenu 0.2s; /* Safari & Chrome */
+	-webkit-animation-iteration-count: 1;
+}
+@keyframe openmenu {
+	0% {
+		opacity:0;
+	}
+	100% {
+		opacity:1;
+	}
+}
+@-webkit-keyframes openmenu {
+	0% {
+		opacity:0;
+	}
+	100% {
+		opacity:1;
+	}
 }
 ul.menu > li > ul > li {
 	padding:0 5px 0 5px;
 	border-top:1px solid #999;
+	background: white;
+	transition: background 0.2s;
 }
 ul.menu > li > ul > li:first-child {
 	border-top:0 none;
 }
 ul.menu > li > ul > li:hover {
-	background-color: #EEE;
+	background: #EEE;
 }
+
 /* menu end */
 .content-box {
 	color: #777;
@@ -150,6 +173,24 @@ ul.menu > li > ul > li:hover {
 	margin-left: -200px;
 	border: 1px solid #999;
 	background:white;
+	animation:opendialoganimation 0.5s linear 0s 1 normal;
+	-webkit-animation:opendialoganimation 0.5s linear 0s 1 normal; /* Safari and Chrome */
+}
+@keyframes opendialoganimation {
+	0% {
+		opacity:0;
+	}
+	100% {
+		opacity:1;
+	}
+}
+@-webkit-keyframes opendialoganimation {
+	0% {
+		opacity:0;
+	}
+	100% {
+		opacity:1;
+	}
 }
 .m-ui-dialog .close-dialog {
 	float:right;
@@ -222,9 +263,15 @@ ul.menu > li > ul > li:hover {
 	height: 30px;
 	padding: 0 10px;
 }
+.form input {
+	border: 1px solid #777;
+	transition: border 0.5s;
+	-webkit-transition: border 0.5s;/* Safari */
+}
 .form input:focus {
 	outline-offset: 0;
-	outline: #DD7A05 solid 1px;
+	outline: 0 none;
+	border:1px solid #DD7A05;
 }
 /* */
 .clear {

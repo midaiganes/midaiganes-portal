@@ -23,6 +23,13 @@
 	<portal-ui:form-content>
 		<portal-ui:form-title title="Add Layout Set" />
 		<portal-ui:form-input-row message="Virtual host" path="host" />
+		<portal-ui:form-select-row-wrapper message="Theme" path="fullThemeName">
+			<form:select path="fullThemeName">
+				<c:forEach items="${themes}" var="theme">
+					<form:option value="${theme.themeName.fullName}">${theme.themeName}</form:option>
+				</c:forEach>
+			</form:select>
+		</portal-ui:form-select-row-wrapper>
 		<div>
 			<input type="submit" value="Add layout Set"/>
 		</div>

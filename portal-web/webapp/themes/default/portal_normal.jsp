@@ -8,7 +8,7 @@
 <html>
 	<head>
 		<title></title>
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta charset="utf-8">
 		<link rel="stylesheet" href="${pageDisplay.theme.cssDir}/css.css" type="text/css" />
 		<script type="text/javascript" charset="UTF-8" src="${pageDisplay.theme.javascriptDir}/jquery-1.8.0.min.js"></script>
 		<script type="text/javascript" charset="UTF-8" src="${pageDisplay.theme.javascriptDir}/jquery-ui-1.8.22.custom.min.js"></script>
@@ -47,7 +47,7 @@
 			</div>
 		</c:if>
 		<div id="page">
-			<div id="header">
+			<header id="header">
 				<c:choose>
 					<c:when test="${pageDisplay.user.defaultUser}">
 						<portal-taglib:portlet-render-url portletName="midaiganes_w_login" var="loginUrl" windowState="exclusive" />
@@ -61,8 +61,8 @@
 						<a href="${logoutUrl}">log out</a>
 					</c:otherwise>
 				</c:choose>
-			</div>
-			<div id="site-menu">
+			</header>
+			<nav id="site-menu">
 				<ul>
 					<c:forEach items="${navItems}" var="navItem">
 						<li>
@@ -77,7 +77,7 @@
 						</li>
 					</c:forEach>
 				</ul>
-			</div>
+			</nav>
 			<div id="content">
 				<%-- portal-taglib:runtime-portlet name="midaiganes_w_layout-set" / --%>
 				<portal-taglib:page-layout />

@@ -230,7 +230,7 @@
 		<property name="javaweaver.path" location="${jetty.run.dir}/spring-instrument.jar" />
 	</target>
 	
-	<target name="start-jetty" depends="prepare-start-jetty">
+	<target name="start-jetty" depends="prepare-start-jetty" description="start jetty server">
 		<java classname="ee.midaiganes.launcher.JettyLauncher" fork="true" classpathref="server-jetty.run.classpath">
 			<sysproperty key="project.basedir" value="${project.basedir}"/>
 			<sysproperty key="deploy.dir" value="${deploy.dir}"/>
