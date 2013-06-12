@@ -65,9 +65,13 @@ public class LayoutPortletRepository {
 		String cacheKey = Long.toString(layoutId);
 		List<LayoutPortlet> layoutPortlets = cache.get(cacheKey);
 		if (layoutPortlets == null) {
-			layoutPortlets = jdbcTemplate.query(GET_LAYOUT_PORTLETS, layoutPortletRowMapper, layoutId);
+			layoutPortlets = queryLayoutPortlets(layoutId);
 			cache.put(cacheKey, layoutPortlets);
 		}
 		return layoutPortlets;
+	}
+
+	private List<LayoutPortlet> queryLayoutPortlets(long layoutId) {
+		return jdbcTemplate.query(GET_LAYOUT_PORTLETS, layoutPortletRowMapper, layoutId);
 	}
 }
