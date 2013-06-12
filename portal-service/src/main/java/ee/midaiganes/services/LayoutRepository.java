@@ -73,19 +73,31 @@ public class LayoutRepository {
 	}
 
 	public List<LayoutTitle> getLayoutTitles(long layoutId) {
-		Element el = layoutTitleCache.getElement(Long.toString(layoutId));
-		if (el != null) {
-			return el.get();
+		List<LayoutTitle> list = getLayoutTitlesFromCache(layoutId);
+		if (list == null) {
+			return queryAndCacheLayoutTitles(layoutId);
 		}
+		return list;
+	}
 
+	private List<LayoutTitle> getLayoutTitlesFromCache(long layoutId) {
+		Element el = layoutTitleCache.getElement(Long.toString(layoutId));
+		return el != null ? el.<List<LayoutTitle>> get() : null;
+	}
+
+	private List<LayoutTitle> queryAndCacheLayoutTitles(long layoutId) {
 		List<LayoutTitle> list = null;
 		try {
-			list = Collections.unmodifiableList(jdbcTemplate.query(QRY_GET_LAYOUT_TITLES, layoutTitleRowMapper, layoutId));
+			list = queryLayoutTitles(layoutId);
 		} finally {
 			list = list == null ? Collections.<LayoutTitle> emptyList() : list;
 			layoutTitleCache.put(Long.toString(layoutId), list);
 		}
 		return list;
+	}
+
+	private List<LayoutTitle> queryLayoutTitles(long layoutId) {
+		return jdbcTemplate.query(QRY_GET_LAYOUT_TITLES, layoutTitleRowMapper, layoutId);
 	}
 
 	public Layout getLayout(long layoutId) {
