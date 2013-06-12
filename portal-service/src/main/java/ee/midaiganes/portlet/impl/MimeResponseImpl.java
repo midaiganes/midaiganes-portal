@@ -100,8 +100,7 @@ public class MimeResponseImpl extends PortletResponseImpl implements MimeRespons
 
 	@Override
 	public ResourceURL createResourceURL() {
-		// TODO Auto-generated method stub
-		return null;
+		return new ResourceURLImpl(request, namespace, PortletLifecycle.RESOURCE);
 	}
 
 	@Override
