@@ -103,8 +103,11 @@ public class PortalServlet extends HttpServlet {
 		} else if (PortletLifecycle.RESOURCE.equals(portletURL.getLifecycle())) {
 			PortletApp portletApp = getPortletApp(pageDisplay, portletURL);
 			if (portletApp != null) {
+				log.debug("Found PortletApp '{}'", portletApp);
 				portletApp.serveResource(request, response);
 				return true;
+			} else {
+				log.debug("Didn't find portletApp for portletUrl '{}'", portletURL);
 			}
 		} else if (MidaiganesWindowState.EXCLUSIVE.equals(portletURL.getWindowState())) {
 			PortletApp portletApp = getPortletApp(pageDisplay, portletURL);
