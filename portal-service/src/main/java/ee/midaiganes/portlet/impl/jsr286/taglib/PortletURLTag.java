@@ -17,7 +17,7 @@ import javax.servlet.jsp.tagext.Tag;
 import ee.midaiganes.util.PortletModeUtil;
 import ee.midaiganes.util.WindowStateUtil;
 
-public abstract class PortletURLTag extends BasePortletTag {
+public abstract class PortletURLTag extends BasePortletTag implements PortletUrlParamTarget {
 	private String portletMode;
 	private String secure;
 	private String windowState;
@@ -99,6 +99,7 @@ public abstract class PortletURLTag extends BasePortletTag {
 		return secure == null ? getPortletRequest().isSecure() : Boolean.parseBoolean(secure);
 	}
 
+	@Override
 	public void addParam(String name, String value) {
 		if (this.parameters == null) {
 			this.parameters = new HashMap<String, String>();
