@@ -37,6 +37,8 @@ public class JettyLauncher {
 		httpConfig.setRequestHeaderSize(8192);
 		httpConfig.setResponseHeaderSize(8192);
 
+		httpConfig.setSendServerVersion(false);
+
 		HandlerCollection handlers = new HandlerCollection();
 		ContextHandlerCollection contexts = new ContextHandlerCollection();
 		DefaultHandler defaultHandler = new DefaultHandler();
