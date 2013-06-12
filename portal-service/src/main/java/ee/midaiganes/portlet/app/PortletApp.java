@@ -8,6 +8,7 @@ import javax.portlet.PortletException;
 import javax.portlet.PortletMode;
 import javax.portlet.PortletPreferences;
 import javax.portlet.RenderResponse;
+import javax.portlet.ResourceResponse;
 import javax.portlet.WindowState;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -28,6 +29,8 @@ import ee.midaiganes.portlet.impl.RenderParameterMap;
 import ee.midaiganes.portlet.impl.RenderParameterUtil;
 import ee.midaiganes.portlet.impl.RenderRequestImpl;
 import ee.midaiganes.portlet.impl.RenderResponseImpl;
+import ee.midaiganes.portlet.impl.ResourceRequestImpl;
+import ee.midaiganes.portlet.impl.ResourceResponseImpl;
 import ee.midaiganes.services.PortletPreferencesRepository;
 import ee.midaiganes.servlet.http.ByteArrayServletOutputStreamAndWriterResponse;
 import ee.midaiganes.util.ThemeUtil;
@@ -101,8 +104,8 @@ public class PortletApp {
 	public void serveResource(HttpServletRequest request, HttpServletResponse response) {
 		if (portlet.isResourceServingPortlet()) {
 			try {
-				log.warn("serveResource not implemented");
-				portlet.serveResource(null, null);
+				ResourceRequestImpl resourceRequest = getResourceRequest(request, response, getPortletPreferences());
+				portlet.serveResource(resourceRequest, getResourceResponse(response, resourceRequest));
 			} catch (RuntimeException | IOException | PortletException e) {
 				log.error(e.getMessage(), e);
 			}
@@ -113,6 +116,14 @@ public class PortletApp {
 
 	private PortletPreferences getPortletPreferences() {
 		return new PortletPreferencesImpl(portletInstance.getId(), portletPreferencesRepository);
+	}
+
+	private ResourceRequestImpl getResourceRequest(HttpServletRequest request, HttpServletResponse response, PortletPreferences portletPreferences) {
+		return new ResourceRequestImpl(request, response, namespace, portletMode, windowState, portletPreferences, portletConfiguration);
+	}
+
+	private ResourceResponse getResourceResponse(HttpServletResponse response, ResourceRequestImpl request) {
+		return new ResourceResponseImpl(response, namespace, request);
 	}
 
 	private ActionRequest getActionRequest(HttpServletRequest request, HttpServletResponse response, PortletPreferences portletPreferences) {
