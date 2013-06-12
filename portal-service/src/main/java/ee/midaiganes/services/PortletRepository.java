@@ -177,7 +177,9 @@ public class PortletRepository {
 				PortletConfig portletConfig = getPortletConfig(servletContext, portletType);
 				PortletName portletName = new PortletName(getContextPathName(servletContext), portletType.getPortletName().getValue());
 				MidaiganesPortlet midaiganesPortlet = getMidaiganesPortlet(portlet, obj, portletName);
+				long start = System.currentTimeMillis();
 				midaiganesPortlet.init(portletConfig);
+				log.info("Portlet '{}' init took: {}ms", portletName, System.currentTimeMillis() - start);
 				PortletAndConfiguration portletAndConfiguration = new PortletAndConfiguration(midaiganesPortlet, portletConfig, portletType);
 				lock.writeLock().lock();
 				try {
