@@ -1,5 +1,8 @@
 package ee.midaiganes.beans;
 
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,6 +25,14 @@ public class RootApplicationContext {
 	public static final String LAYOUT_REPOSITORY = "layoutRepository";
 	public static final String USER_REPOSITORY = "userRepository";
 	public static final String PORTLET_URL_FACTORY = "portletURLFactory";
+
+	@Autowired
+	private UserRepository userRepository;
+
+	@PostConstruct
+	public void postConstruct() {
+		UserRepository.setInstance(userRepository);
+	}
 
 	@Bean(name = THEME_VARIABLES_SERVICE)
 	public ThemeVariablesService themeVariablesService() {

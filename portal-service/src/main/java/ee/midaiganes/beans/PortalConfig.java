@@ -28,7 +28,6 @@ import ee.midaiganes.services.ResourceRepository;
 import ee.midaiganes.services.ThemeRepository;
 import ee.midaiganes.services.util.LanguageUtil;
 import ee.midaiganes.services.util.PermissionUtil;
-import ee.midaiganes.services.util.PortletInstanceUtil;
 
 @Configuration(value = "portalConfig")
 @PropertySource(value = "classpath:portal.properties", name = "portalProperties")
@@ -86,7 +85,7 @@ public class PortalConfig {
 	public void postConstruct() {
 		PermissionUtil.setPermissionRepository(permissionRepository);
 		LanguageUtil.setLanguageRepository(languageRepository);
-		PortletInstanceUtil.setPortletInstanceRepository(portletInstanceRepository);
+		PortletInstanceRepository.setInstance(portletInstanceRepository);
 	}
 
 	@Bean
