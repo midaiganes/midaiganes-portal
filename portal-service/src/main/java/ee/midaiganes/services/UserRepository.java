@@ -20,6 +20,7 @@ import ee.midaiganes.services.statementcreator.AddUserPreparedStatementCreator;
 
 @Component(value = RootApplicationContext.USER_REPOSITORY)
 public class UserRepository {
+	private static UserRepository instance;
 
 	@Resource(name = PortalConfig.PORTAL_JDBC_TEMPLATE)
 	private JdbcTemplate jdbcTemplate;
@@ -27,11 +28,20 @@ public class UserRepository {
 	private static final String SELECT_USER_FROM_USER = "SELECT id, username FROM User";
 	private static final String GET_USER_BY_USERID = SELECT_USER_FROM_USER + " WHERE id = ?";
 	private static final String GET_USER_BY_USERNAME_PASSWORD = SELECT_USER_FROM_USER + " WHERE username = ? AND password = ?";
+	private static final String GET_USER_BY_USERNAME = SELECT_USER_FROM_USER + " WHERE username = ?";
 	private static final String QRY_GET_USERS_COUNT = "SELECT COUNT(1) FROM User";
 	private static final String QRY_GET_USERS_ORDER_BY_ID_ASC_LIMIT = SELECT_USER_FROM_USER + " ORDER BY id ASC LIMIT ?, ?";
 
 	private final UserRowMapper userRowMapper;
 	private final Cache cache;
+
+	public static UserRepository getInstance() {
+		return instance;
+	}
+
+	public static void setInstance(UserRepository instance) {
+		UserRepository.instance = instance;
+	}
 
 	public UserRepository() {
 		cache = SingleVmPool.getCache(UserRepository.class.getName());
@@ -71,6 +81,15 @@ public class UserRepository {
 
 	public User getUser(String username, String password) {
 		List<User> users = jdbcTemplate.query(GET_USER_BY_USERNAME_PASSWORD, userRowMapper, username, password);
+		User user = users.isEmpty() ? null : users.get(0);
+		if (user != null) {
+			cache.put(Long.toString(user.getId()), user);
+		}
+		return user;
+	}
+
+	public User getUser(String username) {
+		List<User> users = jdbcTemplate.query(GET_USER_BY_USERNAME, userRowMapper, username);
 		User user = users.isEmpty() ? null : users.get(0);
 		if (user != null) {
 			cache.put(Long.toString(user.getId()), user);
