@@ -128,26 +128,6 @@
 	</portlet>
 
 	<portlet>
-		<portlet-name>welcome</portlet-name>
-		<display-name>welcome</display-name>
-		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
-		<init-param>
-			<name>contextConfigLocation</name>
-			<value>/WEB-INF/portlet-context/welcome-portlet.xml</value>
-		</init-param>
-		<supports>
-			<mime-type>text/html</mime-type>
-			<portlet-mode>view</portlet-mode>
-			<window-state>normal</window-state>
-		</supports>
-		<portlet-info>
-			<title>welcome</title>
-			<short-title>welcome</short-title>
-			<keywords>welcome</keywords>
-		</portlet-info>
-	</portlet>
-	
-	<portlet>
 		<portlet-name>login</portlet-name>
 		<display-name>login</display-name>
 		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
@@ -207,6 +187,38 @@
 			<title>users-groups</title>
 			<short-title>users-groups</short-title>
 			<keywords>users-groups</keywords>
+		</portlet-info>
+	</portlet>
+	
+	<portlet>
+		<portlet-name>user-profile</portlet-name>
+		<display-name>user-profile</display-name>
+		<portlet-class>ee.midaiganes.portlets.userprofile.UserProfilePortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+			<window-state>normal</window-state>
+		</supports>
+		<portlet-info>
+			<title>user-profile</title>
+			<short-title>user-profile</short-title>
+			<keywords>user-profile</keywords>
+		</portlet-info>
+	</portlet>
+	<portlet>
+		<portlet-name>chat</portlet-name>
+		<display-name>chat</display-name>
+		<portlet-class>ee.midaiganes.portlets.chat.ChatPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+			<window-state>normal</window-state>
+			<window-state>exclusive</window-state>
+		</supports>
+		<portlet-info>
+			<title>chat</title>
+			<short-title>chat</short-title>
+			<keywords>chat</keywords>
 		</portlet-info>
 	</portlet>
 </portlet-app>
