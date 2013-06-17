@@ -75,6 +75,7 @@
 			<exclude module="slf4j-api"/>
 			<exclude module="slf4j-log4j12"/>
 		</dependency>
+        <dependency org="com.google.code.gson" name="gson" rev="2.2.4" conf="global->default"/>
 		<!-- dependency org="org.liquibase" name="liquibase-core" rev="latest.release" conf="dbupdate->default"/-->
 		<dependency org="org.liquibase" name="liquibase-core" rev="2.0.5" conf="dbupdate->default"/>
 		
