@@ -4,23 +4,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.Resource;
 import javax.portlet.WindowStateException;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.stereotype.Component;
-
-import ee.midaiganes.beans.RootApplicationContext;
 import ee.midaiganes.factory.PortletURLFactory;
 import ee.midaiganes.model.Layout;
 import ee.midaiganes.model.MidaiganesWindowState;
 import ee.midaiganes.model.NavItem;
 import ee.midaiganes.model.PageDisplay;
+import ee.midaiganes.secureservices.SecureLayoutRepository;
 import ee.midaiganes.util.MidaiganesPortlets;
 import ee.midaiganes.util.RequestUtil;
 
-@Component(value = RootApplicationContext.THEME_VARIABLES_SERVICE)
 public class ThemeVariablesService {
+	private static final ThemeVariablesService instance = new ThemeVariablesService(PortletURLFactory.getInstance());
 	private static final String LOG_IN_URL = "logInUrl";
 	private static final String NAV_ITEMS = "navItems";
 	private static final String ADD_LAYOUT_URL = "addLayoutUrl";
@@ -28,11 +25,18 @@ public class ThemeVariablesService {
 	private static final String ADD_REMOVE_PORTLET_URL = "addRemovePortletUrl";
 	private static final String PAGE_DISPLAY = "pageDisplay";
 
-	@Resource(name = RootApplicationContext.LAYOUT_REPOSITORY)
-	private LayoutRepository layoutRepository;
+	private final PortletURLFactory portletUrlFactor;
 
-	@Resource(name = RootApplicationContext.PORTLET_URL_FACTORY)
-	private PortletURLFactory portletURLFactory;
+	private ThemeVariablesService(PortletURLFactory portletUrlFactor) {
+		if (portletUrlFactor == null) {
+			throw new IllegalArgumentException("Portlet url factory is null");
+		}
+		this.portletUrlFactor = portletUrlFactor;
+	}
+
+	public static ThemeVariablesService getInstance() {
+		return instance;
+	}
 
 	public List<ThemeVariable> getThemeVariables(HttpServletRequest request) {
 		PageDisplay pageDisplay = RequestUtil.getPageDisplay(request);
@@ -41,11 +45,11 @@ public class ThemeVariablesService {
 		variables.add(new ThemeVariable(NAV_ITEMS, getNavItems(pageDisplay)));
 		variables.add(new ThemeVariable(PAGE_DISPLAY, pageDisplay));
 		try {
-			variables.add(new ThemeVariable(ADD_LAYOUT_URL, portletURLFactory.makeRenderURL(request, MidaiganesPortlets.LAYOUT_PORTLET.getPortletName(),
+			variables.add(new ThemeVariable(ADD_LAYOUT_URL, portletUrlFactor.makeRenderURL(request, MidaiganesPortlets.LAYOUT_PORTLET.getPortletName(),
 					MidaiganesWindowState.EXCLUSIVE)));
-			variables.add(new ThemeVariable(ADD_REMOVE_PORTLET_URL, portletURLFactory.makeRenderURL(request,
+			variables.add(new ThemeVariable(ADD_REMOVE_PORTLET_URL, portletUrlFactor.makeRenderURL(request,
 					MidaiganesPortlets.ADD_REMOVE_PORTLET.getPortletName(), MidaiganesWindowState.EXCLUSIVE)));
-			variables.add(new ThemeVariable(CHANGE_PAGE_LAYOUT_URL, portletURLFactory.makeRenderURL(request,
+			variables.add(new ThemeVariable(CHANGE_PAGE_LAYOUT_URL, portletUrlFactor.makeRenderURL(request,
 					MidaiganesPortlets.CHANGE_PAGE_LAYOUT.getPortletName(), MidaiganesWindowState.EXCLUSIVE)));
 		} catch (WindowStateException e) {
 			throw new RuntimeException(e);
@@ -55,7 +59,8 @@ public class ThemeVariablesService {
 
 	private List<NavItem> getNavItems(PageDisplay pageDisplay) {
 		List<NavItem> navItems = new ArrayList<NavItem>();
-		List<Layout> layouts = layoutRepository.getLayouts(pageDisplay.getLayoutSet().getId());
+		// TODO
+		List<Layout> layouts = SecureLayoutRepository.getInstance().getLayouts(getUserId(pageDisplay), getLayoutSetId(pageDisplay));
 		for (Layout layout : layouts) {
 			if (layout.getParentId() == 0) {
 				navItems.add(new NavItem(layout, layouts));
@@ -63,6 +68,14 @@ public class ThemeVariablesService {
 		}
 		Collections.sort(navItems);
 		return navItems;
+	}
+
+	private long getLayoutSetId(PageDisplay pageDisplay) {
+		return pageDisplay.getLayoutSet().getId();
+	}
+
+	private long getUserId(PageDisplay pageDisplay) {
+		return pageDisplay.getUser().getId();
 	}
 
 	private String getLogInUrl() {

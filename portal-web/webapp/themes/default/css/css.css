@@ -277,3 +277,20 @@ ul.menu > li > ul > li:hover {
 .clear {
 	clear: both;
 }
+/* TODO boxes*/
+.s3, .s6, .s9, .s12 {
+	float: left;
+}
+.s3 {
+	width: 25%;
+}
+.s6 {
+	width: 50%;
+}
+.s9 {
+	width: 75%;
+}
+.s12 {
+	width: 100%;
+}
+/* end boxes */

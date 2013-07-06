@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ee.midaiganes.beans.PortalConfig;
-import ee.midaiganes.beans.RootApplicationContext;
 import ee.midaiganes.model.LayoutPortlet;
 import ee.midaiganes.model.PageDisplay;
 import ee.midaiganes.model.PortletInstance;
@@ -32,7 +31,7 @@ public class LayoutPortletServlet extends HttpServlet {
 	public static final String ID = LayoutPortletServlet.class.getName() + ".ID";
 	private static final Logger log = LoggerFactory.getLogger(LayoutPortletServlet.class);
 
-	@Resource(name = RootApplicationContext.LAYOUT_PORTLET_REPOSITORY)
+	@Resource(name = PortalConfig.LAYOUT_PORTLET_REPOSITORY)
 	private LayoutPortletRepository layoutPortletRepository;
 
 	@Resource(name = PortalConfig.SECURE_PORTLET_REPOSITORY)

@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.Resource;
-
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -24,12 +22,12 @@ public class ResourceActionRepository {
 	private final ResourceActionPermissionRowMapper resourceActionPermissionRowMapper;
 	private final Cache cache;
 
-	@Resource(name = PortalConfig.PORTAL_JDBC_TEMPLATE)
-	private JdbcTemplate jdbcTemplate;
+	private final JdbcTemplate jdbcTemplate;
 
-	public ResourceActionRepository() {
+	public ResourceActionRepository(JdbcTemplate jdbcTemplate) {
 		cache = SingleVmPool.getCache(ResourceActionRepository.class.getName());
 		resourceActionPermissionRowMapper = new ResourceActionPermissionRowMapper();
+		this.jdbcTemplate = jdbcTemplate;
 	}
 
 	public long getResourceActionPermission(long resourceId, String action) throws ResourceActionNotFoundException {

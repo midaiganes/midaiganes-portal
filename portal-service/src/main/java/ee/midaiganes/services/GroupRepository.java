@@ -3,8 +3,6 @@ package ee.midaiganes.services;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.Resource;
-
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -28,13 +26,13 @@ public class GroupRepository {
 	private final GroupRowMapper groupRowMapper;
 	private final LongRowMapper longRowMapper;
 
-	@Resource(name = PortalConfig.PORTAL_JDBC_TEMPLATE)
-	private JdbcTemplate jdbcTemplate;
+	private final JdbcTemplate jdbcTemplate;
 
-	public GroupRepository() {
+	public GroupRepository(JdbcTemplate jdbcTemplate) {
 		cache = SingleVmPool.getCache(GroupRepository.class.getName());
 		groupRowMapper = new GroupRowMapper();
 		longRowMapper = new LongRowMapper();
+		this.jdbcTemplate = jdbcTemplate;
 	}
 
 	public List<Group> getGroups() {
@@ -99,4 +97,11 @@ public class GroupRepository {
 		return jdbcTemplate.query(QRY_LOAD_USER_GROUP_IDS, longRowMapper, userId);
 	}
 
+	public void deleteGroup(long groupId) {
+		try {
+			jdbcTemplate.update("DELETE FROM Group_ WHERE id = ?", groupId);
+		} finally {
+			cache.clear();
+		}
+	}
 }

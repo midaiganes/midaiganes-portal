@@ -9,7 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import javax.annotation.Resource;
 import javax.portlet.Portlet;
 import javax.portlet.PortletConfig;
 import javax.portlet.PortletException;
@@ -48,11 +47,14 @@ public class PortletRepository {
 	private final ConcurrentHashMap<PortletName, PortletAndConfiguration> portlets = new ConcurrentHashMap<>();
 	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
-	@Resource(name = PortalConfig.PORTLET_PREFERENCES_REPOSITORY)
-	private PortletPreferencesRepository portletPreferencesRepository;
+	private final PortletPreferencesRepository portletPreferencesRepository;
 
-	@Resource(name = PortalConfig.PORTLET_INSTANCE_REPOSITORY)
-	private PortletInstanceRepository portletInstanceRepository;
+	private final PortletInstanceRepository portletInstanceRepository;
+
+	public PortletRepository(PortletPreferencesRepository portletPreferencesRepository, PortletInstanceRepository portletInstanceRepository) {
+		this.portletPreferencesRepository = portletPreferencesRepository;
+		this.portletInstanceRepository = portletInstanceRepository;
+	}
 
 	public List<PortletName> getPortletNames() {
 		lock.readLock().lock();

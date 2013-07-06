@@ -1,13 +1,15 @@
 package ee.midaiganes.services;
 
 import java.security.SecureRandom;
-
-import javax.annotation.Resource;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
@@ -32,12 +34,13 @@ public class PortletInstanceRepository {
 	private static final String DELETE_PORTLET_INSTANCE = "DELETE FROM PortletInstance WHERE windowID = ?";
 	private static final String GET_PORTLET_INSTANCE = "SELECT id, portletContext, portletName, windowID FROM PortletInstance WHERE id = ?";
 	private static final String GET_PORTLET_INSTANCE_ID = "SELECT id FROM PortletInstance WHERE portletContext = ? and portletName = ? and windowID = ?";
+	private static final String GET_DEFAULT_PORTLET_INSTANCES = "SELECT id, portletContext, portletName FROM PortletInstance WHERE windowID = ?";
 	private final LongResultSetExtractor longResultSetExtractor;
 
-	@Resource(name = PortalConfig.PORTAL_JDBC_TEMPLATE)
-	private JdbcTemplate jdbcTemplate;
+	private final JdbcTemplate jdbcTemplate;
 
-	public PortletInstanceRepository() {
+	public PortletInstanceRepository(JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
 		longResultSetExtractor = new LongResultSetExtractor();
 	}
 
@@ -74,6 +77,18 @@ public class PortletInstanceRepository {
 			return instance;
 		}
 		return null;
+	}
+
+	public List<PortletInstance> getDefaultPortletInstances() {
+		return jdbcTemplate.query(GET_DEFAULT_PORTLET_INSTANCES, new RowMapper<PortletInstance>() {
+			@Override
+			public PortletInstance mapRow(ResultSet rs, int rowNum) throws SQLException {
+				PortletInstance instance = new PortletInstance();
+				instance.setId(rs.getLong(1));
+				instance.setPortletNamespace(new PortletNamespace(new PortletName(rs.getString(2), rs.getString(3)), StringPool.DEFAULT_PORTLET_WINDOWID));
+				return instance;
+			}
+		}, StringPool.DEFAULT_PORTLET_WINDOWID);
 	}
 
 	public long addPortletInstance(final PortletName portletName) {

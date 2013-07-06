@@ -12,6 +12,13 @@
 			<td>${g.id}</td>
 			<td><c:out value="${g.name}"/></td>
 			<td>${g.userGroup}</td>
+			<td>
+				<portlet:actionURL var="deleteGroupUrl">
+					<portlet:param name="action" value="delete-group"/>
+					<portlet:param name="group-id" value="${g.id}"/>
+				</portlet:actionURL>
+				<a href="${deleteGroupUrl}">Delete</a>
+			</td>
 		</tr>
 	</c:forEach>
 </table>

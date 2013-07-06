@@ -23,6 +23,7 @@ import ee.midaiganes.services.GroupRepository;
 import ee.midaiganes.services.UserRepository;
 import ee.midaiganes.util.PortalURLUtil;
 import ee.midaiganes.util.RequestUtil;
+import ee.midaiganes.util.StringUtil;
 
 @Controller("usersGroupsController")
 @RequestMapping("VIEW")
@@ -90,6 +91,14 @@ public class UsersGroupsController {
 	public void addGroup(@RequestParam("groupName") String groupName, @RequestParam("userGroup") String userGroup, ActionRequest request,
 			ActionResponse response) throws IOException {
 		groupRepository.addGroup(groupName, Boolean.parseBoolean(userGroup));
+		sendRedirect(request, response);
+	}
+
+	@ActionMapping(params = { "action=delete-group", "group-id" })
+	public void deleteGroup(@RequestParam("group-id") String groupId, ActionRequest request, ActionResponse response) throws IOException {
+		if (StringUtil.isNumber(groupId)) {
+			groupRepository.deleteGroup(Long.parseLong(groupId, 10));
+		}
 		sendRedirect(request, response);
 	}
 

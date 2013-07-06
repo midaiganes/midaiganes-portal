@@ -8,6 +8,7 @@ public class ChatService {
 	private final JobSchedulingService jobSchedulingService;
 
 	private final Chats chats = new Chats();
+	private static final long[] EMPTY_LONG_ARRAY = new long[0];
 
 	public ChatService() {
 		jobSchedulingService = JobSchedulingService.getInstance();
@@ -16,6 +17,14 @@ public class ChatService {
 
 	public boolean addUserToChat(long userId, String chatId) {
 		return chats.getOrCreateChat(chatId).addUserToChat(userId);
+	}
+
+	public long[] getChatUserIds(String chatId) {
+		Chat chat = chats.getChat(chatId);
+		if (chat != null) {
+			return chat.getChatUserIds();
+		}
+		return EMPTY_LONG_ARRAY;
 	}
 
 	public void updateUserLastActiveTime(long userId, String chatId) {

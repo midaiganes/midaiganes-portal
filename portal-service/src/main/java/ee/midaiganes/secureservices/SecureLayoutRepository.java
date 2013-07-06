@@ -3,10 +3,9 @@ package ee.midaiganes.secureservices;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Resource;
+import org.springframework.stereotype.Component;
 
 import ee.midaiganes.beans.PortalConfig;
-import ee.midaiganes.beans.RootApplicationContext;
 import ee.midaiganes.model.Layout;
 import ee.midaiganes.services.LayoutRepository;
 import ee.midaiganes.services.PermissionRepository;
@@ -14,14 +13,25 @@ import ee.midaiganes.services.exceptions.PrincipalException;
 import ee.midaiganes.services.exceptions.ResourceActionNotFoundException;
 import ee.midaiganes.services.exceptions.ResourceNotFoundException;
 
+@Component(value = PortalConfig.SECURE_LAYOUT_REPOSITORY)
 public class SecureLayoutRepository {
 	private static final String VIEW = "VIEW";
+	private static SecureLayoutRepository instance;
+	private final LayoutRepository layoutRepository;
+	private final PermissionRepository permissionRepository;
 
-	@Resource(name = RootApplicationContext.LAYOUT_REPOSITORY)
-	private LayoutRepository layoutRepository;
+	public SecureLayoutRepository(LayoutRepository layoutRepository, PermissionRepository permissionRepository) {
+		this.layoutRepository = layoutRepository;
+		this.permissionRepository = permissionRepository;
+	}
 
-	@Resource(name = PortalConfig.PERMISSION_REPOSITORY)
-	private PermissionRepository permissionRepository;
+	public static SecureLayoutRepository getInstance() {
+		return instance;
+	}
+
+	public static void setInstance(SecureLayoutRepository instance) {
+		SecureLayoutRepository.instance = instance;
+	}
 
 	public List<Layout> getLayouts(long userId, long layoutSetId) {
 		List<Layout> layouts = layoutRepository.getLayouts(layoutSetId);

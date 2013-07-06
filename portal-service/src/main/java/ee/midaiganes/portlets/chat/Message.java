@@ -1,6 +1,6 @@
 package ee.midaiganes.portlets.chat;
 
-public class Message {
+public class Message implements Command {
 	private final long userId;
 	private final String message;
 
@@ -15,5 +15,10 @@ public class Message {
 
 	public String getMessage() {
 		return message;
+	}
+
+	@Override
+	public String getCmd() {
+		return "msg";
 	}
 }

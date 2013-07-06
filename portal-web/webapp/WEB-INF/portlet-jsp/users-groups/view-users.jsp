@@ -32,7 +32,7 @@
 												<portlet:param name="user-id" value="${user.user.id}"/>
 												<portlet:param name="group-id" value="${g.id}"/>
 											</portlet:actionURL>
-											<a href="${removeUserGroupUrl}">${g.id}user groups (can delete)</a>
+											<a href="${removeUserGroupUrl}">Remove '${g.name}'</a>
 										</li>
 									</c:forEach>
 									<c:forEach items="${user.notUserGroups}" var="g">
@@ -42,7 +42,7 @@
 												<portlet:param name="user-id" value="${user.user.id}"/>
 												<portlet:param name="group-id" value="${g.id}"/>
 											</portlet:actionURL>
-											<a href="${addUserGroupUrl}">${g.id}user groups (can add)</a>
+											<a href="${addUserGroupUrl}">Add '${g.name}'</a>
 										</li>
 									</c:forEach>
 								</ul>

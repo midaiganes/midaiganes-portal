@@ -1,7 +1,5 @@
 package ee.midaiganes.services;
 
-import javax.annotation.Resource;
-
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -17,12 +15,12 @@ public class ResourceRepository {
 	private final Cache cache;
 	private final LongResultSetExtractor resultSetExtractor;
 
-	@Resource(name = PortalConfig.PORTAL_JDBC_TEMPLATE)
-	private JdbcTemplate jdbcTemplate;
+	private final JdbcTemplate jdbcTemplate;
 
-	public ResourceRepository() {
+	public ResourceRepository(JdbcTemplate jdbcTemplate) {
 		resultSetExtractor = new LongResultSetExtractor();
 		cache = SingleVmPool.getCache(ResourceRepository.class.getName());
+		this.jdbcTemplate = jdbcTemplate;
 	}
 
 	public long getResourceId(final String resource) throws ResourceNotFoundException {

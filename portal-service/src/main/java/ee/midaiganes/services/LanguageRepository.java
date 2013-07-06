@@ -3,8 +3,6 @@ package ee.midaiganes.services;
 import java.util.List;
 import java.util.Locale;
 
-import javax.annotation.Resource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -20,8 +18,11 @@ import ee.midaiganes.util.StringUtil;
 public class LanguageRepository {
 	private static final Logger log = LoggerFactory.getLogger(LanguageRepository.class);
 
-	@Resource(name = PortalConfig.PORTAL_JDBC_TEMPLATE)
-	private JdbcTemplate jdbcTemplate;
+	private final JdbcTemplate jdbcTemplate;
+
+	public LanguageRepository(JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
+	}
 
 	public List<String> getSupportedLanguageIds() {
 		return jdbcTemplate.query("SELECT languageId FROM Language", new StringRowMapper());// TODO

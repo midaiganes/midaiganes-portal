@@ -6,10 +6,15 @@
 <form:form modelAttribute="registrationData" action="${formAction}">
 	<portal-ui:form-content>
 		<portal-ui:form-title title="Registration" />
+		<c:if test="${not empty success and success}">
+			<div>
+				Registration complete!
+			</div>
+		</c:if>
 		<portal-ui:form-input-row-spring message="Username" path="username"/>
 		<portal-ui:form-input-row-spring message="Password" path="password" isPassword="true"/>
 		<div>
-			<button type="submit">Register</button>
+			<button type="button" class="ajax-submit">Register</button>
 		</div>
 	</portal-ui:form-content>
 </form:form>

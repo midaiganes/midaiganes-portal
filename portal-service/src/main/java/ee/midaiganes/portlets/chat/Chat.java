@@ -4,16 +4,31 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import ee.midaiganes.services.UserRepository;
+
 public class Chat {
 	private final List<ChatUser> users = new ArrayList<>();
 	private final List<ChatMessage> messages = new ArrayList<>();
 
 	public synchronized boolean addUserToChat(long userId) {
-		return !isUserInChat(userId) && users.add(new ChatUser(userId));
+		boolean userAdded = !isUserInChat(userId) && users.add(new ChatUser(userId));
+		if (userAdded) {
+			addCommand(new Join(UserRepository.getInstance().getUser(userId)));
+		}
+		return userAdded;
 	}
 
 	public synchronized boolean isUserInChat(long userId) {
 		return findUser(userId) != null;
+	}
+
+	public synchronized long[] getChatUserIds() {
+		long[] userIds = new long[users.size()];
+		int i = 0;
+		for (ChatUser u : users) {
+			userIds[i++] = u.getUserId();
+		}
+		return userIds;
 	}
 
 	private ChatUser findUser(long userId) {
@@ -34,8 +49,10 @@ public class Chat {
 
 	public synchronized void removeTimedOutUsers(long minActiveTimeInMillis) {
 		for (int i = 0; i < users.size();) {
-			if (users.get(i).getLastActiveTimeInMillis() < minActiveTimeInMillis) {
+			ChatUser user = users.get(i);
+			if (user.getLastActiveTimeInMillis() < minActiveTimeInMillis) {
 				users.remove(i);
+				addCommand(new Quit(user.getUserId()));
 				continue;
 			}
 			i++;
@@ -43,7 +60,11 @@ public class Chat {
 	}
 
 	public synchronized void addMessage(long senderUserId, String message) {
-		messages.add(new ChatMessage(senderUserId, message, new ArrayList<>(users)));
+		addCommand(new Message(senderUserId, message));
+	}
+
+	private void addCommand(Command command) {
+		messages.add(new ChatMessage(command, new ArrayList<>(users)));
 	}
 
 	public synchronized List<ChatMessage> getAndRemoveUserOrOldMessages(long userId) {

@@ -14,7 +14,6 @@ import org.springframework.web.portlet.bind.annotation.ActionMapping;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
 
 import ee.midaiganes.beans.PortalConfig;
-import ee.midaiganes.beans.RootApplicationContext;
 import ee.midaiganes.model.Layout;
 import ee.midaiganes.model.LayoutTitle;
 import ee.midaiganes.model.PageLayoutName;
@@ -33,7 +32,7 @@ import ee.midaiganes.util.StringUtil;
 public class LayoutsController {
 	private static final Logger log = LoggerFactory.getLogger(LayoutsController.class);
 
-	@Resource(name = RootApplicationContext.LAYOUT_REPOSITORY)
+	@Resource(name = PortalConfig.LAYOUT_REPOSITORY)
 	private LayoutRepository layoutRepository;
 
 	@Resource(name = PortalConfig.LANGUAGE_REPOSITORY)

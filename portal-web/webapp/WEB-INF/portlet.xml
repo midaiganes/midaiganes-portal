@@ -98,6 +98,7 @@
 			<mime-type>text/html</mime-type>
 			<portlet-mode>view</portlet-mode>
 			<window-state>normal</window-state>
+			<window-state>exclusive</window-state>
 		</supports>
 		<portlet-info>
 			<title>registration</title>

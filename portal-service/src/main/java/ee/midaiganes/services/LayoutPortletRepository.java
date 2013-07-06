@@ -2,25 +2,20 @@ package ee.midaiganes.services;
 
 import java.util.List;
 
-import javax.annotation.Resource;
-
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import ee.midaiganes.beans.PortalConfig;
-import ee.midaiganes.beans.RootApplicationContext;
 import ee.midaiganes.model.LayoutPortlet;
 import ee.midaiganes.model.PortletName;
 import ee.midaiganes.services.SingleVmPool.Cache;
 import ee.midaiganes.services.rowmapper.LayoutPortletRowMapper;
 
-@Component(value = RootApplicationContext.LAYOUT_PORTLET_REPOSITORY)
+@Component(value = PortalConfig.LAYOUT_PORTLET_REPOSITORY)
 public class LayoutPortletRepository {
-	@Resource(name = PortalConfig.PORTAL_JDBC_TEMPLATE)
-	private JdbcTemplate jdbcTemplate;
 
-	@Resource(name = PortalConfig.PORTLET_INSTANCE_REPOSITORY)
-	private PortletInstanceRepository portletInstanceRepository;
+	private final JdbcTemplate jdbcTemplate;
+	private final PortletInstanceRepository portletInstanceRepository;
 
 	private static final String GET_LAYOUT_PORTLETS = "SELECT LayoutPortlet.id, LayoutPortlet.layoutId, LayoutPortlet.rowId, LayoutPortlet.portletInstanceId, PortletInstance.id, PortletInstance.portletContext, PortletInstance.portletName, PortletInstance.windowID FROM LayoutPortlet JOIN PortletInstance ON (LayoutPortlet.portletInstanceId = PortletInstance.id) WHERE layoutId = ?";
 	private static final String ADD_LAYOUT_PORTLET = "INSERT INTO LayoutPortlet (layoutId, rowId, portletInstanceId) VALUES(?, ?, ?)";
@@ -28,7 +23,9 @@ public class LayoutPortletRepository {
 
 	private final Cache cache;
 
-	public LayoutPortletRepository() {
+	public LayoutPortletRepository(JdbcTemplate jdbcTemplate, PortletInstanceRepository portletInstanceRepository) {
+		this.jdbcTemplate = jdbcTemplate;
+		this.portletInstanceRepository = portletInstanceRepository;
 		cache = SingleVmPool.getCache(LayoutPortletRepository.class.getName());
 	}
 

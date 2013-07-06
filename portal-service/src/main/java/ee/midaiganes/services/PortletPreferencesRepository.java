@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
-
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -24,8 +22,7 @@ import ee.midaiganes.util.StringUtil;
 @Component(value = PortalConfig.PORTLET_PREFERENCES_REPOSITORY)
 public class PortletPreferencesRepository {
 
-	@Resource(name = PortalConfig.PORTAL_JDBC_TEMPLATE)
-	private JdbcTemplate jdbcTemplate;
+	private final JdbcTemplate jdbcTemplate;
 
 	private static final String GET_PORTLET_PREFERENCES = "SELECT pp.preferenceName, ppv.preferenceValue FROM PortletPreference pp JOIN PortletPreferenceValue ppv ON (pp.id = ppv.portletPreferenceId) WHERE pp.portletInstanceId = ?";
 	private static final String INSERT_INTO_PORTLETPREFERENCE = "INSERT INTO PortletPreference(portletInstanceId, preferenceName) VALUES(?, ?)";
@@ -33,6 +30,10 @@ public class PortletPreferencesRepository {
 
 	private final Cache cache = SingleVmPool.getCache(PortletPreferencesRepository.class.getName());
 	private static final PortletPreferencesResultSetExtractor getPortletPreferencesExtractor = new PortletPreferencesResultSetExtractor();
+
+	public PortletPreferencesRepository(JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
+	}
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true, isolation = Isolation.DEFAULT)
 	public Map<String, String[]> getPortletPreferences(long portletInstanceId) {

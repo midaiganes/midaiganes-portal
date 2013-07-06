@@ -23,9 +23,11 @@ import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.beans.RootApplicationContext;
 import ee.midaiganes.model.Group;
 import ee.midaiganes.model.PortalResource;
+import ee.midaiganes.model.PortletInstance;
 import ee.midaiganes.model.User;
 import ee.midaiganes.services.GroupRepository;
 import ee.midaiganes.services.PermissionRepository;
+import ee.midaiganes.services.PortletInstanceRepository;
 import ee.midaiganes.services.ResourceActionRepository;
 import ee.midaiganes.services.ResourceRepository;
 import ee.midaiganes.services.UserRepository;
@@ -54,9 +56,13 @@ public class PermissionsController {
 	private UserRepository userRepository;
 
 	@RenderMapping
-	public String defaultView() {
-		log.warn("Invalid request params");
-		return null;
+	public String defaultView(RenderRequest request) throws ResourceNotFoundException {
+		long resourceId = resourceRepository.getResourceId(PortletInstance.getResourceName());
+		List<PortletInstance> defaultPortletInstances = PortletInstanceRepository.getInstance().getDefaultPortletInstances();
+
+		request.setAttribute("resourceId", resourceId);
+		request.setAttribute("portletInstances", defaultPortletInstances);
+		return "permissions/portlet-instances";
 	}
 
 	@RenderMapping(params = { "resource-id", "resource-prim-key" })

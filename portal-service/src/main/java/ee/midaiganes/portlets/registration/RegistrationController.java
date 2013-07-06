@@ -1,5 +1,7 @@
 package ee.midaiganes.portlets.registration;
 
+import javax.portlet.ActionRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +29,13 @@ public class RegistrationController {
 	}
 
 	@ActionMapping
-	public void registerUser(@ModelAttribute("registrationData") RegistrationData registrationData) {
+	public void registerUser(@ModelAttribute("registrationData") RegistrationData registrationData, ActionRequest request) {
 		if (!StringUtil.isEmpty(registrationData.getUsername()) && !StringUtil.isEmpty(registrationData.getPassword())) {
 			try {
 				log.debug("add user");
 				long userid = userRepository.addUser(registrationData.getUsername(), registrationData.getPassword());
 				log.debug("user added: id = {}; name = {}", userid, registrationData.getUsername());
+				request.setAttribute("success", Boolean.TRUE);
 			} catch (DuplicateUsernameException e) {
 				log.debug("duplicate username", e);
 			}

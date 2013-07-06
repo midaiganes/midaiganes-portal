@@ -15,7 +15,6 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 
 import ee.midaiganes.beans.PortalConfig;
-import ee.midaiganes.beans.RootApplicationContext;
 import ee.midaiganes.model.DefaultLayout;
 import ee.midaiganes.model.Layout;
 import ee.midaiganes.model.LayoutTitle;
@@ -34,7 +33,7 @@ import ee.midaiganes.services.statementcreator.AddLayoutPreparedStatementCreator
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.StringUtil;
 
-@Component(value = RootApplicationContext.LAYOUT_REPOSITORY)
+@Component(value = PortalConfig.LAYOUT_REPOSITORY)
 public class LayoutRepository {
 	private static final Logger log = LoggerFactory.getLogger(LayoutRepository.class);
 	private static final String QRY_GET_LAYOUT_BY_LAYOUTSETID = "SELECT Layout.id, Layout.layoutSetId, Layout.friendlyUrl, Layout.pageLayoutId, Theme.name, Theme.context, Layout.parentId, Layout.nr, Layout.defaultLayoutTitleLanguageId FROM Layout LEFT JOIN Theme ON (Layout.themeId = Theme.id) WHERE layoutSetId = ?";
@@ -260,6 +259,10 @@ public class LayoutRepository {
 		}
 	}
 
+	/**
+	 * TODO remove me
+	 */
+	@Deprecated
 	public Layout getDefaultLayout(long layoutSetId, String friendlyUrl) {
 		log.warn("get default layout; layoutsetid = {}; friendlyUrl = {}", layoutSetId, friendlyUrl);
 		Theme defaultTheme = themeRepository.getDefaultTheme();

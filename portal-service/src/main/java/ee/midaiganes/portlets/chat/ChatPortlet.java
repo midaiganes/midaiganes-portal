@@ -2,6 +2,7 @@ package ee.midaiganes.portlets.chat;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Type;
 import java.util.List;
 
 import javax.portlet.ActionRequest;
@@ -19,9 +20,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
 import ee.midaiganes.model.DefaultUser;
+import ee.midaiganes.model.User;
 import ee.midaiganes.portlets.BasePortlet;
+import ee.midaiganes.services.UserRepository;
 import ee.midaiganes.util.CharsetPool;
 import ee.midaiganes.util.SessionUtil;
 import ee.midaiganes.util.StringUtil;
@@ -31,7 +39,34 @@ public class ChatPortlet extends BasePortlet implements ResourceServingPortlet {
 	private final ChatService chatService = new ChatService();
 	private static final String SHOW_VIEW = ChatPortlet.class.getName() + ".SHOW_VIEW";
 	private static final String SHOW_NOTHING = ChatPortlet.class.getName() + ".SHOW_NOTHING";
-	private static final Gson gson = new Gson();
+	private static final Gson gson = new GsonBuilder().disableInnerClassSerialization().registerTypeAdapter(Message.class, new JsonSerializer<Message>() {
+		@Override
+		public JsonElement serialize(Message src, Type typeOfSrc, JsonSerializationContext context) {
+			JsonObject el = new JsonObject();
+			el.addProperty("cmd", src.getCmd());
+			el.addProperty("userId", src.getUserId());
+			el.addProperty("message", src.getMessage());
+			return el;
+		}
+	}).registerTypeAdapter(Join.class, new JsonSerializer<Join>() {
+		@Override
+		public JsonElement serialize(Join src, Type typeOfSrc, JsonSerializationContext context) {
+			JsonObject el = new JsonObject();
+			el.addProperty("cmd", src.getCmd());
+			el.addProperty("userId", src.getUserId());
+			el.addProperty("username", src.getUsername());
+			return el;
+		}
+	}).registerTypeAdapter(Quit.class, new JsonSerializer<Quit>() {
+
+		@Override
+		public JsonElement serialize(Quit src, Type typeOfSrc, JsonSerializationContext context) {
+			JsonObject el = new JsonObject();
+			el.addProperty("cmd", src.getCmd());
+			el.addProperty("userId", src.getUserId());
+			return el;
+		}
+	}).create();
 
 	@Override
 	public void render(RenderRequest request, RenderResponse response) throws PortletException, IOException {
@@ -45,35 +80,50 @@ public class ChatPortlet extends BasePortlet implements ResourceServingPortlet {
 	@Override
 	public void processAction(ActionRequest request, ActionResponse response) throws PortletException, IOException {
 		if ("1".equals(request.getParameter("join"))) {
-			String chatId = getChatId(request);
-			if (isValidChatId(chatId)) {
-				long userId = SessionUtil.getUserId(request);
-				if (userId != DefaultUser.DEFAULT_USER_ID) {
-					if (chatService.addUserToChat(userId, chatId)) {
-						log.info("User added to chat: '{}'", chatId);
-					} else {
-						log.info("User not added to chat! Allready in chat!");
-					}
-					request.setAttribute(SHOW_VIEW, Boolean.TRUE);
-				} else {
-					log.info("User not logged in");
-				}
-			}
+			handleJoinChat(request);
 		} else if ("1".equals(request.getParameter("send-message"))) {
-			String message = request.getParameter("message");
+			handleSendMessage(request);
+		}
+	}
+
+	private void handleJoinChat(ActionRequest request) {
+		String chatId = getChatId(request);
+		if (isValidChatId(chatId)) {
 			long userId = SessionUtil.getUserId(request);
-			String chatId = getChatId(request);
-			if (isValidChatId(chatId) && userId != DefaultUser.DEFAULT_USER_ID && chatService.isUserInChat(userId, chatId)) {
-				if (!StringUtil.isEmpty(message)) {
-					chatService.addMessage(userId, chatId, message);
-					log.info("Message added to chat: '{}'", chatId);
-					request.setAttribute(SHOW_NOTHING, Boolean.TRUE);
+			if (userId != DefaultUser.DEFAULT_USER_ID) {
+				if (chatService.addUserToChat(userId, chatId)) {
+					log.info("User added to chat: '{}'", chatId);
 				} else {
-					log.info("Message is empty");
+					log.info("User not added to chat! Allready in chat!");
 				}
+				setChatUsers(request, chatId);
+				request.setAttribute(SHOW_VIEW, Boolean.TRUE);
 			} else {
-				log.info("User not logged in or user not in chat. UserId = {}", userId);
+				log.info("User not logged in");
 			}
+		}
+	}
+
+	private void setChatUsers(PortletRequest request, String chatId) {
+		long[] userIds = chatService.getChatUserIds(chatId);
+		List<User> users = UserRepository.getInstance().getUsers(userIds);
+		request.setAttribute("users", users);
+	}
+
+	private void handleSendMessage(ActionRequest request) {
+		String message = request.getParameter("message");
+		long userId = SessionUtil.getUserId(request);
+		String chatId = getChatId(request);
+		if (isValidChatId(chatId) && userId != DefaultUser.DEFAULT_USER_ID && chatService.isUserInChat(userId, chatId)) {
+			if (!StringUtil.isEmpty(message)) {
+				chatService.addMessage(userId, chatId, message);
+				log.info("Message added to chat: '{}'", chatId);
+				request.setAttribute(SHOW_NOTHING, Boolean.TRUE);
+			} else {
+				log.info("Message is empty");
+			}
+		} else {
+			log.info("User not logged in or user not in chat. UserId = {}", userId);
 		}
 	}
 
@@ -87,7 +137,7 @@ public class ChatPortlet extends BasePortlet implements ResourceServingPortlet {
 				List<ChatMessage> messages = chatService.getUserMessages(userId, chatId);
 				if (messages != null) {
 					if (!messages.isEmpty()) {
-						writeMessages(messages, response);
+						writeMessages(messages, userId, response);
 					} else {
 						log.debug("No messages for user");
 					}
@@ -110,23 +160,25 @@ public class ChatPortlet extends BasePortlet implements ResourceServingPortlet {
 		return !StringUtil.isEmpty(chatId);
 	}
 
-	private String createMessagesJson(List<ChatMessage> messages) {
+	private String createMessagesJson(List<ChatMessage> messages, long userId) {
 		StringBuilder sb = new StringBuilder(messages.size() * 100);
 		sb.append("{\"messages\":[");
 		boolean first = true;
 		for (ChatMessage cm : messages) {
-			if (!first) {
-				sb.append(",");
+			if (!Join.isSelfJoin(cm.getCommand(), userId)) {
+				if (!first) {
+					sb.append(",");
+				}
+				first = false;
+				gson.toJson(cm.getCommand(), sb);
 			}
-			first = false;
-			sb.append(gson.toJson(cm.getMessage()));
 		}
 		sb.append("]}");
 		return sb.toString();
 	}
 
-	private void writeMessages(List<ChatMessage> messages, MimeResponse response) throws IOException {
-		String json = createMessagesJson(messages);
+	private void writeMessages(List<ChatMessage> messages, long userId, MimeResponse response) throws IOException {
+		String json = createMessagesJson(messages, userId);
 		try (OutputStream os = response.getPortletOutputStream()) {
 			os.write(json.getBytes(CharsetPool.UTF_8));
 		}

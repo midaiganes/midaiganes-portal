@@ -42,7 +42,7 @@ public class PortalServlet extends HttpServlet {
 	@Resource(name = RootApplicationContext.DB_INSTALL_SERVICE)
 	private DbInstallService dbInstallService;
 
-	@Resource(name = RootApplicationContext.LAYOUT_PORTLET_REPOSITORY)
+	@Resource(name = PortalConfig.LAYOUT_PORTLET_REPOSITORY)
 	private LayoutPortletRepository layoutPortletRepository;
 
 	@Resource(name = PortalConfig.SECURE_PORTLET_REPOSITORY)

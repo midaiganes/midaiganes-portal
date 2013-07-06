@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import javax.annotation.Resource;
 import javax.xml.bind.JAXBException;
 
 import org.slf4j.Logger;
@@ -30,8 +29,11 @@ public class ThemeRepository {
 	private final Map<ThemeName, Theme> themes = new ConcurrentHashMap<>();
 	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
-	@Resource(name = PortalConfig.PORTAL_JDBC_TEMPLATE)
-	private JdbcTemplate jdbcTemplate;
+	private final JdbcTemplate jdbcTemplate;
+
+	public ThemeRepository(JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
+	}
 
 	public Theme getTheme(ThemeName themeName) {
 		lock.readLock().lock();

@@ -3,8 +3,6 @@ package ee.midaiganes.services;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Resource;
-
 import org.springframework.stereotype.Component;
 
 import ee.midaiganes.beans.PortalConfig;
@@ -23,14 +21,17 @@ import ee.midaiganes.util.StringUtil;
 public class PermissionRepository {
 	private static final long[] EMPTY_ARRAY = new long[0];
 
-	@Resource(name = PortalConfig.PERMISSION_SERVICE)
-	private PermissionService permissionService;
+	private final PermissionService permissionService;
 
-	@Resource(name = PortalConfig.RESOURCE_REPOSITORY)
-	private ResourceRepository resourceRepository;
+	private final ResourceRepository resourceRepository;
 
-	@Resource(name = PortalConfig.GROUP_REPOSITORY)
-	private GroupRepository groupRepository;
+	private final GroupRepository groupRepository;
+
+	public PermissionRepository(PermissionService permissionService, ResourceRepository resourceRepository, GroupRepository groupRepository) {
+		this.permissionService = permissionService;
+		this.resourceRepository = resourceRepository;
+		this.groupRepository = groupRepository;
+	}
 
 	public boolean hasUserPermission(long userId, PortalResource resource, String action) throws ResourceNotFoundException, ResourceActionNotFoundException {
 		return hasUserPermission(userId, resource.getResource(), resource.getId(), action);

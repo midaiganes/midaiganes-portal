@@ -20,11 +20,13 @@ import ee.midaiganes.model.PageDisplay;
 import ee.midaiganes.model.Theme;
 import ee.midaiganes.model.ThemeName;
 import ee.midaiganes.model.User;
+import ee.midaiganes.secureservices.SecureLayoutRepository;
 import ee.midaiganes.services.LayoutRepository;
 import ee.midaiganes.services.LayoutSetRepository;
 import ee.midaiganes.services.RequestParser;
 import ee.midaiganes.services.ThemeRepository;
 import ee.midaiganes.services.UserRepository;
+import ee.midaiganes.services.exceptions.PrincipalException;
 import ee.midaiganes.util.RequestUtil;
 import ee.midaiganes.util.SessionUtil;
 
@@ -34,7 +36,7 @@ public class PortalFilter extends HttpFilter {
 	@Resource(name = RootApplicationContext.LAYOUT_SET_REPOSITORY)
 	private LayoutSetRepository layoutSetRepository;
 
-	@Resource(name = RootApplicationContext.LAYOUT_REPOSITORY)
+	@Resource(name = PortalConfig.LAYOUT_REPOSITORY)
 	private LayoutRepository layoutRepository;
 
 	@Resource(name = RootApplicationContext.USER_REPOSITORY)
@@ -51,9 +53,11 @@ public class PortalFilter extends HttpFilter {
 		try {
 			PageDisplay pageDisplay = new PageDisplay();
 			pageDisplay.setRequestInfo(requestParser.parserRequest(request));
-			pageDisplay.setLayoutSet(getLayoutSet(request.getServerName()));
-			pageDisplay.setLayout(getLayout(pageDisplay.getLayoutSet(), RequestUtil.getFriendlyURL(request.getRequestURI())));
-			pageDisplay.setUser(getUser(request));
+			LayoutSet layoutSet = getLayoutSet(request.getServerName());
+			pageDisplay.setLayoutSet(layoutSet);
+			User user = getUser(request);
+			pageDisplay.setUser(user);
+			pageDisplay.setLayout(getLayout(user.getId(), layoutSet, RequestUtil.getFriendlyURL(request.getRequestURI())));
 			pageDisplay.setTheme(getTheme(pageDisplay));
 			RequestUtil.setPageDisplay(request, pageDisplay);
 			if (pageDisplay.getLayout().isDefault()) {
@@ -83,10 +87,15 @@ public class PortalFilter extends HttpFilter {
 		return themeRepository.getDefaultTheme();
 	}
 
-	private Layout getLayout(LayoutSet layoutSet, String friendlyUrl) {
-		Layout layout = layoutRepository.getLayout(layoutSet.getId(), friendlyUrl);
-		if (layout != null) {
-			return layout;
+	private Layout getLayout(long userId, LayoutSet layoutSet, String friendlyUrl) {
+		try {
+			Layout layout = SecureLayoutRepository.getInstance().getLayout(userId, layoutSet.getId(), friendlyUrl);
+			if (layout != null) {
+				return layout;
+			}
+		} catch (PrincipalException e) {
+			// TODO handle this..
+			log.info("User '{}' is not allowd to access '{}'", userId, friendlyUrl);
 		}
 		return layoutRepository.getDefaultLayout(layoutSet.getId(), friendlyUrl);
 	}
