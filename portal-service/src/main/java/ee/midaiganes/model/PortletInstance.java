@@ -27,6 +27,10 @@ public class PortletInstance implements Serializable, PortalResource {
 
 	@Override
 	public String getResource() {
+		return getResourceName();
+	}
+
+	public static String getResourceName() {
 		return PortletInstance.class.getName();
 	}
 
