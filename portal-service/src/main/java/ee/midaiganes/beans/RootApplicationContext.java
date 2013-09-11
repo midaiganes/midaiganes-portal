@@ -25,7 +25,7 @@ public class RootApplicationContext {
 
 	@PostConstruct
 	public void postConstruct() {
-		UserRepository.setInstance(userRepository);
+		BeanUtil.addBean(UserRepository.class, userRepository);
 	}
 
 	@Bean(name = REQUEST_PARSER)
