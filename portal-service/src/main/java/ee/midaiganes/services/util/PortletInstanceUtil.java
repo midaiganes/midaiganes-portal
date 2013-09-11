@@ -2,6 +2,7 @@ package ee.midaiganes.services.util;
 
 import javax.portlet.PortletResponse;
 
+import ee.midaiganes.beans.BeanUtil;
 import ee.midaiganes.model.PortletInstance;
 import ee.midaiganes.model.PortletNamespace;
 import ee.midaiganes.services.PortletInstanceRepository;
@@ -13,6 +14,6 @@ public class PortletInstanceUtil {
 	}
 
 	public static PortletInstance getPortletInstance(PortletNamespace namespace) {
-		return PortletInstanceRepository.getInstance().getPortletInstance(namespace.getPortletName(), namespace.getWindowID());
+		return BeanUtil.getBean(PortletInstanceRepository.class).getPortletInstance(namespace.getPortletName(), namespace.getWindowID());
 	}
 }
