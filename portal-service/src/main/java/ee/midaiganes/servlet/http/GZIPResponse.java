@@ -81,7 +81,6 @@ public class GZIPResponse extends HttpServletResponseWrapper {
 			initWriter();
 			writerCalled = true;
 		}
-		log.info("use getOutputStream");
 		return pw;
 	}
 
