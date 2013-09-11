@@ -26,8 +26,9 @@ public class LayoutRowMapper implements RowMapper<Layout> {
 		if (!StringUtil.isEmpty(themeName) && !StringUtil.isEmpty(themeContext)) {
 			layout.setThemeName(new ThemeName(themeContext, themeName));
 		}
-		// TODO NULL OR 0 ?
-		layout.setParentId(rs.getLong(7));
+		long parentId = rs.getLong(7);
+		layout.setParentId(rs.wasNull() ? null : Long.valueOf(parentId));
+
 		layout.setNr(rs.getLong(8));
 		layout.setDefaultLayoutTitleLanguageId(rs.getLong(9));
 		return layout;
