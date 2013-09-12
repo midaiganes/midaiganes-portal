@@ -17,6 +17,7 @@ public class GZIPFilter extends HttpFilter {
 	protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
 		String acceptEncoding = request.getHeader(HttpHeaders.ACCEPT_ENCODING);
 		if (acceptEncoding != null && acceptEncoding.contains(GZIP)) {
+			// TODO acceptEncoding.contains = bug
 			GZIPResponse gzipresponse = new GZIPResponse(response);
 			gzipresponse.setHeader(HttpHeaders.CONTENT_TYPE, GZIP);
 			chain.doFilter(request, gzipresponse);

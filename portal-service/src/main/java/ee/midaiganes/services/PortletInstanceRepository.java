@@ -28,7 +28,6 @@ import ee.midaiganes.util.StringPool;
 @Component(value = PortalConfig.PORTLET_INSTANCE_REPOSITORY)
 public class PortletInstanceRepository {
 	private static final Logger log = LoggerFactory.getLogger(PortletInstanceRepository.class);
-	private static PortletInstanceRepository instance;
 	private static final SecureRandom random = new SecureRandom(new Object().toString().getBytes(CharsetPool.UTF_8));
 	private static final PortletInstanceRowMapper rowMapper = new PortletInstanceRowMapper();
 	private static final String DELETE_PORTLET_INSTANCE = "DELETE FROM PortletInstance WHERE windowID = ?";
@@ -42,14 +41,6 @@ public class PortletInstanceRepository {
 	public PortletInstanceRepository(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 		longResultSetExtractor = new LongResultSetExtractor();
-	}
-
-	public static void setInstance(PortletInstanceRepository instance) {
-		PortletInstanceRepository.instance = instance;
-	}
-
-	public static PortletInstanceRepository getInstance() {
-		return PortletInstanceRepository.instance;
 	}
 
 	public PortletInstance getPortletInstance(long id) {

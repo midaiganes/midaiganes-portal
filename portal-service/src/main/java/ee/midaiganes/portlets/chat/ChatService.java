@@ -2,58 +2,44 @@ package ee.midaiganes.portlets.chat;
 
 import java.util.List;
 
-import ee.midaiganes.services.JobSchedulingService;
+import ee.midaiganes.model.User;
+import ee.midaiganes.portlets.chat.Chat.AddUserToChatResponse;
+import ee.midaiganes.portlets.chat.Chat.SendAndRemoveUserChatMessages;
+import ee.midaiganes.portlets.chat.Chat.SendAndRemoveUserChatMessagesRequest;
+import ee.midaiganes.portlets.chat.Chat.SendMessageToChat;
 
 public class ChatService {
-	private final JobSchedulingService jobSchedulingService;
-
 	private final Chats chats = new Chats();
-	private static final long[] EMPTY_LONG_ARRAY = new long[0];
 
-	public ChatService() {
-		jobSchedulingService = JobSchedulingService.getInstance();
-		jobSchedulingService.runAtInterval(new UserRemoverJob(chats));
+	public List<ChatModel> getChats() {
+		return chats.getChats();
 	}
 
-	public boolean addUserToChat(long userId, String chatId) {
-		return chats.getOrCreateChat(chatId).addUserToChat(userId);
+	public AddUserToChatResponse addUserToChat(User user, long chatId) {
+		return chats.getChat(chatId).addUserToChat(user);
 	}
 
-	public long[] getChatUserIds(String chatId) {
-		Chat chat = chats.getChat(chatId);
-		if (chat != null) {
-			return chat.getChatUserIds();
-		}
-		return EMPTY_LONG_ARRAY;
+	public SendMessageToChat sendMessageToChat(User user, long chatId, String msg) {
+		return chats.getChat(chatId).sendMessageToChat(user, msg);
 	}
 
-	public void updateUserLastActiveTime(long userId, String chatId) {
-		Chat chat = chats.getChat(chatId);
-		if (chat != null) {
-			chat.updateUserLastActiveTime(userId);
-		}
+	public void sendPrivateMessageToUser(User from, User to, long chatId, String msg) {
+		chats.getChat(chatId).sendPrivateMessageToUser(from, to, msg);
 	}
 
-	public boolean isUserInChat(long userId, String chatId) {
-		Chat chat = chats.getChat(chatId);
-		if (chat != null) {
-			return chat.isUserInChat(userId);
-		}
-		return false;
+	public SendAndRemoveUserChatMessages sendAndRemoveUserChatMessages(long chatId, SendAndRemoveUserChatMessagesRequest call) {
+		return chats.getChat(chatId).sendAndRemoveUserChatMessages(call);
 	}
 
-	public void addMessage(long senderUserId, String chatId, String message) {
-		Chat chat = chats.getChat(chatId);
-		if (chat != null) {
-			chat.addMessage(senderUserId, message);
-		}
+	public void setUsersPrivateInChat(User user1, User user2, long chatId) {
+		chats.getChat(chatId).setUsersPrivateInChat(user1, user2);
 	}
 
-	public List<ChatMessage> getUserMessages(long userId, String chatId) {
-		Chat chat = chats.getChat(chatId);
-		if (chat != null) {
-			return chat.getAndRemoveUserOrOldMessages(userId);
-		}
-		return null;
+	public void setUsersPublicInChat(User user1, long chatId) {
+		chats.getChat(chatId);// TODO
+	}
+
+	public void destroyAll() {
+		chats.destroyAll();
 	}
 }

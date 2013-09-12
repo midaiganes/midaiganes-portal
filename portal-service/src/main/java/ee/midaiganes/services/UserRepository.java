@@ -23,7 +23,6 @@ import ee.midaiganes.util.StringUtil;
 
 @Component(value = RootApplicationContext.USER_REPOSITORY)
 public class UserRepository {
-	private static UserRepository instance;
 
 	@Resource(name = PortalConfig.PORTAL_JDBC_TEMPLATE)
 	private JdbcTemplate jdbcTemplate;
@@ -38,14 +37,6 @@ public class UserRepository {
 
 	private final UserRowMapper userRowMapper;
 	private final Cache cache;
-
-	public static UserRepository getInstance() {
-		return instance;
-	}
-
-	public static void setInstance(UserRepository instance) {
-		UserRepository.instance = instance;
-	}
 
 	public UserRepository() {
 		cache = SingleVmPool.getCache(UserRepository.class.getName());

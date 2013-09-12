@@ -5,8 +5,8 @@
 <%@ attribute name="path" required="true" %>
 <%@ attribute name="isPassword" required="false" %>
 
-<div>
-	<form:label path="${path}">${message}</form:label>
+<form:label path="${path}">
+	<span>${message}</span>
 	<c:choose>
 		<c:when test="${isPassword eq 'true'}">
 			<form:password path="${path}"/>
@@ -15,4 +15,4 @@
 			<form:input path="${path}" />
 		</c:otherwise>
 	</c:choose>
-</div>
+</form:label>

@@ -27,7 +27,7 @@ public class ResourceRepository {
 		final String cacheKey = resource;
 		final Element el = cache.getElement(cacheKey);
 		if (el != null) {
-			return el.get();
+			return el.<Long> get().longValue();
 		}
 		Long value = null;
 		try {

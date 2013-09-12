@@ -58,4 +58,7 @@ public class PortletResponseImpl implements PortletResponse {
 		return null;
 	}
 
+	public HttpServletResponse getHttpServletResponse() {
+		return this.response;
+	}
 }

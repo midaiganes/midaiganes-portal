@@ -1,27 +1,26 @@
 package ee.midaiganes.portlets.chat;
 
+import ee.midaiganes.model.User;
+
 public class ChatUser {
-	private final long userId;
-	private long lastActiveTimeInMillis;
+	private final User user;
+	private long lastActive;
+	private static final long ONE_MINUTE_IN_MILLIS = 60 * 1000;
 
-	public ChatUser(long userId) {
-		this.userId = userId;
-		this.lastActiveTimeInMillis = System.currentTimeMillis();
+	public ChatUser(User user) {
+		this.user = user;
+		this.lastActive = System.currentTimeMillis();
 	}
 
-	public long getUserId() {
-		return userId;
+	public boolean isTimedOut(long currentTimeMillis) {
+		return lastActive + ONE_MINUTE_IN_MILLIS < currentTimeMillis;
 	}
 
-	public long getLastActiveTimeInMillis() {
-		return lastActiveTimeInMillis;
+	public void updateActiveTime(long currentTimeMillis) {
+		this.lastActive = currentTimeMillis;
 	}
 
-	public void setLastActiveTimeInMillis(long lastActiveTimeInMillis) {
-		this.lastActiveTimeInMillis = lastActiveTimeInMillis;
-	}
-
-	public static long getMinLastActiveTime() {
-		return System.currentTimeMillis() - (1000 * 60 * 60);
+	public User getUser() {
+		return user;
 	}
 }

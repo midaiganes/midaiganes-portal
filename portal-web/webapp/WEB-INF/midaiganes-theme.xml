@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <midaiganes-theme xmlns="http://www.example.org/midaiganes-theme" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.example.org/midaiganes-theme ../META-INF/xsd/midaiganes-theme.xsd ">
-	<theme id="default">
+	<!-- <theme id="default">
 		<name>default theme</name>
 		<path>/themes/default</path>
+		<javascript-path>js</javascript-path>
+		<css-path>css</css-path>
+	</theme> -->
+	<theme id="midaiganes">
+		<name>midaiganes theme</name>
+		<path>/themes/midaiganes</path>
 		<javascript-path>js</javascript-path>
 		<css-path>css</css-path>
 	</theme>

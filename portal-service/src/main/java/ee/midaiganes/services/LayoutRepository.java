@@ -2,6 +2,7 @@ package ee.midaiganes.services;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -13,6 +14,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.model.DefaultLayout;
@@ -153,6 +157,24 @@ public class LayoutRepository {
 		return layouts;
 	}
 
+	public List<Layout> getChildLayouts(long layoutSetId, Long parentId) {
+		List<Layout> layouts = new ArrayList<>();
+		for (Layout layout : getLayouts(layoutSetId)) {
+			Long layoutParentId = layout.getParentId();
+			if (parentId == null && layoutParentId == null || parentId.longValue() == layoutParentId.longValue()) {
+				layouts.add(layout);
+			}
+		}
+		Collections.sort(layouts, new Comparator<Layout>() {
+
+			@Override
+			public int compare(Layout o1, Layout o2) {
+				return Long.compare(o1.getNr(), o2.getNr());
+			}
+		});
+		return layouts;
+	}
+
 	public Layout getLayout(long layoutSetId, String friendlyUrl) {
 		for (Layout layout : getLayouts(layoutSetId)) {
 			if (layout.getFriendlyUrl().equals(friendlyUrl)) {
@@ -231,14 +253,25 @@ public class LayoutRepository {
 		}
 	}
 
+	@Transactional(isolation = Isolation.DEFAULT, propagation = Propagation.REQUIRED, readOnly = false, value = PortalConfig.TXMANAGER)
 	public void deleteLayout(long layoutId) {
 		try {
-			jdbcTemplate.update(QRY_DELETE_LAYOUT, layoutId);
+			Layout layout = getLayout(layoutId);
+			int deleted = jdbcTemplate.update(QRY_DELETE_LAYOUT, layoutId);
+			int updated = moveLayoutsUp(layout.getLayoutSetId(), layout.getParentId(), layout.getNr());
+			log.debug("Deleted {} and updated {} layout(s)", deleted, updated);
 		} finally {
 			cache.clear();
 			layoutTitleCache.remove(Long.toString(layoutId));
 			layoutCache.remove(Long.toString(layoutId));
 		}
+	}
+
+	private int moveLayoutsUp(long layoutSetId, Long parentId, long nr) {
+		if (parentId == null) {
+			return jdbcTemplate.update("UPDATE Layout set nr = nr - 1 WHERE layoutSetId = ? AND parentId IS NULL AND nr > ?", layoutSetId, nr);
+		}
+		return jdbcTemplate.update("UPDATE Layout set nr = nr - 1 WHERE layoutSetId = ? AND parentId = ? AND nr > ?", layoutSetId, parentId, nr);
 	}
 
 	public boolean moveLayoutUp(long layoutId) {

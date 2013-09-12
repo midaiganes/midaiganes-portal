@@ -40,6 +40,15 @@
     			srcdir="@{srcdir}"
     			>
     			<compilerarg value="-Xlint:serial"/>
+    			<compilerarg value="-Xlint:deprecation"/>
+    			<compilerarg value="-Xlint:cast"/>
+    			<compilerarg value="-Xlint:finally"/>
+    			<compilerarg value="-Xlint:overrides"/>
+    			<compilerarg value="-Xlint:rawtypes"/>
+    			<compilerarg value="-Xlint:static"/>
+    			<compilerarg value="-Xlint:try"/>
+    			<compilerarg value="-Xlint:unchecked"/>
+    			<compilerarg value="-Xlint:varargs"/>
     		</javac>
         </sequential>
     </macrodef>

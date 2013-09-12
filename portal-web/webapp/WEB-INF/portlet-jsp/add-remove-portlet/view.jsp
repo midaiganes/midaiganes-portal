@@ -11,10 +11,3 @@
 		<div class="draggable-portlet-name" data-add-portlet-url="${addPortletUrl}"><a href="#"><c:out value="${name}" /></a></div>
 	</c:forEach>
 </div>
-<portlet:actionURL var="removePortletUrl">
-	<portlet:param name="action" value="remove-portlet"/>
-	<portlet:param name="window-id" value="PORTLET_WINDOW_ID" />
-</portlet:actionURL>
-<script type="text/javascript">
-	SPortal.Portlets.AddRemovePortlet.start();
-</script>

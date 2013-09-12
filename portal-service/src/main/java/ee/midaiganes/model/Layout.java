@@ -13,7 +13,7 @@ public class Layout implements Serializable, PortalResource {
 	private ThemeName themeName;
 	private String pageLayoutId;
 	private long nr;
-	private long parentId;
+	private Long parentId;
 	private long defaultLayoutTitleLanguageId;
 	private List<LayoutTitle> layoutTitles;
 
@@ -90,11 +90,11 @@ public class Layout implements Serializable, PortalResource {
 		this.nr = nr;
 	}
 
-	public long getParentId() {
+	public Long getParentId() {
 		return parentId;
 	}
 
-	public void setParentId(long parentId) {
+	public void setParentId(Long parentId) {
 		this.parentId = parentId;
 	}
 

@@ -1,5 +1,8 @@
 package ee.midaiganes.services;
 
+import javax.annotation.Resource;
+
+@Resource(name = "JobSchedulingService")
 public class JobSchedulingService {
 	private static final JobSchedulingService jobSchedulingService = new JobSchedulingService();
 

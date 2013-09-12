@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ee.midaiganes.beans.BeanUtil;
 import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.beans.RootApplicationContext;
 import ee.midaiganes.model.DefaultUser;
@@ -29,6 +30,7 @@ import ee.midaiganes.services.UserRepository;
 import ee.midaiganes.services.exceptions.PrincipalException;
 import ee.midaiganes.util.RequestUtil;
 import ee.midaiganes.util.SessionUtil;
+import ee.midaiganes.util.StringPool;
 
 public class PortalFilter extends HttpFilter {
 	private static final Logger log = LoggerFactory.getLogger(PortalFilter.class);
@@ -57,7 +59,7 @@ public class PortalFilter extends HttpFilter {
 			pageDisplay.setLayoutSet(layoutSet);
 			User user = getUser(request);
 			pageDisplay.setUser(user);
-			pageDisplay.setLayout(getLayout(user.getId(), layoutSet, RequestUtil.getFriendlyURL(request.getRequestURI())));
+			pageDisplay.setLayout(getLayout(user.getId(), layoutSet.getId(), RequestUtil.getFriendlyURL(request.getRequestURI())));
 			pageDisplay.setTheme(getTheme(pageDisplay));
 			RequestUtil.setPageDisplay(request, pageDisplay);
 			if (pageDisplay.getLayout().isDefault()) {
@@ -87,9 +89,14 @@ public class PortalFilter extends HttpFilter {
 		return themeRepository.getDefaultTheme();
 	}
 
-	private Layout getLayout(long userId, LayoutSet layoutSet, String friendlyUrl) {
+	private Layout getLayout(long userId, long layoutSetId, String friendlyUrl) {
 		try {
-			Layout layout = SecureLayoutRepository.getInstance().getLayout(userId, layoutSet.getId(), friendlyUrl);
+			final Layout layout;
+			if (StringPool.SLASH.equals(friendlyUrl)) {
+				layout = BeanUtil.getBean(SecureLayoutRepository.class).getHomeLayout(userId, layoutSetId);
+			} else {
+				layout = BeanUtil.getBean(SecureLayoutRepository.class).getLayout(userId, layoutSetId, friendlyUrl);
+			}
 			if (layout != null) {
 				return layout;
 			}
@@ -97,7 +104,7 @@ public class PortalFilter extends HttpFilter {
 			// TODO handle this..
 			log.info("User '{}' is not allowd to access '{}'", userId, friendlyUrl);
 		}
-		return layoutRepository.getDefaultLayout(layoutSet.getId(), friendlyUrl);
+		return layoutRepository.getDefaultLayout(layoutSetId, friendlyUrl);
 	}
 
 	private LayoutSet getLayoutSet(String virtualHost) {

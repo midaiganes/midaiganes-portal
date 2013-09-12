@@ -45,7 +45,7 @@ public class User implements Serializable, PortalResource {
 
 	@Override
 	public int hashCode() {
-		return ((int) id) + username.hashCode() + password.hashCode();
+		return ((int) id) + username.hashCode();
 	}
 
 	@Override

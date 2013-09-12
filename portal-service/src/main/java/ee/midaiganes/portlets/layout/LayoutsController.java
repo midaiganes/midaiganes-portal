@@ -53,7 +53,8 @@ public class LayoutsController {
 			Layout layout = layoutRepository.getLayout(Long.parseLong(id));
 			LayoutModel layoutModel = new LayoutModel();
 			layoutModel.setDefaultLayoutTitleLanguageId(languageRepository.getLanguageId(layout.getDefaultLayoutTitleLanguageId()));
-			layoutModel.setParentId(Long.toString(layout.getParentId()));
+			Long parentId = layout.getParentId();
+			layoutModel.setParentId(Long.toString(parentId == null ? 0 : parentId.longValue()));
 			layoutModel.setUrl(layout.getFriendlyUrl());
 			for (String languageId : languageRepository.getSupportedLanguageIds()) {
 				layoutModel.getLayoutTitles().put(languageId, StringPool.EMPTY);
@@ -128,8 +129,10 @@ public class LayoutsController {
 
 	private void updateLayout(LayoutModel layoutModel, Layout layout) throws IllegalFriendlyUrlException, IllegalLanguageIdException,
 			IllegalPageLayoutException {
-		layoutRepository.updateLayout(layoutModel.getUrl(), new PageLayoutName(layout.getPageLayoutId()), StringUtil.isEmpty(layoutModel.getParentId()) ? null
-				: Long.parseLong(layoutModel.getParentId()), languageRepository.getId(layoutModel.getDefaultLayoutTitleLanguageId()), layout.getId());
+		PageLayoutName pageLayoutName = new PageLayoutName(layout.getPageLayoutId());
+		Long parentId = StringUtil.isEmpty(layoutModel.getParentId()) ? null : Long.valueOf(layoutModel.getParentId());
+		Long defaultLayoutTitleLanguageId = languageRepository.getId(layoutModel.getDefaultLayoutTitleLanguageId());
+		layoutRepository.updateLayout(layoutModel.getUrl(), pageLayoutName, parentId, defaultLayoutTitleLanguageId, layout.getId());
 		updateLayoutTitles(layoutModel, layout);
 	}
 

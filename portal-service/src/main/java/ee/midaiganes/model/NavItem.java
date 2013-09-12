@@ -15,7 +15,8 @@ public class NavItem implements Serializable, Comparable<NavItem> {
 	public NavItem(Layout layout, List<Layout> layouts) {
 		this.layout = layout;
 		for (Layout l : layouts) {
-			if (this.layout.getId() == l.getParentId()) {
+			Long parentId = l.getParentId();
+			if (parentId != null && parentId.longValue() == this.layout.getId()) {
 				childs.add(new NavItem(l, layouts));
 			}
 		}

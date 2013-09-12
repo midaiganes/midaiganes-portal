@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.portlet.bind.annotation.ActionMapping;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
 
+import ee.midaiganes.beans.BeanUtil;
 import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.beans.RootApplicationContext;
 import ee.midaiganes.model.Group;
@@ -58,7 +59,7 @@ public class PermissionsController {
 	@RenderMapping
 	public String defaultView(RenderRequest request) throws ResourceNotFoundException {
 		long resourceId = resourceRepository.getResourceId(PortletInstance.getResourceName());
-		List<PortletInstance> defaultPortletInstances = PortletInstanceRepository.getInstance().getDefaultPortletInstances();
+		List<PortletInstance> defaultPortletInstances = BeanUtil.getBean(PortletInstanceRepository.class).getDefaultPortletInstances();
 
 		request.setAttribute("resourceId", resourceId);
 		request.setAttribute("portletInstances", defaultPortletInstances);

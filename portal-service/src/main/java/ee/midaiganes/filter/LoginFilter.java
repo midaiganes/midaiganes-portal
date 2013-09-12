@@ -51,7 +51,7 @@ public class LoginFilter extends HttpFilter {
 			if (!StringUtil.isEmpty(login) && StringUtil.isEmpty(password)) {
 				User user = userRepository.getUser(login, password);
 				if (user != null) {
-					SessionUtil.setUserId(request, user.getId());
+					SessionUtil.setUserId(request, Long.valueOf(user.getId()));
 					RequestUtil.getPageDisplay(request).setUser(user);
 					if (!StringUtil.isEmpty(redirect)) {
 						return removeRedirectLoop(redirect, login, password);

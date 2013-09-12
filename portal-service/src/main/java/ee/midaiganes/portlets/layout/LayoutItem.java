@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import ee.midaiganes.model.DefaultLayout;
 import ee.midaiganes.model.Layout;
 
 public class LayoutItem implements Serializable, Comparable<LayoutItem> {
@@ -16,7 +15,8 @@ public class LayoutItem implements Serializable, Comparable<LayoutItem> {
 	public LayoutItem(Layout layout, List<Layout> layouts) {
 		this.layout = layout;
 		for (Layout l : layouts) {
-			if (this.layout.getId() == l.getParentId()) {
+			Long parentId = l.getParentId();
+			if (parentId != null && parentId.longValue() == this.layout.getId()) {
 				childs.add(new LayoutItem(l, layouts));
 			}
 		}
@@ -26,7 +26,7 @@ public class LayoutItem implements Serializable, Comparable<LayoutItem> {
 	public static List<LayoutItem> getLayoutItems(List<Layout> layouts) {
 		List<LayoutItem> list = new ArrayList<>();
 		for (Layout layout : layouts) {
-			if (layout.getParentId() == DefaultLayout.DEFAULT_LAYOUT_ID) {
+			if (layout.getParentId() == null) {
 				list.add(new LayoutItem(layout, layouts));
 			}
 		}

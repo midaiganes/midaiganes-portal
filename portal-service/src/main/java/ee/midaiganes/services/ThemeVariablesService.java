@@ -7,6 +7,7 @@ import java.util.List;
 import javax.portlet.WindowStateException;
 import javax.servlet.http.HttpServletRequest;
 
+import ee.midaiganes.beans.BeanUtil;
 import ee.midaiganes.factory.PortletURLFactory;
 import ee.midaiganes.model.Layout;
 import ee.midaiganes.model.MidaiganesWindowState;
@@ -60,9 +61,9 @@ public class ThemeVariablesService {
 	private List<NavItem> getNavItems(PageDisplay pageDisplay) {
 		List<NavItem> navItems = new ArrayList<NavItem>();
 		// TODO
-		List<Layout> layouts = SecureLayoutRepository.getInstance().getLayouts(getUserId(pageDisplay), getLayoutSetId(pageDisplay));
+		List<Layout> layouts = BeanUtil.getBean(SecureLayoutRepository.class).getLayouts(getUserId(pageDisplay), getLayoutSetId(pageDisplay));
 		for (Layout layout : layouts) {
-			if (layout.getParentId() == 0) {
+			if (layout.getParentId() == null) {
 				navItems.add(new NavItem(layout, layouts));
 			}
 		}

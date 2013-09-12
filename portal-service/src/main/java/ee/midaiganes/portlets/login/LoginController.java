@@ -6,6 +6,7 @@ import javax.annotation.Resource;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletRequest;
+import javax.portlet.WindowState;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ import org.springframework.web.portlet.bind.annotation.ActionMapping;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
 
 import ee.midaiganes.beans.RootApplicationContext;
+import ee.midaiganes.model.MidaiganesWindowState;
 import ee.midaiganes.model.User;
 import ee.midaiganes.services.UserRepository;
 import ee.midaiganes.util.PortalURLUtil;
@@ -35,16 +37,19 @@ public class LoginController {
 		if (!UserUtil.isLoggedIn(request)) {
 			return "login/view";
 		}
-		return "login/loggedInView";
+		return MidaiganesWindowState.EXCLUSIVE.equals(request.getWindowState()) ? "login/loggedInView" : null;
 	}
 
 	@ActionMapping
-	public void loginAction(ActionRequest request, ActionResponse response, @ModelAttribute("loginData") LoginData loginData) {
+	public void loginAction(ActionRequest request, ActionResponse response, @ModelAttribute("loginData") LoginData loginData) throws IOException {
 		log.trace("Login data = {}", loginData);
 		if (!UserUtil.isLoggedIn(request)) {
 			User user = userRepository.getUser(loginData.getUsername(), loginData.getPassword());
 			if (user != null) {
 				SessionUtil.setUserId(request, user.getId());
+				if (WindowState.NORMAL.equals(request.getWindowState())) {
+					response.sendRedirect(getAfterLoginUrl());
+				}
 			} else {
 				log.debug("User not found {}", loginData);
 			}
