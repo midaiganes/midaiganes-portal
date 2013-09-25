@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.beans.RootApplicationContext;
+import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.model.DefaultUser;
 import ee.midaiganes.model.User;
 import ee.midaiganes.services.UserRepository;
@@ -25,7 +25,7 @@ public class LoginFilter extends HttpFilter {
 	private static final String PASSWORD = "pwd";
 	private static final String REDIRECT = "redirect";
 
-	@Resource(name = RootApplicationContext.USER_REPOSITORY)
+	@Resource(name = PortalConfig.USER_REPOSITORY)
 	private UserRepository userRepository;
 
 	@Override

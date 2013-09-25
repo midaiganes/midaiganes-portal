@@ -24,13 +24,14 @@ import ee.midaiganes.model.DefaultUser;
 import ee.midaiganes.model.User;
 import ee.midaiganes.portlets.BasePortlet;
 import ee.midaiganes.portlets.chat.Chat.AddUserToChatResponse;
-import ee.midaiganes.portlets.chat.Chat.SendAndRemoveUserChatMessages;
-import ee.midaiganes.portlets.chat.Chat.SendAndRemoveUserChatMessagesRequest;
-import ee.midaiganes.portlets.chat.Chat.SendMessageToChat;
 import ee.midaiganes.portlets.chat.Chat.AddUserToChatResponse.AddUserToChatResponseStatus;
+import ee.midaiganes.portlets.chat.Chat.SendAndRemoveUserChatMessages;
 import ee.midaiganes.portlets.chat.Chat.SendAndRemoveUserChatMessages.SendAndRemoveUserChatMessagesStatus;
+import ee.midaiganes.portlets.chat.Chat.SendAndRemoveUserChatMessagesRequest;
 import ee.midaiganes.portlets.chat.Chat.SendAndRemoveUserChatMessagesRequest.AsyncCallback;
 import ee.midaiganes.portlets.chat.Chat.SendAndRemoveUserChatMessagesRequest.GetAsyncCallback;
+import ee.midaiganes.portlets.chat.Chat.SendMessageToChat;
+import ee.midaiganes.portlets.chat.Chat.SendPrivateMessageToUserResponse;
 import ee.midaiganes.services.UserRepository;
 import ee.midaiganes.util.CharsetPool;
 import ee.midaiganes.util.LongUtil;
@@ -47,19 +48,36 @@ public class ChatPortlet extends BasePortlet implements ResourceServingPortlet {
 	private static final String CHAT_NOT_FOUND = "chatnotfound";
 	private static final String CHAT_ID = "chatid";
 	private static final String EMTPY_RESPONSE = "EMTPY_RESPONSE";
+	private static final String RESPONSE_MSG = "RESPONSE_MSG";
+	private final UserRepository userRepository;
+
+	public ChatPortlet() {
+		userRepository = BeanUtil.getBean(UserRepository.class);
+	}
 
 	@Override
-	public void render(RenderRequest request, RenderResponse response) throws PortletException, IOException {
-		if (SessionUtil.getUserId(request) != DefaultUser.DEFAULT_USER_ID) {
-			if (Boolean.TRUE.equals(request.getAttribute(EMTPY_RESPONSE))) {
-				// empty response...
-			} else if (Boolean.TRUE.equals(request.getAttribute(SHOW_CHAT))) {
-				super.include("chat2/chat", request, response);
-			} else {
-				List<ChatModel> chats = chatService.getChats();
-				request.setAttribute("chats", chats);
-				super.include("chat2/chats", request, response);
+	public void render(RenderRequest request, RenderResponse response) {
+		try {
+			if (SessionUtil.getUserId(request) != DefaultUser.DEFAULT_USER_ID) {
+				if (Boolean.TRUE.equals(request.getAttribute(EMTPY_RESPONSE))) {
+					// empty response...
+				} else if (Boolean.TRUE.equals(request.getAttribute(SHOW_CHAT))) {
+					super.include("chat/chat", request, response);
+				} else {
+					String responseMsg = (String) request.getAttribute(RESPONSE_MSG);
+					if (responseMsg != null) {
+						try (OutputStream os = response.getPortletOutputStream()) {
+							os.write(responseMsg.getBytes(CharsetPool.UTF_8));
+						}
+					} else {
+						List<ChatModel> chats = chatService.getChats();
+						request.setAttribute("chats", chats);
+						super.include("chat/chats", request, response);
+					}
+				}
 			}
+		} catch (IOException | PortletException | RuntimeException e) {
+			log.error(e.getMessage(), e);
 		}
 	}
 
@@ -78,6 +96,7 @@ public class ChatPortlet extends BasePortlet implements ResourceServingPortlet {
 		String sendMessage = request.getParameter("send-message");
 		String chat = request.getParameter("chat");
 		String message = request.getParameter("message");
+		String messageToUserId = request.getParameter("to");
 		if (LongUtil.isNonNegativeLong(join)) {
 			User user = getUser(userId);
 			AddUserToChatResponse addUserToChatResponse = chatService.addUserToChat(user, Long.parseLong(join));
@@ -92,11 +111,32 @@ public class ChatPortlet extends BasePortlet implements ResourceServingPortlet {
 				request.setAttribute(CHAT_NOT_FOUND, Boolean.TRUE);
 			}
 		} else if (!StringUtil.isEmpty(message) && "1".equals(sendMessage) && LongUtil.isNonNegativeLong(chat)) {
-			SendMessageToChat resp = chatService.sendMessageToChat(getUser(userId), Long.parseLong(chat), message);
-			if (SendMessageToChat.SUCCESS.equals(resp)) {
-				request.setAttribute(EMTPY_RESPONSE, Boolean.TRUE);
-			} else if (SendMessageToChat.CHAT_NOT_FOUND.equals(resp)) {
-				request.setAttribute(CHAT_NOT_FOUND, Boolean.TRUE);
+			if (LongUtil.isNonNegativeLong(messageToUserId)) {
+				User to = getUser(Long.parseLong(messageToUserId));
+				if (to != null) {
+					SendPrivateMessageToUserResponse resp = chatService.sendPrivateMessageToUser(getUser(userId), to, Long.parseLong(chat), message);
+					if (SendPrivateMessageToUserResponse.SUCCESS.equals(resp)) {
+						request.setAttribute(EMTPY_RESPONSE, Boolean.TRUE);
+					} else if (SendPrivateMessageToUserResponse.USER_NOT_IN_CHAT.equals(resp)) {
+						// TODO
+						request.setAttribute(RESPONSE_MSG, "{\"status\":\"error\",\"message\":\"User not in chat\"}");
+					} else if (SendPrivateMessageToUserResponse.AT_LEAST_ONE_USER_IS_IN_PRIVATE_CHAT.equals(resp)) {
+						request.setAttribute(RESPONSE_MSG, "{\"status\":\"error\",\"message\":\"User in private chat\"}");
+					} else if (SendPrivateMessageToUserResponse.CHAT_NOT_FOUND.equals(resp)) {
+						request.setAttribute(RESPONSE_MSG, "{\"status\":\"error\",\"message\":\"Chat not found\"}");
+					} else {
+						request.setAttribute(RESPONSE_MSG, "{\"status\":\"error\",\"message\":\"error\"}");
+					}
+				} else {
+					request.setAttribute(RESPONSE_MSG, "{\"status\":\"error\",\"message\":\"User not in chat\"}");
+				}
+			} else {
+				SendMessageToChat resp = chatService.sendMessageToChat(getUser(userId), Long.parseLong(chat), message);
+				if (SendMessageToChat.SUCCESS.equals(resp)) {
+					request.setAttribute(EMTPY_RESPONSE, Boolean.TRUE);
+				} else if (SendMessageToChat.CHAT_NOT_FOUND.equals(resp)) {
+					request.setAttribute(CHAT_NOT_FOUND, Boolean.TRUE);
+				}
 			}
 		} else {
 			log.debug("Invalid parameters");
@@ -120,21 +160,30 @@ public class ChatPortlet extends BasePortlet implements ResourceServingPortlet {
 						os.write(bytes);
 						os.flush();
 					}
+				} else if (SendAndRemoveUserChatMessagesStatus.USER_NOT_IN_CHAT.equals(resp.getStatus())) {
+					// TODO
+				} else if (SendAndRemoveUserChatMessagesStatus.CHAT_NOT_FOUND.equals(resp.getStatus())) {
+					// TODO
+				} else if (SendAndRemoveUserChatMessagesStatus.SUCCESS_WAITING.equals(resp.getStatus())) {
+					// Do nothing
+				} else {
+					log.error("Illegal state " + resp.getStatus());
 				}
 			}
 		}
 	}
 
 	private User getUser(long userId) {
-		UserRepository userRepository = BeanUtil.getBean(UserRepository.class);
 		return userRepository.getUser(userId);
 	}
 
 	private static class ChatAsyncCallback implements AsyncCallback {
-		final AsyncContext asyncContext;
+		private final AsyncContext asyncContext;
+		private final long timeoutTimeInMillis;
 
 		private ChatAsyncCallback(AsyncContext asyncContext) {
 			this.asyncContext = asyncContext;
+			this.timeoutTimeInMillis = System.currentTimeMillis() + (1000 * 30);
 		}
 
 		@Override
@@ -154,9 +203,20 @@ public class ChatPortlet extends BasePortlet implements ResourceServingPortlet {
 		public void userNotInChat() {
 			asyncContext.complete();
 		}
+
+		@Override
+		public void timeout() {
+			asyncContext.complete();
+		}
+
+		@Override
+		public boolean isTimedOut(long currentTimeInMillis) {
+			return timeoutTimeInMillis < currentTimeInMillis;
+		}
 	}
 
 	private static class ChatGetAsyncCallback implements GetAsyncCallback {
+		private static final long ASYNC_CONTEXT_TIMEOUT_IN_MILLIS = 60_000;
 		private final ResourceRequest request;
 
 		private ChatGetAsyncCallback(ResourceRequest request) {
@@ -167,6 +227,7 @@ public class ChatPortlet extends BasePortlet implements ResourceServingPortlet {
 		public AsyncCallback getAsyncCallback() {
 			HttpServletRequest req = RequestUtil.getHttpServletRequest(request);
 			AsyncContext asyncContext = req.startAsync();
+			asyncContext.setTimeout(ASYNC_CONTEXT_TIMEOUT_IN_MILLIS);
 			// TODO
 			// HttpServletResponse resp =
 			// ResponseUtil.getHttpServletResponse(response);

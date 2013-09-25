@@ -39,7 +39,11 @@ public interface Chat {
 			/** this should start new thread! **/
 			void call(ChatCmds messages);
 
+			void timeout();
+
 			void userNotInChat();
+
+			boolean isTimedOut(long currentTimeInMillis);
 		}
 
 		public static interface GetAsyncCallback {

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.portlet.bind.annotation.ActionMapping;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
 
-import ee.midaiganes.beans.RootApplicationContext;
+import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.model.MidaiganesWindowState;
 import ee.midaiganes.model.User;
 import ee.midaiganes.services.UserRepository;
@@ -29,7 +29,7 @@ import ee.midaiganes.util.UserUtil;
 public class LoginController {
 	private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
-	@Resource(name = RootApplicationContext.USER_REPOSITORY)
+	@Resource(name = PortalConfig.USER_REPOSITORY)
 	private UserRepository userRepository;
 
 	@RenderMapping

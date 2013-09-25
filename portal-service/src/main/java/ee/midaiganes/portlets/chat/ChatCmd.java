@@ -54,7 +54,6 @@ public class ChatCmd<A> {
 	}
 
 	public static class MsgChatCmd extends ChatCmd<MsgChatCmdData> {
-
 		public MsgChatCmd(String msg, User user) {
 			super(Cmd.MSG, new MsgChatCmdData(msg, user));
 		}
@@ -66,9 +65,27 @@ public class ChatCmd<A> {
 		}
 	}
 
-	public static class PrivMsgChatCmd extends ChatCmd<String> {
-		public PrivMsgChatCmd(String msg) {
-			super(Cmd.PRIVMSG, msg);
+	public static class PrivMsgChatCmd extends ChatCmd<PrivMsgChatCmdData> {
+		public PrivMsgChatCmd(String msg, long fromUserId) {
+			super(Cmd.PRIVMSG, new PrivMsgChatCmdData(msg, fromUserId));
+		}
+	}
+
+	public static class PrivMsgChatCmdData {
+		private final String msg;
+		private final long fromUserId;
+
+		public PrivMsgChatCmdData(String msg, long fromUserId) {
+			this.msg = msg;
+			this.fromUserId = fromUserId;
+		}
+
+		public String getMsg() {
+			return msg;
+		}
+
+		public long getFromUserId() {
+			return fromUserId;
 		}
 	}
 

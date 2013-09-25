@@ -16,7 +16,6 @@ import org.springframework.web.portlet.bind.annotation.ActionMapping;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
 
 import ee.midaiganes.beans.PortalConfig;
-import ee.midaiganes.beans.RootApplicationContext;
 import ee.midaiganes.model.Group;
 import ee.midaiganes.model.User;
 import ee.midaiganes.services.GroupRepository;
@@ -32,7 +31,7 @@ public class UsersGroupsController {
 	@Resource(name = PortalConfig.GROUP_REPOSITORY)
 	private GroupRepository groupRepository;
 
-	@Resource(name = RootApplicationContext.USER_REPOSITORY)
+	@Resource(name = PortalConfig.USER_REPOSITORY)
 	private UserRepository userRepository;
 
 	@RenderMapping
@@ -41,15 +40,15 @@ public class UsersGroupsController {
 		List<Group> groups = groupRepository.getGroups();
 		List<UsersListData> usersList = new ArrayList<>(users.size());
 		for (User user : users) {
-			List<Long> userGroupIds = groupRepository.getUserGroupIds(user.getId());
+			long[] userGroupIds = groupRepository.getUserGroupIds(user.getId());
 
 			List<Group> userGroups = new ArrayList<>();
 			List<Group> notUserGroups = new ArrayList<>();
 			for (Group g : groups) {
 				if (g.isUserGroup()) {
 					boolean added = false;
-					for (Long userGroupId : userGroupIds) {
-						if (g.getId() == userGroupId.longValue()) {
+					for (long userGroupId : userGroupIds) {
+						if (g.getId() == userGroupId) {
 							userGroups.add(g);
 							added = true;
 							break;

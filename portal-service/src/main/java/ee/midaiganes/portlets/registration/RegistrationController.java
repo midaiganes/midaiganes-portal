@@ -32,9 +32,8 @@ public class RegistrationController {
 	public void registerUser(@ModelAttribute("registrationData") RegistrationData registrationData, ActionRequest request) {
 		if (!StringUtil.isEmpty(registrationData.getUsername()) && !StringUtil.isEmpty(registrationData.getPassword())) {
 			try {
-				log.debug("add user");
 				long userid = userRepository.addUser(registrationData.getUsername(), registrationData.getPassword());
-				log.debug("user added: id = {}; name = {}", userid, registrationData.getUsername());
+				log.debug("user added: id = {}; name = {}", Long.valueOf(userid), registrationData.getUsername());
 				request.setAttribute("success", Boolean.TRUE);
 			} catch (DuplicateUsernameException e) {
 				log.debug("duplicate username", e);

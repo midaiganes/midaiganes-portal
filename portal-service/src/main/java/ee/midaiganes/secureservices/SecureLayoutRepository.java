@@ -46,6 +46,9 @@ public class SecureLayoutRepository {
 	public Layout getLayout(long userId, long layoutSetId, String friendlyUrl) throws PrincipalException {
 		Layout layout = layoutRepository.getLayout(layoutSetId, friendlyUrl);
 		try {
+			if (layout == null) {
+				return null;
+			}
 			if (permissionRepository.hasUserPermission(userId, layout, VIEW)) {
 				return layout;
 			}

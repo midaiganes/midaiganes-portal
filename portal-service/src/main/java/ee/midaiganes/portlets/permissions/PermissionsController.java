@@ -21,7 +21,6 @@ import org.springframework.web.portlet.bind.annotation.RenderMapping;
 
 import ee.midaiganes.beans.BeanUtil;
 import ee.midaiganes.beans.PortalConfig;
-import ee.midaiganes.beans.RootApplicationContext;
 import ee.midaiganes.model.Group;
 import ee.midaiganes.model.PortalResource;
 import ee.midaiganes.model.PortletInstance;
@@ -53,15 +52,21 @@ public class PermissionsController {
 	@Resource(name = PortalConfig.GROUP_REPOSITORY)
 	private GroupRepository groupRepository;
 
-	@Resource(name = RootApplicationContext.USER_REPOSITORY)
+	@Resource(name = PortalConfig.USER_REPOSITORY)
 	private UserRepository userRepository;
+
+	private final PortletInstanceRepository portletInstanceRepository;
+
+	public PermissionsController() {
+		this.portletInstanceRepository = BeanUtil.getBean(PortletInstanceRepository.class);
+	}
 
 	@RenderMapping
 	public String defaultView(RenderRequest request) throws ResourceNotFoundException {
 		long resourceId = resourceRepository.getResourceId(PortletInstance.getResourceName());
-		List<PortletInstance> defaultPortletInstances = BeanUtil.getBean(PortletInstanceRepository.class).getDefaultPortletInstances();
+		List<PortletInstance> defaultPortletInstances = portletInstanceRepository.getDefaultPortletInstances();
 
-		request.setAttribute("resourceId", resourceId);
+		request.setAttribute("resourceId", Long.valueOf(resourceId));
 		request.setAttribute("portletInstances", defaultPortletInstances);
 		return "permissions/portlet-instances";
 	}
@@ -114,7 +119,7 @@ public class PermissionsController {
 		boolean[] permissions = new boolean[actions.size()];
 		for (PermissionsDataRow row : data.getRows()) {
 			for (int i = 0; i < actions.size(); i++) {
-				permissions[i] = row.getPermissions().get(i);
+				permissions[i] = row.getPermissions().get(i).booleanValue();
 			}
 			permissionRepository.setPermissions(resourceId, row.getResourcePrimKey(), resource2Id, resourcePrimKey, allActions, permissions);
 		}
@@ -134,17 +139,17 @@ public class PermissionsController {
 
 			for (String action : actions) {
 				try {
-					permissions.add(permissionRepository.hasPermission(resource, resourceId, resourcePrimKey, action));
+					permissions.add(Boolean.valueOf(permissionRepository.hasPermission(resource, resourceId, resourcePrimKey, action)));
 				} catch (ResourceNotFoundException | ResourceActionNotFoundException e) {
 					log.error(e.getMessage(), e);
 				}
 			}
 		}
-		request.setAttribute("id", resourceRepository.getResourceId(PropsValues.PERMISSIONS_RESOURCE_NAME));
+		request.setAttribute("id", Long.valueOf(resourceRepository.getResourceId(PropsValues.PERMISSIONS_RESOURCE_NAME)));
 		request.setAttribute("actionsList", actions);
 		request.setAttribute("permissionsData", permissionsData);
-		request.setAttribute("resourceId", resourceId);
-		request.setAttribute("resourcePrimKey", resourcePrimKey);
+		request.setAttribute("resourceId", Long.valueOf(resourceId));
+		request.setAttribute("resourcePrimKey", Long.valueOf(resourcePrimKey));
 		return "permissions/view";
 	}
 

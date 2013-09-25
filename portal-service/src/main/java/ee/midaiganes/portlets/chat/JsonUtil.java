@@ -16,13 +16,16 @@ import ee.midaiganes.portlets.chat.ChatCmd.Cmd;
 import ee.midaiganes.portlets.chat.ChatCmd.JoinChatCmd;
 import ee.midaiganes.portlets.chat.ChatCmd.MsgChatCmd;
 import ee.midaiganes.portlets.chat.ChatCmd.MsgChatCmdData;
+import ee.midaiganes.portlets.chat.ChatCmd.PrivMsgChatCmd;
+import ee.midaiganes.portlets.chat.ChatCmd.PrivMsgChatCmdData;
 
 public class JsonUtil {
 	private static final Gson gson;
 	static {
 		gson = new GsonBuilder().disableInnerClassSerialization().registerTypeAdapter(ChatCmds.class, new ChatCmdsJsonSerializer())
-				.registerTypeAdapter(MsgChatCmd.class, new MsgChatCmdJsonSerializer()).registerTypeAdapter(JoinChatCmd.class, new JoinChatCmdJsonSerializer())
-				.create();
+				.registerTypeAdapter(MsgChatCmd.class, new MsgChatCmdJsonSerializer())
+				.registerTypeAdapter(PrivMsgChatCmd.class, new PrivMsgChatCmdJsonSerializer())
+				.registerTypeAdapter(JoinChatCmd.class, new JoinChatCmdJsonSerializer()).create();
 	}
 
 	private static class ChatCmdsJsonSerializer implements JsonSerializer<ChatCmds> {
@@ -47,6 +50,13 @@ public class JsonUtil {
 		}
 	}
 
+	private static class PrivMsgChatCmdJsonSerializer extends ChatCmdJsonSerializer implements JsonSerializer<PrivMsgChatCmd> {
+		@Override
+		public JsonElement serialize(PrivMsgChatCmd src, Type typeOfSrc, JsonSerializationContext context) {
+			return super.serialize(src, typeOfSrc, context);
+		}
+	}
+
 	private static class JoinChatCmdJsonSerializer extends ChatCmdJsonSerializer implements JsonSerializer<JoinChatCmd> {
 		@Override
 		public JsonElement serialize(JoinChatCmd src, Type typeOfSrc, JsonSerializationContext context) {
@@ -64,10 +74,18 @@ public class JsonUtil {
 				setJoinProperties(jo, src);
 			} else if (Cmd.MSG.equals(cmd)) {
 				setMsgProperties(jo, src);
+			} else if (Cmd.PRIVMSG.equals(cmd)) {
+				setPrivMsgProperties(jo, src);
 			} else {
 				jo.add("data", context.serialize(src.getObj()));
 			}
 			return jo;
+		}
+
+		private void setPrivMsgProperties(JsonObject jo, ChatCmd<?> src) {
+			PrivMsgChatCmdData data = (PrivMsgChatCmdData) src.getObj();
+			jo.addProperty("message", data.getMsg());
+			jo.addProperty("userId", Long.valueOf(data.getFromUserId()));
 		}
 
 		private void setMsgProperties(JsonObject jo, ChatCmd<?> src) {

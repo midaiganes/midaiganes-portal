@@ -7,6 +7,7 @@ import ee.midaiganes.portlets.chat.Chat.AddUserToChatResponse;
 import ee.midaiganes.portlets.chat.Chat.SendAndRemoveUserChatMessages;
 import ee.midaiganes.portlets.chat.Chat.SendAndRemoveUserChatMessagesRequest;
 import ee.midaiganes.portlets.chat.Chat.SendMessageToChat;
+import ee.midaiganes.portlets.chat.Chat.SendPrivateMessageToUserResponse;
 
 public class ChatService {
 	private final Chats chats = new Chats();
@@ -23,8 +24,8 @@ public class ChatService {
 		return chats.getChat(chatId).sendMessageToChat(user, msg);
 	}
 
-	public void sendPrivateMessageToUser(User from, User to, long chatId, String msg) {
-		chats.getChat(chatId).sendPrivateMessageToUser(from, to, msg);
+	public SendPrivateMessageToUserResponse sendPrivateMessageToUser(User from, User to, long chatId, String msg) {
+		return chats.getChat(chatId).sendPrivateMessageToUser(from, to, msg);
 	}
 
 	public SendAndRemoveUserChatMessages sendAndRemoveUserChatMessages(long chatId, SendAndRemoveUserChatMessagesRequest call) {

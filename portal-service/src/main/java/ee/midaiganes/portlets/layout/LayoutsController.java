@@ -78,7 +78,8 @@ public class LayoutsController {
 			Long parentId = getParentId(layout.getParentId());
 			long layoutSetId = RequestUtil.getPageDisplay(request).getLayoutSet().getId();
 			PageLayoutName defaultPageLayoutName = pageLayoutRepository.getDefaultPageLayout().getPageLayoutName();
-			long languageId = languageRepository.getId(languageRepository.getSupportedLanguageIds().get(0));
+			// TODO
+			long languageId = languageRepository.getId(languageRepository.getSupportedLanguageIds().get(0)).longValue();
 			layoutRepository.addLayout(layoutSetId, layout.getUrl(), null, defaultPageLayoutName, parentId, languageId);
 		} else {
 			log.warn("invalid friendly url '{}'", layout.getUrl());
@@ -131,7 +132,7 @@ public class LayoutsController {
 			IllegalPageLayoutException {
 		PageLayoutName pageLayoutName = new PageLayoutName(layout.getPageLayoutId());
 		Long parentId = StringUtil.isEmpty(layoutModel.getParentId()) ? null : Long.valueOf(layoutModel.getParentId());
-		Long defaultLayoutTitleLanguageId = languageRepository.getId(layoutModel.getDefaultLayoutTitleLanguageId());
+		long defaultLayoutTitleLanguageId = languageRepository.getId(layoutModel.getDefaultLayoutTitleLanguageId()).longValue();
 		layoutRepository.updateLayout(layoutModel.getUrl(), pageLayoutName, parentId, defaultLayoutTitleLanguageId, layout.getId());
 		updateLayoutTitles(layoutModel, layout);
 	}
@@ -153,7 +154,7 @@ public class LayoutsController {
 		if (lid != null) {
 			layoutRepository.deleteLayoutTitle(layoutId, lid.longValue());
 		} else {
-			log.warn("Can't delete LayoutTitle ({}). Invalid language id '{}'", layoutId, languageId);
+			log.warn("Can't delete LayoutTitle ({}). Invalid language id '{}'", Long.valueOf(layoutId), languageId);
 		}
 	}
 

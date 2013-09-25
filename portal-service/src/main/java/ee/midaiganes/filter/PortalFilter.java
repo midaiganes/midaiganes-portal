@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.annotation.Resource;
 import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -35,13 +36,13 @@ import ee.midaiganes.util.StringPool;
 public class PortalFilter extends HttpFilter {
 	private static final Logger log = LoggerFactory.getLogger(PortalFilter.class);
 
-	@Resource(name = RootApplicationContext.LAYOUT_SET_REPOSITORY)
+	@Resource(name = PortalConfig.LAYOUT_SET_REPOSITORY)
 	private LayoutSetRepository layoutSetRepository;
 
 	@Resource(name = PortalConfig.LAYOUT_REPOSITORY)
 	private LayoutRepository layoutRepository;
 
-	@Resource(name = RootApplicationContext.USER_REPOSITORY)
+	@Resource(name = PortalConfig.USER_REPOSITORY)
 	private UserRepository userRepository;
 
 	@Resource(name = RootApplicationContext.REQUEST_PARSER)
@@ -49,6 +50,14 @@ public class PortalFilter extends HttpFilter {
 
 	@Resource(name = PortalConfig.THEME_REPOSITORY)
 	private ThemeRepository themeRepository;
+
+	private SecureLayoutRepository secureLayoutRepository;
+
+	@Override
+	public void init(FilterConfig filterConfig) throws ServletException {
+		super.init(filterConfig);
+		this.secureLayoutRepository = BeanUtil.getBean(SecureLayoutRepository.class);
+	}
 
 	@Override
 	protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -93,16 +102,16 @@ public class PortalFilter extends HttpFilter {
 		try {
 			final Layout layout;
 			if (StringPool.SLASH.equals(friendlyUrl)) {
-				layout = BeanUtil.getBean(SecureLayoutRepository.class).getHomeLayout(userId, layoutSetId);
+				layout = secureLayoutRepository.getHomeLayout(userId, layoutSetId);
 			} else {
-				layout = BeanUtil.getBean(SecureLayoutRepository.class).getLayout(userId, layoutSetId, friendlyUrl);
+				layout = secureLayoutRepository.getLayout(userId, layoutSetId, friendlyUrl);
 			}
 			if (layout != null) {
 				return layout;
 			}
 		} catch (PrincipalException e) {
 			// TODO handle this..
-			log.info("User '{}' is not allowd to access '{}'", userId, friendlyUrl);
+			log.info("User '{}' is not allowd to access '{}'", Long.valueOf(userId), friendlyUrl);
 		}
 		return layoutRepository.getDefaultLayout(layoutSetId, friendlyUrl);
 	}
