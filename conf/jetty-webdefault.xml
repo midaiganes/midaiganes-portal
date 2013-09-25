@@ -301,6 +301,18 @@
       <param-name>xpoweredBy</param-name>
       <param-value>false</param-value>
     </init-param>
+    <init-param>
+    	<param-name>reloading</param-name>
+    	<param-value>false</param-value>
+    </init-param>
+    <init-param>
+    	<param-name>javaEncoding</param-name>
+    	<param-value>UTF-8</param-value>
+    </init-param>
+    <init-param>
+    	<param-name>development</param-name>
+    	<param-value>false</param-value>
+    </init-param>
     <!--  
     <init-param>
         <param-name>classpath</param-name>

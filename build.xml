@@ -244,9 +244,9 @@
 			<sysproperty key="project.basedir" value="${project.basedir}"/>
 			<sysproperty key="deploy.dir" value="${deploy.dir}"/>
 			<sysproperty key="java.security.policy" value="${project.basedir}/conf/catalina.policy"/>
+			<sysproperty key="file.encoding" value="UTF-8"/>
 			<jvmarg line="-javaagent:${javaweaver.path}"/>
-			<jvmarg line="-Xmx32M"/>
-			<jvmarg line="-Xms32M"/>
+			<jvmarg line="${jetty.jvm.args}"/>
 		</java>
 	</target>
 	
