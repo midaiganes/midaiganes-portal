@@ -1,9 +1,9 @@
 package ee.midaiganes.services;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.annotation.Resource;
 
-import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.model.DefaultUser;
@@ -12,12 +12,11 @@ import ee.midaiganes.model.PortalResource;
 import ee.midaiganes.model.User;
 import ee.midaiganes.services.exceptions.ResourceActionNotFoundException;
 import ee.midaiganes.services.exceptions.ResourceNotFoundException;
-import ee.midaiganes.util.ArrayUtil;
 import ee.midaiganes.util.PortalUtil;
 import ee.midaiganes.util.PropsValues;
 import ee.midaiganes.util.StringUtil;
 
-@Component(value = PortalConfig.PERMISSION_REPOSITORY)
+@Resource(name = PortalConfig.PERMISSION_REPOSITORY)
 public class PermissionRepository {
 	private static final long[] EMPTY_ARRAY = new long[0];
 
@@ -33,30 +32,36 @@ public class PermissionRepository {
 		this.groupRepository = groupRepository;
 	}
 
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = true, value = PortalConfig.TXMANAGER)
 	public boolean hasUserPermission(long userId, PortalResource resource, String action) throws ResourceNotFoundException, ResourceActionNotFoundException {
 		return hasUserPermission(userId, resource.getResource(), resource.getId(), action);
 	}
 
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = true, value = PortalConfig.TXMANAGER)
 	public boolean hasUserPermission(long userId, String resource, long resourcePrimKey, String action) throws ResourceNotFoundException,
 			ResourceActionNotFoundException {
 		return hasUserPermission(userId, resourceRepository.getResourceId(resource), resourcePrimKey, action);
 	}
 
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = true, value = PortalConfig.TXMANAGER)
 	public void setUserPermissions(long userId, long resourceId, long resourcePrimKey, String[] actions, boolean[] permissions)
 			throws ResourceNotFoundException, ResourceActionNotFoundException {
 		setPermissions(getUserResourceId(), userId, resourceId, resourcePrimKey, actions, permissions);
 	}
 
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = true, value = PortalConfig.TXMANAGER)
 	public void setPermissions(long resourceId, long resourcePrimKey, long resource2Id, long resource2PrimKey, String[] actions, boolean[] permissions)
 			throws ResourceActionNotFoundException {
 		permissionService.setPermissions(resourceId, resourcePrimKey, resource2Id, resource2PrimKey, actions, permissions);
 	}
 
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = true, value = PortalConfig.TXMANAGER)
 	public boolean hasPermission(PortalResource resource, long resourceId, long resourcePrimKey, String action) throws ResourceNotFoundException,
 			ResourceActionNotFoundException {
 		return permissionService.hasPermission(resourceRepository.getResourceId(resource.getResource()), resource.getId(), resourceId, resourcePrimKey, action);
 	}
 
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = true, value = PortalConfig.TXMANAGER)
 	public boolean hasUserPermission(long userId, long resourceId, long resourcePrimKey, String action) throws ResourceNotFoundException,
 			ResourceActionNotFoundException {
 		return PortalUtil.isSuperAdminUser(userId) ||
@@ -91,24 +96,28 @@ public class PermissionRepository {
 				}
 			}
 		} else {
-			List<Long> list = groupRepository.getUserGroupIds(userId);
+			long[] list = groupRepository.getUserGroupIds(userId);
 			if (!StringUtil.isEmpty(PropsValues.LOGGED_IN_GROUP_NAME)) {
 				Long gid = groupRepository.getGroupId(PropsValues.LOGGED_IN_GROUP_NAME);
 				if (gid != null) {
-					list = new ArrayList<>(list);
-					list.add(gid);
+					long[] ll = new long[list.length + 1];
+					System.arraycopy(list, 0, ll, 0, list.length);
+					ll[list.length - 1] = gid.longValue();
+					list = ll;
 				}
 			}
-			groupIds = ArrayUtil.toPrimitivLongArray(list);
+			groupIds = list;
 		}
 		return groupIds == null ? EMPTY_ARRAY : groupIds;
 	}
 
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = true, value = PortalConfig.TXMANAGER)
 	public boolean hasGroupPermission(long groupId, String resource, long resourcePrimKey, String action) throws ResourceNotFoundException,
 			ResourceActionNotFoundException {
 		return hasGroupPermission(groupId, resourceRepository.getResourceId(resource), resourcePrimKey, action);
 	}
 
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = true, value = PortalConfig.TXMANAGER)
 	public boolean hasGroupPermission(long groupId, long resourceId, long resourcePrimKey, String action) throws ResourceNotFoundException,
 			ResourceActionNotFoundException {
 		return permissionService.hasPermission(getGroupResourceId(), groupId, resourceId, resourcePrimKey, action);

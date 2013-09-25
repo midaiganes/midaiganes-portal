@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.Resource;
+
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
 
 import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.model.ResourceActionPermission;
@@ -15,7 +16,7 @@ import ee.midaiganes.services.exceptions.ResourceActionNotFoundException;
 import ee.midaiganes.services.exceptions.ResourceHasNoActionsException;
 import ee.midaiganes.services.rowmapper.ResourceActionPermissionRowMapper;
 
-@Component(value = PortalConfig.RESOURCE_ACTION_REPOSITORY)
+@Resource(name = PortalConfig.RESOURCE_ACTION_REPOSITORY)
 public class ResourceActionRepository {
 	private static final String QRY_GET_RESOURCE_ACTION_PERMISSION = "SELECT resourceId, action, permission FROM ResourceAction WHERE resourceId = ?";
 
@@ -61,12 +62,16 @@ public class ResourceActionRepository {
 		if (el == null) {
 			List<ResourceActionPermission> list = null;
 			try {
-				list = jdbcTemplate.query(QRY_GET_RESOURCE_ACTION_PERMISSION, resourceActionPermissionRowMapper, resourceId);
+				list = loadResourceActionPermissions(resourceId);
 			} finally {
 				cache.put(cacheKey, list == null || list.isEmpty() ? Collections.emptyList() : list);
 			}
 			return list;
 		}
 		return el.get();
+	}
+
+	private List<ResourceActionPermission> loadResourceActionPermissions(long resourceId) {
+		return jdbcTemplate.query(QRY_GET_RESOURCE_ACTION_PERMISSION, resourceActionPermissionRowMapper, Long.valueOf(resourceId));
 	}
 }

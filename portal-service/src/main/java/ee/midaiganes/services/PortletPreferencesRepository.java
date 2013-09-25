@@ -6,9 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +20,7 @@ import ee.midaiganes.services.rowmapper.PortletPreferencesResultSetExtractor;
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.StringUtil;
 
-@Component(value = PortalConfig.PORTLET_PREFERENCES_REPOSITORY)
+@Resource(name = PortalConfig.PORTLET_PREFERENCES_REPOSITORY)
 public class PortletPreferencesRepository {
 
 	private final JdbcTemplate jdbcTemplate;
@@ -35,7 +36,7 @@ public class PortletPreferencesRepository {
 		this.jdbcTemplate = jdbcTemplate;
 	}
 
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true, isolation = Isolation.DEFAULT)
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = true, isolation = Isolation.DEFAULT)
 	public Map<String, String[]> getPortletPreferences(long portletInstanceId) {
 		String key = Long.toString(portletInstanceId);
 		SingleVmPool.Cache.Element element = cache.getElement(key);
@@ -69,19 +70,20 @@ public class PortletPreferencesRepository {
 	}
 
 	private Map<String, String[]> loadPortletPreferences(long portletInstanceId) {
-		return jdbcTemplate.query(GET_PORTLET_PREFERENCES, getPortletPreferencesExtractor, portletInstanceId);
+		return jdbcTemplate.query(GET_PORTLET_PREFERENCES, getPortletPreferencesExtractor, Long.valueOf(portletInstanceId));
 	}
 
 	private void savePortletPreferences(final long portletInstanceId, final List<String> keys, final List<String[]> values) {
-		if (keys.size() > 0) {
-			Object[] arguments = new Object[keys.size() + 1];
-			arguments[0] = portletInstanceId;
-			for (int i = 0; i < keys.size(); i++) {
+		final int keysSize = keys.size();
+		if (!keys.isEmpty()) {
+			Object[] arguments = new Object[keysSize + 1];
+			arguments[0] = Long.valueOf(portletInstanceId);
+			for (int i = 0; i < keysSize; i++) {
 				arguments[1 + i] = keys.get(i);
 			}
 			jdbcTemplate.update(
 					"DELETE FROM PortletPreference WHERE portletInstanceId = ? AND preferenceName IN ("
-							+ StringUtil.repeat(StringPool.QUESTION, StringPool.COMMA, keys.size()) + ")", arguments);
+							+ StringUtil.repeat(StringPool.QUESTION, StringPool.COMMA, keysSize) + ")", arguments);
 
 		}
 		jdbcTemplate.batchUpdate(INSERT_INTO_PORTLETPREFERENCE, new BatchPreparedStatementSetter() {
@@ -93,7 +95,7 @@ public class PortletPreferencesRepository {
 
 			@Override
 			public int getBatchSize() {
-				return keys.size();
+				return keysSize;
 			}
 		});
 

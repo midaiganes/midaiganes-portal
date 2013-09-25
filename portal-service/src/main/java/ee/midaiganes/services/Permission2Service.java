@@ -2,40 +2,31 @@ package ee.midaiganes.services;
 
 import javax.annotation.Resource;
 
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.services.SingleVmPool.Cache;
 import ee.midaiganes.services.SingleVmPool.Cache.Element;
+import ee.midaiganes.services.dao.PermissionDao;
 import ee.midaiganes.services.exceptions.ResourceActionNotFoundException;
-import ee.midaiganes.services.rowmapper.LongResultSetExtractor;
 
-@Component(value = PortalConfig.PERMISSION_SERVICE)
+@Resource(name = PortalConfig.PERMISSION_SERVICE)
 public class Permission2Service implements PermissionService {
-	private static final String QRY_LOAD_PERMISSIONS = "SELECT permission FROM Permission WHERE resourceId = ? AND resourcePrimKey = ? AND resource2Id = ? AND resource2PrimKey = ?";
-	private static final String QRY_ADD_PERMISSIONS = "INSERT INTO Permission(resourceId, resourcePrimKey, resource2Id, resource2PrimKey, permission) VALUES(?, ?, ?, ?, ?)";
-	private static final String QRY_UPDATE_PERMISSIONS = "UPDATE Permission SET permission = ? WHERE id = ?";
-	private static final String QRY_GET_PERMISSIONS_ID = "SELECT id FROM Permission WHERE resourceId = ? AND resourcePrimKey = ? AND resource2Id = ? AND resource2PrimKey = ?";
 
-	private final LongResultSetExtractor longResultSetExtractor;
+	private final PermissionDao permissionDao;
 	private final Cache cache;
 
-	@Resource(name = PortalConfig.PORTAL_JDBC_TEMPLATE)
-	private JdbcTemplate jdbcTemplate;
+	private final ResourceActionRepository resourceActionPermissionRepository;
 
-	@Resource(name = PortalConfig.RESOURCE_ACTION_REPOSITORY)
-	private ResourceActionRepository resourceActionPermissionRepository;
-
-	public Permission2Service() {
-		longResultSetExtractor = new LongResultSetExtractor();
+	public Permission2Service(PermissionDao permissionDao, ResourceActionRepository resourceActionPermissionRepository) {
+		this.permissionDao = permissionDao;
+		this.resourceActionPermissionRepository = resourceActionPermissionRepository;
 		cache = SingleVmPool.getCache(Permission2Service.class.getName());
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true, value = PortalConfig.TXMANAGER)
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = true, value = PortalConfig.TXMANAGER)
 	public boolean hasPermission(long resource1, long resource1PrimKey, long resource2, long resource2PrimKey, String action)
 			throws ResourceActionNotFoundException {
 		long resourceActionPermission = resourceActionPermissionRepository.getResourceActionPermission(resource2, action);
@@ -48,14 +39,14 @@ public class Permission2Service implements PermissionService {
 	public void setPermissions(long resource1, long resource1PrimKey, long resource2, long resource2PrimKey, String[] actions, boolean[] permissions)
 			throws ResourceActionNotFoundException {
 		long actionPermissions = calculateActionPermission(getResourceActionPermissions(resource2, actions), permissions);
-		Long id = getPermissionsId(resource1, resource1PrimKey, resource2, resource2PrimKey);
+		Long id = permissionDao.loadPermissionsId(resource1, resource1PrimKey, resource2, resource2PrimKey);
 		try {
 			if (id == null) {
-				addPermissions(resource1, resource1PrimKey, resource2, resource2PrimKey, actionPermissions);
+				permissionDao.addPermissions(resource1, resource1PrimKey, resource2, resource2PrimKey, actionPermissions);
 			} else {
-				updatePermissions(id.longValue(), actionPermissions);
+				permissionDao.updatePermissions(id.longValue(), actionPermissions);
 			}
-			cache.put(resource1 + "#" + resource1PrimKey + "#" + resource2 + "#" + resource2PrimKey, actionPermissions);
+			cache.put(resource1 + "#" + resource1PrimKey + "#" + resource2 + "#" + resource2PrimKey, Long.valueOf(actionPermissions));
 		} catch (RuntimeException e) {
 			cache.clear();
 			throw e;
@@ -68,7 +59,7 @@ public class Permission2Service implements PermissionService {
 		if (el == null) {
 			Long permissions = null;
 			try {
-				permissions = loadPermissions(resource1, resource1PrimKey, resource2, resource2PrimKey);
+				permissions = permissionDao.loadPermissions(resource1, resource1PrimKey, resource2, resource2PrimKey);
 			} finally {
 				cache.put(cacheKey, permissions);
 			}
@@ -95,19 +86,4 @@ public class Permission2Service implements PermissionService {
 		return actionPermissions;
 	}
 
-	private Long loadPermissions(long resource1, long resource1PrimKey, long resource2, long resource2PrimKey) {
-		return jdbcTemplate.query(QRY_LOAD_PERMISSIONS, longResultSetExtractor, resource1, resource1PrimKey, resource2, resource2PrimKey);
-	}
-
-	private void addPermissions(long resource1, long resource1PrimKey, long resource2, long resource2PrimKey, long actionPermissions) {
-		jdbcTemplate.update(QRY_ADD_PERMISSIONS, resource1, resource1PrimKey, resource2, resource2PrimKey, actionPermissions);
-	}
-
-	private void updatePermissions(long id, long actionPermissions) {
-		jdbcTemplate.update(QRY_UPDATE_PERMISSIONS, actionPermissions, id);
-	}
-
-	private Long getPermissionsId(long resource1, long resource1PrimKey, long resource2, long resource2PrimKey) {
-		return jdbcTemplate.query(QRY_GET_PERMISSIONS_ID, longResultSetExtractor, resource1, resource1PrimKey, resource2, resource2PrimKey);
-	}
 }

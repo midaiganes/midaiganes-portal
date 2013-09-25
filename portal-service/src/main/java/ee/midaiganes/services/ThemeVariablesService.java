@@ -18,7 +18,6 @@ import ee.midaiganes.util.MidaiganesPortlets;
 import ee.midaiganes.util.RequestUtil;
 
 public class ThemeVariablesService {
-	private static final ThemeVariablesService instance = new ThemeVariablesService(PortletURLFactory.getInstance());
 	private static final String LOG_IN_URL = "logInUrl";
 	private static final String NAV_ITEMS = "navItems";
 	private static final String ADD_LAYOUT_URL = "addLayoutUrl";
@@ -28,15 +27,11 @@ public class ThemeVariablesService {
 
 	private final PortletURLFactory portletUrlFactor;
 
-	private ThemeVariablesService(PortletURLFactory portletUrlFactor) {
+	public ThemeVariablesService(PortletURLFactory portletUrlFactor) {
 		if (portletUrlFactor == null) {
 			throw new IllegalArgumentException("Portlet url factory is null");
 		}
 		this.portletUrlFactor = portletUrlFactor;
-	}
-
-	public static ThemeVariablesService getInstance() {
-		return instance;
 	}
 
 	public List<ThemeVariable> getThemeVariables(HttpServletRequest request) {

@@ -1,7 +1,8 @@
 package ee.midaiganes.services;
 
+import javax.annotation.Resource;
+
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
 
 import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.services.SingleVmPool.Cache;
@@ -9,12 +10,11 @@ import ee.midaiganes.services.SingleVmPool.Cache.Element;
 import ee.midaiganes.services.exceptions.ResourceNotFoundException;
 import ee.midaiganes.services.rowmapper.LongResultSetExtractor;
 
-@Component(value = PortalConfig.RESOURCE_REPOSITORY)
+@Resource(name = PortalConfig.RESOURCE_REPOSITORY)
 public class ResourceRepository {
 	private static final String QRY_GET_RESOURCE_ID = "SELECT id FROM Resource WHERE resource = ?";
 	private final Cache cache;
 	private final LongResultSetExtractor resultSetExtractor;
-
 	private final JdbcTemplate jdbcTemplate;
 
 	public ResourceRepository(JdbcTemplate jdbcTemplate) {
@@ -23,7 +23,7 @@ public class ResourceRepository {
 		this.jdbcTemplate = jdbcTemplate;
 	}
 
-	public long getResourceId(final String resource) throws ResourceNotFoundException {
+	public long getResourceId(String resource) throws ResourceNotFoundException {
 		final String cacheKey = resource;
 		final Element el = cache.getElement(cacheKey);
 		if (el != null) {
@@ -31,7 +31,7 @@ public class ResourceRepository {
 		}
 		Long value = null;
 		try {
-			value = jdbcTemplate.query(QRY_GET_RESOURCE_ID, resultSetExtractor, resource);
+			value = loadResourceId(resource);
 			if (value == null) {
 				throw new ResourceNotFoundException("Invalid resource: '" + resource + "'");
 			}
@@ -39,5 +39,9 @@ public class ResourceRepository {
 		} finally {
 			cache.put(cacheKey, value);
 		}
+	}
+
+	private Long loadResourceId(String resource) {
+		return jdbcTemplate.query(QRY_GET_RESOURCE_ID, resultSetExtractor, resource);
 	}
 }

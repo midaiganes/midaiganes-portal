@@ -12,20 +12,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Component;
 
 import ee.midaiganes.beans.PortalConfig;
-import ee.midaiganes.beans.RootApplicationContext;
 import ee.midaiganes.services.exceptions.DbInstallFailedException;
 import ee.midaiganes.util.IOUtil;
 
-@Component(value = RootApplicationContext.DB_INSTALL_SERVICE)
+@Resource(name = PortalConfig.DB_INSTALL_SERVICE)
 public class DbInstallService {
 
 	private static final Logger log = LoggerFactory.getLogger(DbInstallService.class);
 
-	@Resource(name = PortalConfig.PORTAL_JDBC_TEMPLATE)
-	private JdbcTemplate jdbcTemplate;
+	private final JdbcTemplate jdbcTemplate;
+
+	public DbInstallService(JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
+	}
 
 	private static class BooleanTrueRowMapper implements RowMapper<Boolean> {
 		@Override
@@ -58,5 +59,4 @@ public class DbInstallService {
 			log.error(e.getMessage(), e);
 		}
 	}
-
 }

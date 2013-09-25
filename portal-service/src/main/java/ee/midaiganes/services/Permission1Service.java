@@ -3,7 +3,6 @@ package ee.midaiganes.services;
 import javax.annotation.Resource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
 
 import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.services.SingleVmPool.Cache;
@@ -12,7 +11,7 @@ import ee.midaiganes.services.exceptions.ResourceActionNotFoundException;
 import ee.midaiganes.services.rowmapper.LongResultSetExtractor;
 
 @Deprecated
-@Component(value = PortalConfig.PERMISSION_SERVICE)
+// @Resource(name = PortalConfig.PERMISSION_SERVICE)
 public class Permission1Service implements PermissionService {
 	private final LongResultSetExtractor resultSetExtractor;
 	private final Cache cache;

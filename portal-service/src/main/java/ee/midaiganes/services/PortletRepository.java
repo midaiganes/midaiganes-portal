@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import javax.annotation.Resource;
 import javax.portlet.Portlet;
 import javax.portlet.PortletConfig;
 import javax.portlet.PortletException;
@@ -20,7 +21,6 @@ import javax.xml.bind.JAXBException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.generated.xml.portlet.DescriptionType;
@@ -41,7 +41,7 @@ import ee.midaiganes.portlet.impl.PortletConfigImpl;
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.XmlUtil;
 
-@Component(value = PortalConfig.PORTLET_REPOSITORY)
+@Resource(name = PortalConfig.PORTLET_REPOSITORY)
 public class PortletRepository {
 	private static final Logger log = LoggerFactory.getLogger(PortletRepository.class);
 	private final ConcurrentHashMap<PortletName, PortletAndConfiguration> portlets = new ConcurrentHashMap<>();
@@ -181,7 +181,7 @@ public class PortletRepository {
 				MidaiganesPortlet midaiganesPortlet = getMidaiganesPortlet(portlet, obj, portletName);
 				long start = System.currentTimeMillis();
 				midaiganesPortlet.init(portletConfig);
-				log.info("Portlet '{}' init took: {}ms", portletName, System.currentTimeMillis() - start);
+				log.info("Portlet '{}' init took: {}ms", portletName, Long.valueOf(System.currentTimeMillis() - start));
 				PortletAndConfiguration portletAndConfiguration = new PortletAndConfiguration(midaiganesPortlet, portletConfig, portletType);
 				lock.writeLock().lock();
 				try {
