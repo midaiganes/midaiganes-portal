@@ -15,13 +15,17 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
+import ee.midaiganes.factory.PortletURLFactory;
 import ee.midaiganes.secureservices.SecureLayoutRepository;
 import ee.midaiganes.secureservices.SecurePortletRepository;
+import ee.midaiganes.services.DbInstallService;
 import ee.midaiganes.services.GroupRepository;
 import ee.midaiganes.services.LanguageRepository;
 import ee.midaiganes.services.LayoutPortletRepository;
 import ee.midaiganes.services.LayoutRepository;
+import ee.midaiganes.services.LayoutSetRepository;
 import ee.midaiganes.services.PageLayoutRepository;
+import ee.midaiganes.services.Permission2Service;
 import ee.midaiganes.services.PermissionRepository;
 import ee.midaiganes.services.PermissionService;
 import ee.midaiganes.services.PortletInstanceRepository;
@@ -30,6 +34,15 @@ import ee.midaiganes.services.PortletRepository;
 import ee.midaiganes.services.ResourceActionRepository;
 import ee.midaiganes.services.ResourceRepository;
 import ee.midaiganes.services.ThemeRepository;
+import ee.midaiganes.services.ThemeVariablesService;
+import ee.midaiganes.services.UserRepository;
+import ee.midaiganes.services.dao.GroupDao;
+import ee.midaiganes.services.dao.LayoutDao;
+import ee.midaiganes.services.dao.LayoutPortletDao;
+import ee.midaiganes.services.dao.LayoutSetDao;
+import ee.midaiganes.services.dao.PermissionDao;
+import ee.midaiganes.services.dao.PortletInstanceDao;
+import ee.midaiganes.services.dao.UserDao;
 
 @Configuration(value = "portalConfig")
 @PropertySource(value = "classpath:portal.properties", name = "portalProperties")
@@ -56,6 +69,9 @@ public class PortalConfig {
 	public static final String PERMISSION_SERVICE = "permissionService";
 	public static final String GROUP_REPOSITORY = "groupRepository";
 	public static final String PORTAL_JDBC_TEMPLATE = "portalJdbcTemplate";
+	public static final String LAYOUT_SET_REPOSITORY = "layoutSetRepository";
+	public static final String USER_REPOSITORY = "userRepository";
+	public static final String DB_INSTALL_SERVICE = "dbInstallService";
 	public static final String TXMANAGER = "txManager";
 
 	@Value("${jdbc.driverClassName}")
@@ -73,9 +89,6 @@ public class PortalConfig {
 	@Value("${txManager.defaultTimeout}")
 	private int txManagerDefaultTimeout;
 
-	@Value("${permission.service.class.name}")
-	private String permissionServiceClassName;
-
 	// @Resource(name = PERMISSION_REPOSITORY)
 	@Autowired
 	private PermissionRepository permissionRepository;
@@ -89,12 +102,32 @@ public class PortalConfig {
 	@Autowired
 	private SecureLayoutRepository secureLayoutRepository;
 
+	@Autowired
+	private UserRepository userRepository;
+
 	@PostConstruct
 	public void postConstruct() {
 		BeanUtil.addBean(PermissionRepository.class, permissionRepository);
 		BeanUtil.addBean(LanguageRepository.class, languageRepository);
 		BeanUtil.addBean(PortletInstanceRepository.class, portletInstanceRepository);
 		BeanUtil.addBean(SecureLayoutRepository.class, secureLayoutRepository);
+		BeanUtil.addBean(ThemeVariablesService.class, new ThemeVariablesService(PortletURLFactory.getInstance()));
+		BeanUtil.addBean(UserRepository.class, userRepository);
+	}
+
+	@Bean(name = DB_INSTALL_SERVICE, autowire = Autowire.NO)
+	public DbInstallService dbInstallService() {
+		return new DbInstallService(portalJdbcTemplate());
+	}
+
+	@Bean(name = USER_REPOSITORY, autowire = Autowire.NO)
+	public UserRepository userRepository() {
+		return new UserRepository(new UserDao(portalJdbcTemplate()));
+	}
+
+	@Bean(name = LAYOUT_SET_REPOSITORY, autowire = Autowire.NO)
+	public LayoutSetRepository layoutSetRepository() {
+		return new LayoutSetRepository(new LayoutSetDao(portalJdbcTemplate()));
 	}
 
 	@Bean(name = "propertySourcesPlaceholderConfigurer", autowire = Autowire.NO)
@@ -146,12 +179,12 @@ public class PortalConfig {
 	}
 
 	@Bean(name = SECURE_PORTLET_REPOSITORY, autowire = Autowire.NO)
-	public SecurePortletRepository securePortletRepository() throws Exception {
+	public SecurePortletRepository securePortletRepository() {
 		return new SecurePortletRepository(portletRepository(), permissionRepository());
 	}
 
 	@Bean(name = SECURE_LAYOUT_REPOSITORY, autowire = Autowire.NO)
-	public SecureLayoutRepository secureLayoutRepository() throws Exception {
+	public SecureLayoutRepository secureLayoutRepository() {
 		return new SecureLayoutRepository(layoutRepository(), permissionRepository());
 	}
 
@@ -162,7 +195,7 @@ public class PortalConfig {
 
 	@Bean(name = PORTLET_INSTANCE_REPOSITORY, autowire = Autowire.NO)
 	public PortletInstanceRepository portletInstanceRepository() {
-		return new PortletInstanceRepository(portalJdbcTemplate());
+		return new PortletInstanceRepository(new PortletInstanceDao(portalJdbcTemplate()));
 	}
 
 	@Bean(name = LANGUAGE_REPOSITORY, autowire = Autowire.NO)
@@ -187,13 +220,13 @@ public class PortalConfig {
 	}
 
 	@Bean(name = PERMISSION_REPOSITORY, autowire = Autowire.NO)
-	public PermissionRepository permissionRepository() throws Exception {
+	public PermissionRepository permissionRepository() {
 		return new PermissionRepository(permissionService(), resourceRepository(), groupRepository());
 	}
 
-	@Bean(name = PERMISSION_SERVICE)
-	public PermissionService permissionService() throws Exception {
-		return (PermissionService) Class.forName(permissionServiceClassName).newInstance();
+	@Bean(name = PERMISSION_SERVICE, autowire = Autowire.NO)
+	public PermissionService permissionService() {
+		return new Permission2Service(new PermissionDao(portalJdbcTemplate()), resourceActionRepository());
 	}
 
 	@Bean(name = RESOURCE_ACTION_REPOSITORY, autowire = Autowire.NO)
@@ -203,16 +236,16 @@ public class PortalConfig {
 
 	@Bean(name = GROUP_REPOSITORY, autowire = Autowire.NO)
 	public GroupRepository groupRepository() {
-		return new GroupRepository(portalJdbcTemplate());
+		return new GroupRepository(new GroupDao(portalJdbcTemplate()));
 	}
 
-	@Bean(name = LAYOUT_REPOSITORY)
+	@Bean(name = LAYOUT_REPOSITORY, autowire = Autowire.NO)
 	public LayoutRepository layoutRepository() {
-		return new LayoutRepository();
+		return new LayoutRepository(new LayoutDao(portalJdbcTemplate()), themeRepository(), pageLayoutRepository());
 	}
 
 	@Bean(name = LAYOUT_PORTLET_REPOSITORY, autowire = Autowire.NO)
 	public LayoutPortletRepository layoutPortletRepository() {
-		return new LayoutPortletRepository(portalJdbcTemplate(), portletInstanceRepository());
+		return new LayoutPortletRepository(new LayoutPortletDao(portalJdbcTemplate()), portletInstanceRepository());
 	}
 }
