@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ee.midaiganes.beans.PortalConfig;
-import ee.midaiganes.beans.RootApplicationContext;
 import ee.midaiganes.model.LayoutPortlet;
 import ee.midaiganes.model.MidaiganesWindowState;
 import ee.midaiganes.model.PageDisplay;
@@ -39,7 +38,7 @@ public class PortalServlet extends HttpServlet {
 	private static final Logger log = LoggerFactory.getLogger(PortalServlet.class);
 	private static final String WEBINF_THEME = "/WEB-INF/theme";
 
-	@Resource(name = RootApplicationContext.DB_INSTALL_SERVICE)
+	@Resource(name = PortalConfig.DB_INSTALL_SERVICE)
 	private DbInstallService dbInstallService;
 
 	@Resource(name = PortalConfig.LAYOUT_PORTLET_REPOSITORY)

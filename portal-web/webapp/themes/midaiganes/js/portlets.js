@@ -2,12 +2,12 @@ jQuery(function() {
 // chat
 	function sendChatMessageSuccess(msg) {
 		jQuery('#chat-message').val('');
-		console.log('send response = ' + msg);
 	}
 	function sendChatMessage() {
 		var chatMessageForm = jQuery('#chat-message-form');
 		var _d = chatMessageForm.serialize();
 		var _url = chatMessageForm.attr('action');
+		
 		jQuery.ajax({
 			url:_url,
 			type: "POST",
@@ -29,9 +29,9 @@ jQuery(function() {
 					var m = messages.messages[i];
 					if(m.cmd == 'join') {
 						jQuery('<li data-user-id="' + m.userId + '"></li>').text(m.username).appendTo(jQuery('#chat-users'));
-					} else if(m.cmd == 'msg') {
+					} else if(m.cmd == 'msg' || m.cmd == 'privmsg') {
 						var userName = jQuery('#chat-users li[data-user-id='+ m.userId +']').text();
-						cm.append(jQuery('<div></div>').text(userName + ": " + m.message));
+						cm.append(jQuery(m.cmd == 'privmsg' ? '<div class="privmsg"></div>' : '<div></div>').text(userName + ": " + m.message));
 					} else if(m.cmd == 'quit') {
 						jQuery('#chat-users li[data-user-id='+ m.userId +']').remove();
 					}
@@ -61,5 +61,19 @@ jQuery(function() {
 	if(jQuery('#chat-messages').length > 0) {
 		setTimeout(waitMessages, 100);
 	}
+	jQuery('body').on('click', '#chat-users li', function() {
+		var t = jQuery(this);
+		if(!t.hasClass('selected')) {
+			jQuery('#chat-users li.selected').toggleClass('selected');
+		}
+		jQuery('#to-user-id').attr('checked', false);			
+		jQuery(this).toggleClass('selected');
+		if(jQuery(this).hasClass('selected')) {
+			jQuery('#to-user-id').attr('disabled', false);
+			jQuery('#to-user-id').val(jQuery(this).data('userId'));
+		} else {
+			jQuery('#to-user-id').attr('disabled', true);
+		}
+	});
 // end of chat
 });

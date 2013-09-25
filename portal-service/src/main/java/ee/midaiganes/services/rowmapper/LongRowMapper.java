@@ -5,6 +5,7 @@ import java.sql.SQLException;
 
 import org.springframework.jdbc.core.RowMapper;
 
+// TODO remove me
 public class LongRowMapper implements RowMapper<Long> {
 	@Override
 	public Long mapRow(ResultSet rs, int rowNum) throws SQLException {

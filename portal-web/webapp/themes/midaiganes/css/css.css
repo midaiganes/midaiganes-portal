@@ -192,6 +192,17 @@ a.text-right {
 .chat span {
 	font-weight: bold;
 }
+ul.chat li {
+	padding: 5px 3px;
+	background: #fff;
+	transition: background 0.4s;
+	-webkit-transition: background 0.4s;
+}
+ul.chat li.selected{
+	background: #eee;
+	border-radius: 3px;
+	padding: 5px 3px;
+}
 .chat-input {
 	width: 620px;
 }

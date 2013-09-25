@@ -22,7 +22,7 @@ public class LayoutPortletTag extends SimpleTag {
 
 	@Override
 	public int doEndTag() {
-		log.debug("id = {}", id);
+		log.debug("id = {}", Long.valueOf(id));
 		try {
 			HttpServletRequest request = getHttpServletRequest();
 			ServletContext servletContext = ContextUtil.getPortalServletContext(request);

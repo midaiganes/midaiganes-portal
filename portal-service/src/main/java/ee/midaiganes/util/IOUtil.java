@@ -1,6 +1,5 @@
 package ee.midaiganes.util;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -32,12 +31,12 @@ public class IOUtil {
 		return count;
 	}
 
-	public static void close(Closeable closeable) {
+	public static void close(AutoCloseable closeable) {
 		try {
 			if (closeable != null) {
 				closeable.close();
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			log.debug(e.getMessage(), e);
 		}
 	}

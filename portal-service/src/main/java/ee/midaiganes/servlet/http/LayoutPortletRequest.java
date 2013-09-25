@@ -6,11 +6,11 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import ee.midaiganes.servlet.LayoutPortletServlet;
 
 public class LayoutPortletRequest extends HttpServletRequestWrapper {
-	private final long id;
+	private final Long id;
 
 	public LayoutPortletRequest(HttpServletRequest request, long id) {
 		super(request);
-		this.id = id;
+		this.id = Long.valueOf(id);
 	}
 
 	@Override

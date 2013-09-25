@@ -20,6 +20,10 @@ public class SessionUtil {
 		return getUserId(RequestUtil.getHttpServletRequest(request));
 	}
 
+	public static void setUserId(PortletRequest request, long userId) {
+		setUserId(request, Long.valueOf(userId));
+	}
+
 	public static void setUserId(PortletRequest request, Long userId) {
 		setUserId(RequestUtil.getHttpServletRequest(request), userId);
 	}

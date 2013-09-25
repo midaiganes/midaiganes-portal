@@ -45,6 +45,12 @@
 		</c:if>
 		<div class="content">
 			<header>
+				<c:if test="${!pageDisplay.user.defaultUser}">
+					<portal-taglib:portlet-action-url portletName="midaiganes_w_login" var="logoutUrl">
+						<portlet:param name="action" value="logout"/>
+					</portal-taglib:portlet-action-url>
+					<a href="${logoutUrl}" style="float:right;color: white;margin: 13px; text-decoration: none;">log out</a>
+				</c:if>
 				<h1>MIDAIGANES</h1>
 			</header>
 			
