@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ee.midaiganes.beans.PortalConfig;
-import ee.midaiganes.model.DefaultUser;
 import ee.midaiganes.model.User;
 import ee.midaiganes.services.UserRepository;
 import ee.midaiganes.util.RequestUtil;
@@ -43,7 +42,7 @@ public class LoginFilter extends HttpFilter {
 	}
 
 	private String doLoginAndGetRedirectUrl(HttpServletRequest request) {
-		if (SessionUtil.getUserId(request) == DefaultUser.DEFAULT_USER_ID) {
+		if (SessionUtil.getUserId(request) == User.DEFAULT_USER_ID) {
 			log.debug("not logged in");
 			String login = request.getParameter(LOGIN);
 			String password = request.getParameter(PASSWORD);

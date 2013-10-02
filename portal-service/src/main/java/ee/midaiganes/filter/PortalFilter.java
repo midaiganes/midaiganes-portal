@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import ee.midaiganes.beans.BeanUtil;
 import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.beans.RootApplicationContext;
-import ee.midaiganes.model.DefaultUser;
 import ee.midaiganes.model.Layout;
 import ee.midaiganes.model.LayoutSet;
 import ee.midaiganes.model.PageDisplay;
@@ -127,9 +126,9 @@ public class PortalFilter extends HttpFilter {
 	private User getUser(HttpServletRequest request) {
 		long userid = SessionUtil.getUserId(request);
 		User user = null;
-		if (userid != DefaultUser.DEFAULT_USER_ID) {
+		if (userid != User.DEFAULT_USER_ID) {
 			user = userRepository.getUser(userid);
 		}
-		return user != null ? user : new DefaultUser();
+		return user != null ? user : User.getDefault();
 	}
 }
