@@ -2,40 +2,47 @@ package ee.midaiganes.model;
 
 import java.io.Serializable;
 
+import ee.midaiganes.util.StringPool;
+
 public class User implements Serializable, PortalResource {
 	private static final long serialVersionUID = 1L;
+	public static final long DEFAULT_USER_ID = 0;
+	private static final User DEFAULT_USER = new User();
 
-	private long id;
-	private String username;
-	private String password;
+	private final long id;
+	private final String username;
+
+	private User() {
+		this.id = DEFAULT_USER_ID;
+		this.username = StringPool.EMPTY;
+	}
+
+	public User(long id, String username) {
+		if (id == DEFAULT_USER_ID) {
+			throw new IllegalArgumentException("Default user id not allowed");
+		}
+		if (username == null) {
+			throw new IllegalArgumentException("Username is null");
+		}
+		this.id = id;
+		this.username = username;
+	}
+
+	public static User getDefault() {
+		return DEFAULT_USER;
+	}
 
 	@Override
 	public long getId() {
 		return id;
 	}
 
-	public void setId(long id) {
-		this.id = id;
-	}
-
 	public String getUsername() {
 		return username;
 	}
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
 	public boolean isDefaultUser() {
-		return id == DefaultUser.DEFAULT_USER_ID;
+		return id == DEFAULT_USER_ID;
 	}
 
 	@Override
@@ -52,9 +59,8 @@ public class User implements Serializable, PortalResource {
 	public boolean equals(Object obj) {
 		if (obj instanceof User) {
 			User u = (User) obj;
-			return id == u.id && username.equals(u.username) && password.equals(u.password);
+			return id == u.id && username.equals(u.username);
 		}
 		return false;
 	}
-
 }

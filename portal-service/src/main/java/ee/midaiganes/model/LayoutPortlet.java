@@ -5,50 +5,38 @@ import java.io.Serializable;
 public class LayoutPortlet implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	private long id;
-	private long portletInstanceId;
-	private long layoutId;
-	private long rowId;
-	private PortletInstance portletInstance;
+	private final long id;
+	private final long portletInstanceId;
+	private final long layoutId;
+	private final long rowId;
+	private final PortletInstance portletInstance;
+
+	public LayoutPortlet(long id, long portletInstanceId, long layoutId, long rowId, PortletInstance portletInstance) {
+		this.id = id;
+		this.portletInstanceId = portletInstanceId;
+		this.layoutId = layoutId;
+		this.rowId = rowId;
+		this.portletInstance = portletInstance;
+	}
 
 	public long getId() {
 		return id;
-	}
-
-	public void setId(long id) {
-		this.id = id;
 	}
 
 	public long getPortletInstanceId() {
 		return portletInstanceId;
 	}
 
-	public void setPortletInstanceId(long portletInstanceId) {
-		this.portletInstanceId = portletInstanceId;
-	}
-
 	public long getLayoutId() {
 		return layoutId;
-	}
-
-	public void setLayoutId(long layoutId) {
-		this.layoutId = layoutId;
 	}
 
 	public long getRowId() {
 		return rowId;
 	}
 
-	public void setRowId(long rowId) {
-		this.rowId = rowId;
-	}
-
 	public PortletInstance getPortletInstance() {
 		return portletInstance;
-	}
-
-	public void setPortletInstance(PortletInstance portletInstance) {
-		this.portletInstance = portletInstance;
 	}
 
 	@Override

@@ -4,57 +4,44 @@ import java.io.Serializable;
 
 public class LayoutTitle implements Serializable {
 	private static final long serialVersionUID = 1L;
-	private long id;
-	private long layoutId;
-	private long languageId;
-	private String title;
+	public static final long DEFAULT_LAYOUT_TITLE_ID = 0;
+	private final long id;
+	private final long layoutId;
+	private final long languageId;
+	private final String title;
 
-	public LayoutTitle(LayoutTitle layoutTitle) {
-		id = layoutTitle.id;
-		layoutId = layoutTitle.layoutId;
-		languageId = layoutTitle.languageId;
-		title = layoutTitle.title;
-	}
-
-	public LayoutTitle() {
-	}
-
-	public LayoutTitle(long layoutId, long languageId, String title) {
+	public LayoutTitle(long id, long layoutId, long languageId, String title) {
+		this.id = id;
 		this.layoutId = layoutId;
 		this.languageId = languageId;
 		this.title = title;
+	}
+
+	private LayoutTitle(long layoutId, long languageId, String title) {
+		this.id = DEFAULT_LAYOUT_TITLE_ID;
+		this.layoutId = layoutId;
+		this.languageId = languageId;
+		this.title = title;
+	}
+
+	public static LayoutTitle getDefault(long layoutId, long languageId, String title) {
+		return new LayoutTitle(layoutId, languageId, title);
 	}
 
 	public long getId() {
 		return id;
 	}
 
-	public void setId(long id) {
-		this.id = id;
-	}
-
 	public long getLayoutId() {
 		return layoutId;
-	}
-
-	public void setLayoutId(long layoutId) {
-		this.layoutId = layoutId;
 	}
 
 	public long getLanguageId() {
 		return languageId;
 	}
 
-	public void setLanguageId(long languageId) {
-		this.languageId = languageId;
-	}
-
 	public String getTitle() {
 		return title;
-	}
-
-	public void setTitle(String title) {
-		this.title = title;
 	}
 
 	@Override

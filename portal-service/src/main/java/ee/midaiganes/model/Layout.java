@@ -1,40 +1,44 @@
 package ee.midaiganes.model;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Layout implements Serializable, PortalResource {
 	private static final long serialVersionUID = 1L;
+	public static final long DEFAULT_LAYOUT_ID = 0;
 
-	private long id;
-	private long layoutSetId;
-	private String friendlyUrl;
-	private ThemeName themeName;
-	private String pageLayoutId;
-	private long nr;
-	private Long parentId;
-	private long defaultLayoutTitleLanguageId;
+	private final long id;
+	private final long layoutSetId;
+	private final String friendlyUrl;
+	private final ThemeName themeName;
+	private final String pageLayoutId;
+	private final long nr;
+	private final Long parentId;
+	private final long defaultLayoutTitleLanguageId;
+
+	// TODO
 	private List<LayoutTitle> layoutTitles;
 
-	public Layout() {
+	private static final long DEFAULT_LAYOUT_TITLE_LANGUAGE_ID = -1;
+
+	private Layout(long layoutSetId, String friendlyUrl, ThemeName themeName, String pageLayoutId) {
+		this(DEFAULT_LAYOUT_ID, layoutSetId, friendlyUrl, themeName, pageLayoutId, 0, null, DEFAULT_LAYOUT_TITLE_LANGUAGE_ID);
 	}
 
-	public Layout(Layout layout) {
-		id = layout.id;
-		layoutSetId = layout.layoutSetId;
-		friendlyUrl = layout.friendlyUrl;
-		themeName = layout.themeName == null ? null : new ThemeName(layout.themeName);
-		pageLayoutId = layout.pageLayoutId;
-		nr = layout.nr;
-		parentId = layout.parentId;
-		defaultLayoutTitleLanguageId = layout.defaultLayoutTitleLanguageId;
-		if (layout.layoutTitles != null) {
-			layoutTitles = new ArrayList<>(layout.layoutTitles.size());
-			for (LayoutTitle lt : layout.layoutTitles) {
-				layoutTitles.add(new LayoutTitle(lt));
-			}
-		}
+	public static Layout getDefault(long layoutSetId, String friendlyUrl, ThemeName themeName, String pageLayoutId) {
+		return new Layout(layoutSetId, friendlyUrl, themeName, pageLayoutId);
+	}
+
+	public Layout(long id, long layoutSetId, String friendlyUrl, ThemeName themeName, String pageLayoutId, long nr, Long parentId,
+			long defaultLayoutTitleLanguageId) {
+		this.id = id;
+		this.layoutSetId = layoutSetId;
+		this.friendlyUrl = friendlyUrl;
+		this.themeName = themeName;
+		this.pageLayoutId = pageLayoutId;
+		this.nr = nr;
+		this.parentId = parentId;
+		this.defaultLayoutTitleLanguageId = defaultLayoutTitleLanguageId;
 	}
 
 	@Override
@@ -42,60 +46,32 @@ public class Layout implements Serializable, PortalResource {
 		return id;
 	}
 
-	public void setId(long id) {
-		this.id = id;
-	}
-
 	public long getLayoutSetId() {
 		return layoutSetId;
-	}
-
-	public void setLayoutSetId(long layoutSetId) {
-		this.layoutSetId = layoutSetId;
 	}
 
 	public String getFriendlyUrl() {
 		return friendlyUrl;
 	}
 
-	public void setFriendlyUrl(String friendlyUrl) {
-		this.friendlyUrl = friendlyUrl;
-	}
-
 	public boolean isDefault() {
-		return false;
+		return id == DEFAULT_LAYOUT_ID;
 	}
 
 	public ThemeName getThemeName() {
 		return themeName;
 	}
 
-	public void setThemeName(ThemeName themeName) {
-		this.themeName = themeName;
-	}
-
 	public String getPageLayoutId() {
 		return pageLayoutId;
-	}
-
-	public void setPageLayoutId(String pageLayoutId) {
-		this.pageLayoutId = pageLayoutId;
 	}
 
 	public long getNr() {
 		return nr;
 	}
 
-	public void setNr(long nr) {
-		this.nr = nr;
-	}
-
 	public Long getParentId() {
 		return parentId;
-	}
-
-	public void setParentId(Long parentId) {
-		this.parentId = parentId;
 	}
 
 	public List<LayoutTitle> getLayoutTitles() {
@@ -110,13 +86,9 @@ public class Layout implements Serializable, PortalResource {
 		return defaultLayoutTitleLanguageId;
 	}
 
-	public void setDefaultLayoutTitleLanguageId(long defaultLayoutTitleLanguageId) {
-		this.defaultLayoutTitleLanguageId = defaultLayoutTitleLanguageId;
-	}
-
 	public LayoutTitle getDefaultLayoutTitle() {
 		LayoutTitle layoutTitle = getLayoutTitle(defaultLayoutTitleLanguageId);
-		return layoutTitle != null ? layoutTitle : new LayoutTitle(id, defaultLayoutTitleLanguageId, friendlyUrl);
+		return layoutTitle != null ? layoutTitle : LayoutTitle.getDefault(id, defaultLayoutTitleLanguageId, friendlyUrl);
 	}
 
 	/**

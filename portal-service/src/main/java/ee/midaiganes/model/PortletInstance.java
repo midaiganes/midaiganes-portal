@@ -5,24 +5,21 @@ import java.io.Serializable;
 public class PortletInstance implements Serializable, PortalResource {
 	private static final long serialVersionUID = 1L;
 
-	private long id;
-	private PortletNamespace portletNamespace;
+	private final long id;
+	private final PortletNamespace portletNamespace;
+
+	public PortletInstance(long id, PortletNamespace portletNamespace) {
+		this.id = id;
+		this.portletNamespace = portletNamespace;
+	}
 
 	@Override
 	public long getId() {
 		return id;
 	}
 
-	public void setId(long id) {
-		this.id = id;
-	}
-
 	public PortletNamespace getPortletNamespace() {
 		return portletNamespace;
-	}
-
-	public void setPortletNamespace(PortletNamespace portletNamespace) {
-		this.portletNamespace = portletNamespace;
 	}
 
 	@Override
