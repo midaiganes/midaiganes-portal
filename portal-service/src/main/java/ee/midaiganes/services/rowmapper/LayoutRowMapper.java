@@ -16,21 +16,19 @@ public class LayoutRowMapper implements RowMapper<Layout> {
 	}
 
 	public static Layout getLayout(ResultSet rs) throws SQLException {
-		Layout layout = new Layout();
-		layout.setId(rs.getLong(1));
-		layout.setLayoutSetId(rs.getLong(2));
-		layout.setFriendlyUrl(rs.getString(3));
-		layout.setPageLayoutId(rs.getString(4));
+		long id = rs.getLong(1);
+		long layoutSetId = rs.getLong(2);
+		String friendlyUrl = rs.getString(3);
+		String pageLayoutId = rs.getString(4);
 		String themeName = rs.getString(5);
 		String themeContext = rs.getString(6);
+		ThemeName theme = null;
 		if (!StringUtil.isEmpty(themeName) && !StringUtil.isEmpty(themeContext)) {
-			layout.setThemeName(new ThemeName(themeContext, themeName));
+			theme = new ThemeName(themeContext, themeName);
 		}
 		long parentId = rs.getLong(7);
-		layout.setParentId(rs.wasNull() ? null : Long.valueOf(parentId));
-
-		layout.setNr(rs.getLong(8));
-		layout.setDefaultLayoutTitleLanguageId(rs.getLong(9));
-		return layout;
+		Long parent = rs.wasNull() ? null : Long.valueOf(parentId);
+		long nr = rs.getLong(8);
+		return new Layout(id, layoutSetId, friendlyUrl, theme, pageLayoutId, nr, parent, rs.getLong(9));
 	}
 }

@@ -10,9 +10,6 @@ import ee.midaiganes.model.User;
 public class UserRowMapper implements RowMapper<User> {
 	@Override
 	public User mapRow(ResultSet rs, int rowNum) throws SQLException {
-		User user = new User();
-		user.setId(rs.getLong(1));
-		user.setUsername(rs.getString(2));
-		return user;
+		return new User(rs.getLong(1), rs.getString(2));
 	}
 }

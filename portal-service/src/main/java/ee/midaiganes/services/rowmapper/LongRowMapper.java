@@ -9,6 +9,6 @@ import org.springframework.jdbc.core.RowMapper;
 public class LongRowMapper implements RowMapper<Long> {
 	@Override
 	public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
-		return rs.getLong(1);
+		return Long.valueOf(rs.getLong(1));
 	}
 }

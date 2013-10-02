@@ -45,10 +45,9 @@ public class PortletInstanceDao {
 		return jdbcTemplate.query(GET_DEFAULT_PORTLET_INSTANCES, new RowMapper<PortletInstance>() {
 			@Override
 			public PortletInstance mapRow(ResultSet rs, int rowNum) throws SQLException {
-				PortletInstance instance = new PortletInstance();
-				instance.setId(rs.getLong(1));
-				instance.setPortletNamespace(new PortletNamespace(new PortletName(rs.getString(2), rs.getString(3)), StringPool.DEFAULT_PORTLET_WINDOWID));
-				return instance;
+				long id = rs.getLong(1);
+				PortletNamespace namespace = new PortletNamespace(new PortletName(rs.getString(2), rs.getString(3)), StringPool.DEFAULT_PORTLET_WINDOWID);
+				return new PortletInstance(id, namespace);
 			}
 		}, StringPool.DEFAULT_PORTLET_WINDOWID);
 	}

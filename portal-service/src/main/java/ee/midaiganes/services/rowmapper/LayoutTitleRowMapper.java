@@ -10,11 +10,6 @@ import ee.midaiganes.model.LayoutTitle;
 public class LayoutTitleRowMapper implements RowMapper<LayoutTitle> {
 	@Override
 	public LayoutTitle mapRow(ResultSet rs, int rowNum) throws SQLException {
-		LayoutTitle layoutTitle = new LayoutTitle();
-		layoutTitle.setId(rs.getLong(1));
-		layoutTitle.setLanguageId(rs.getLong(2));
-		layoutTitle.setLayoutId(rs.getLong(3));
-		layoutTitle.setTitle(rs.getString(4));
-		return layoutTitle;
+		return new LayoutTitle(rs.getLong(1), rs.getLong(3), rs.getLong(2), rs.getString(4));
 	}
 }

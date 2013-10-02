@@ -69,9 +69,7 @@ public class PortletInstanceRepository {
 		try {
 			Long value = portletInstanceDao.loadPortletInstanceId(portletName, windowID);
 			if (value != null) {
-				instance = new PortletInstance();
-				instance.setId(value.longValue());
-				instance.setPortletNamespace(new PortletNamespace(portletName, windowID));
+				instance = new PortletInstance(value.longValue(), new PortletNamespace(portletName, windowID));
 			}
 		} finally {
 			cache.put(cacheKey, instance);

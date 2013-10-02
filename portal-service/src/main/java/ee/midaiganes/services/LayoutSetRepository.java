@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ee.midaiganes.beans.PortalConfig;
-import ee.midaiganes.model.DefaultLayoutSet;
 import ee.midaiganes.model.LayoutSet;
 import ee.midaiganes.model.ThemeName;
 import ee.midaiganes.services.SingleVmPool.Cache;
@@ -80,6 +79,6 @@ public class LayoutSetRepository {
 
 	public LayoutSet getDefaultLayoutSet(String virtualHost) {
 		log.warn("get default layout set: {}", virtualHost);
-		return new DefaultLayoutSet(virtualHost);
+		return LayoutSet.getDefault(virtualHost);
 	}
 }

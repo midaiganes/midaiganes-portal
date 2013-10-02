@@ -10,7 +10,7 @@ public final class LongResultSetExtractor implements ResultSetExtractor<Long> {
 	public final Long extractData(final ResultSet rs) throws SQLException {
 		if (rs.next()) {
 			final long value = rs.getLong(1);
-			return rs.wasNull() ? null : value;
+			return rs.wasNull() ? null : Long.valueOf(value);
 		}
 		return null;
 	}

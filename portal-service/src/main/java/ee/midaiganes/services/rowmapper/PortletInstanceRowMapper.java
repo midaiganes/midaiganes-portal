@@ -12,9 +12,8 @@ import ee.midaiganes.model.PortletNamespace;
 public class PortletInstanceRowMapper implements RowMapper<PortletInstance> {
 	@Override
 	public PortletInstance mapRow(ResultSet rs, int rowNum) throws SQLException {
-		PortletInstance portletInstance = new PortletInstance();
-		portletInstance.setId(rs.getLong(1));
-		portletInstance.setPortletNamespace(new PortletNamespace(new PortletName(rs.getString(2), rs.getString(3)), rs.getString(4)));
-		return portletInstance;
+		long id = rs.getLong(1);
+		PortletNamespace namespace = new PortletNamespace(new PortletName(rs.getString(2), rs.getString(3)), rs.getString(4));
+		return new PortletInstance(id, namespace);
 	}
 }

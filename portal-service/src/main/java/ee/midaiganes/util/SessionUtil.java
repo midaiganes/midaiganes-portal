@@ -6,14 +6,14 @@ import javax.portlet.PortletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import ee.midaiganes.model.DefaultUser;
+import ee.midaiganes.model.User;
 
 public class SessionUtil {
 	private static final String USER_ID = "USERID";
 
 	public static long getUserId(HttpServletRequest request) {
 		Long userid = getAttribute(request.getSession(false), USER_ID);
-		return userid != null ? userid.longValue() : DefaultUser.DEFAULT_USER_ID;
+		return userid != null ? userid.longValue() : User.DEFAULT_USER_ID;
 	}
 
 	public static long getUserId(PortletRequest request) {

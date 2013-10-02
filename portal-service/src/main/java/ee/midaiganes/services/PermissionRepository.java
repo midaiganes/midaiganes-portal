@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import ee.midaiganes.beans.PortalConfig;
-import ee.midaiganes.model.DefaultUser;
 import ee.midaiganes.model.Group;
 import ee.midaiganes.model.PortalResource;
 import ee.midaiganes.model.User;
@@ -82,7 +81,7 @@ public class PermissionRepository {
 
 	private long[] getUserGroups(long userId) {
 		long[] groupIds = null;
-		if (DefaultUser.DEFAULT_USER_ID == userId) {
+		if (User.DEFAULT_USER_ID == userId) {
 			if (!StringUtil.isEmpty(PropsValues.GUEST_GROUP_NAME)) {
 				Long gid = groupRepository.getGroupId(PropsValues.GUEST_GROUP_NAME);
 				if (gid != null) {

@@ -50,11 +50,8 @@ public class StaticContentServlet extends HttpServlet {
 			Map<String, Theme> staticFiles = getThemesStaticContents();
 			log.debug("requestURI = {}; staticFiles = {}", requestURI, staticFiles);
 			if (staticFiles.containsKey(requestURI)) {
-				InputStream is = getResourceAsStream(staticFiles.get(requestURI), requestURI);
-				try {
+				try (InputStream is = getResourceAsStream(staticFiles.get(requestURI), requestURI)) {
 					copyToOutputStream(response, is);
-				} finally {
-					IOUtil.close(is);
 				}
 			} else {
 				log.error("file not found: {}", requestURI);
@@ -66,12 +63,9 @@ public class StaticContentServlet extends HttpServlet {
 	}
 
 	private void copyToOutputStream(HttpServletResponse response, InputStream is) throws IOException {
-		ServletOutputStream os = response.getOutputStream();
-		try {
+		try (ServletOutputStream os = response.getOutputStream()) {
 			IOUtil.copy(is, os);
 			os.flush();
-		} finally {
-			IOUtil.close(os);
 		}
 	}
 

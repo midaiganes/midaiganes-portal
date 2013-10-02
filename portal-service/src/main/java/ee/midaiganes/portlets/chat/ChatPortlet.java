@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ee.midaiganes.beans.BeanUtil;
-import ee.midaiganes.model.DefaultUser;
 import ee.midaiganes.model.User;
 import ee.midaiganes.portlets.BasePortlet;
 import ee.midaiganes.portlets.chat.Chat.AddUserToChatResponse;
@@ -58,7 +57,7 @@ public class ChatPortlet extends BasePortlet implements ResourceServingPortlet {
 	@Override
 	public void render(RenderRequest request, RenderResponse response) {
 		try {
-			if (SessionUtil.getUserId(request) != DefaultUser.DEFAULT_USER_ID) {
+			if (SessionUtil.getUserId(request) != User.DEFAULT_USER_ID) {
 				if (Boolean.TRUE.equals(request.getAttribute(EMTPY_RESPONSE))) {
 					// empty response...
 				} else if (Boolean.TRUE.equals(request.getAttribute(SHOW_CHAT))) {
@@ -84,7 +83,7 @@ public class ChatPortlet extends BasePortlet implements ResourceServingPortlet {
 	@Override
 	public void processAction(ActionRequest request, ActionResponse response) throws PortletException, IOException {
 		long userId = SessionUtil.getUserId(request);
-		if (userId != DefaultUser.DEFAULT_USER_ID) {
+		if (userId != User.DEFAULT_USER_ID) {
 			processLoggedInUserAction(request, response, userId);
 		} else {
 			log.debug("User is not logged in");
@@ -146,7 +145,7 @@ public class ChatPortlet extends BasePortlet implements ResourceServingPortlet {
 	@Override
 	public void serveResource(ResourceRequest request, ResourceResponse response) throws PortletException, IOException {
 		long userId = SessionUtil.getUserId(request);
-		if (userId != DefaultUser.DEFAULT_USER_ID) {
+		if (userId != User.DEFAULT_USER_ID) {
 			String chatId = request.getParameter("chat");
 			if (LongUtil.isNonNegativeLong(chatId)) {
 				User user = getUser(userId);
