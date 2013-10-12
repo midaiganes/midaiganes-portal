@@ -16,7 +16,7 @@
 				INSERT INTO Language(languageId) VALUES('en_US');
 				INSERT INTO User(username, password) VALUES('test', 'test');
 				INSERT INTO LayoutSet(virtualHost, themeId) VALUES('localhost', NULL);
-				INSERT INTO Layout(layoutSetId, friendlyUrl, themeId, pageLayoutId, defaultLayoutTitleLanguageId) VALUES((SELECT id FROM LayoutSet WHERE virtualHost = 'localhost'), '/test', NULL, '${portal.context.withoutslash}_w_default', (SELECT id FROM Language WHERE languageId = 'en_US'));
+				INSERT INTO Layout(layoutSetId, friendlyUrl, themeId, pageLayoutId, defaultLayoutTitleLanguageId) VALUES((SELECT id FROM LayoutSet WHERE virtualHost = 'localhost'), '/test', NULL, '${portal.context.withoutslash}_w_1-col', (SELECT id FROM Language WHERE languageId = 'en_US'));
 				INSERT INTO PortletInstance(portletContext, portletName, windowID) VALUES('${portal.context.withoutslash}', 'login', '0000');
 				INSERT INTO Group_(name) VALUES('${guest.group.name}');
 				INSERT INTO Permission(resourceId, resourcePrimKey, resource2Id, resource2PrimKey, permission) 
@@ -26,6 +26,20 @@
 								(SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.PortletInstance'),
 								(SELECT id FROM PortletInstance WHERE portletContext = '${portal.context.withoutslash}' AND portletName = 'login' AND windowID = '0000'),
 								1
+								);
+				INSERT INTO Permission(resourceId, resourcePrimKey, resource2Id, resource2PrimKey, permission) 
+							VALUES(
+								(SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.Group'),
+								(SELECT id FROM Group_ WHERE name = 'GUEST'),
+								(SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.Layout'),
+								(SELECT id FROM Layout WHERE friendlyUrl = '/test'),
+								1
+								);
+				INSERT INTO LayoutPortlet(layoutId, rowId, portletInstanceId) 
+							VALUES(
+								(SELECT id FROM Layout WHERE friendlyUrl = '/test'),
+								1,
+								(SELECT id FROM PortletInstance WHERE portletContext = '${portal.context.withoutslash}' AND portletName = 'login' AND windowID = '0000')
 								);
 			]]>
 		</sql>
