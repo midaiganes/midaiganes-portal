@@ -90,7 +90,6 @@ public class PortalConfig {
     @Value("${txManager.defaultTimeout}")
     private int txManagerDefaultTimeout;
 
-    // @Resource(name = PERMISSION_REPOSITORY)
     @Autowired
     private PermissionRepository permissionRepository;
 
