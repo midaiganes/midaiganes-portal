@@ -29,7 +29,7 @@ public class UserDao {
 	}
 
 	public long getUsersCount() {
-		return jdbcTemplate.queryForLong(QRY_GET_USERS_COUNT);
+		return jdbcTemplate.queryForObject(QRY_GET_USERS_COUNT, Long.class).longValue();
 	}
 
 	public List<User> getUsers(long start, long count) {
