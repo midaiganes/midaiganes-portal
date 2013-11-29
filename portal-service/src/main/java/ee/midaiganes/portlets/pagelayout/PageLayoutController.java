@@ -1,77 +1,68 @@
 package ee.midaiganes.portlets.pagelayout;
 
 import java.io.IOException;
-import java.util.List;
 
-import javax.annotation.Resource;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
+import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
 import javax.portlet.RenderRequest;
+import javax.portlet.RenderResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.portlet.bind.annotation.ActionMapping;
-import org.springframework.web.portlet.bind.annotation.RenderMapping;
 
+import ee.midaiganes.beans.BeanRepositoryUtil;
 import ee.midaiganes.model.ContextAndName;
 import ee.midaiganes.model.Layout;
 import ee.midaiganes.model.PageLayout;
+import ee.midaiganes.portlets.BasePortlet;
 import ee.midaiganes.services.LayoutRepository;
 import ee.midaiganes.services.PageLayoutRepository;
 import ee.midaiganes.util.PortalURLUtil;
 import ee.midaiganes.util.RequestUtil;
 
-@Controller("pageLayoutController")
-@RequestMapping("VIEW")
-public class PageLayoutController {
-	private static final Logger log = LoggerFactory.getLogger(PageLayoutController.class);
+public class PageLayoutController extends BasePortlet {
+    private static final Logger log = LoggerFactory.getLogger(PageLayoutController.class);
 
-	@Resource
-	private PageLayoutRepository pageLayoutRepository;
+    @Override
+    public void processAction(ActionRequest request, ActionResponse response) throws PortletException, IOException {
+        String pageLayoutId = request.getParameter("pageLayoutId");
+        if (pageLayoutId != null) {
+            setPageLayout(request, response, pageLayoutId);
+        }
+    }
 
-	@Resource
-	private LayoutRepository layoutRepository;
+    @Override
+    public void render(RenderRequest request, RenderResponse response) throws PortletException, IOException {
 
-	@RenderMapping
-	public String view(RenderRequest request, Model model) {
-		PageLayout pageLayout = pageLayoutRepository.getPageLayout(getPageLayoutId(request));
-		if (pageLayout != null) {
-			model.addAttribute("pageLayoutName", pageLayout.getPageLayoutName());
-		}
-		return "pagelayout/view";
-	}
+        PageLayout pageLayout = BeanRepositoryUtil.getBean(PageLayoutRepository.class).getPageLayout(getPageLayoutId(request));
+        if (pageLayout != null) {
+            request.setAttribute("pageLayoutName", pageLayout.getPageLayoutName());
+        }
+        request.setAttribute("pageLayouts", BeanRepositoryUtil.getBean(PageLayoutRepository.class).getPageLayouts());
+        super.include("pagelayout/view", request, response);
+    }
 
-	@ActionMapping(params = { "pageLayoutId" })
-	public void setPageLayout(ActionRequest request, ActionResponse response, @RequestParam("pageLayoutId") String pageLayoutId) throws IOException {
-		if (ContextAndName.isValidFullName(pageLayoutId)) {
-			PageLayout pageLayout = pageLayoutRepository.getPageLayout(pageLayoutId);
-			if (pageLayout != null) {
-				layoutRepository.updatePageLayout(getLayout(request).getId(), pageLayout.getPageLayoutName());
-				response.sendRedirect(PortalURLUtil.getFullURLByFriendlyURL(RequestUtil.getPageDisplay(request).getLayout().getFriendlyUrl()));
-			} else {
-				log.warn("page layout not found; pageLayoutId = '{}'", pageLayoutId);
-			}
-		} else {
-			log.warn("invalid pageLayoutId '{}'", pageLayoutId);
-		}
-	}
+    private void setPageLayout(ActionRequest request, ActionResponse response, String pageLayoutId) throws IOException {
+        if (ContextAndName.isValidFullName(pageLayoutId)) {
+            PageLayout pageLayout = BeanRepositoryUtil.getBean(PageLayoutRepository.class).getPageLayout(pageLayoutId);
+            if (pageLayout != null) {
+                BeanRepositoryUtil.getBean(LayoutRepository.class).updatePageLayout(getLayout(request).getId(), pageLayout.getPageLayoutName());
+                response.sendRedirect(PortalURLUtil.getFullURLByFriendlyURL(RequestUtil.getPageDisplay(request).getLayout().getFriendlyUrl()));
+            } else {
+                log.warn("page layout not found; pageLayoutId = '{}'", pageLayoutId);
+            }
+        } else {
+            log.warn("invalid pageLayoutId '{}'", pageLayoutId);
+        }
+    }
 
-	@ModelAttribute("pageLayouts")
-	public List<PageLayout> getPageLayouts() {
-		return pageLayoutRepository.getPageLayouts();
-	}
+    private String getPageLayoutId(PortletRequest request) {
+        return getLayout(request).getPageLayoutId();
+    }
 
-	private String getPageLayoutId(PortletRequest request) {
-		return getLayout(request).getPageLayoutId();
-	}
-
-	private Layout getLayout(PortletRequest request) {
-		return RequestUtil.getPageDisplay(request).getLayout();
-	}
+    private Layout getLayout(PortletRequest request) {
+        return RequestUtil.getPageDisplay(request).getLayout();
+    }
 }
