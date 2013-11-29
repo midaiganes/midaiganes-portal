@@ -30,6 +30,7 @@ import ee.midaiganes.services.PermissionService;
 import ee.midaiganes.services.PortletInstanceRepository;
 import ee.midaiganes.services.PortletPreferencesRepository;
 import ee.midaiganes.services.PortletRepository;
+import ee.midaiganes.services.RequestParser;
 import ee.midaiganes.services.ResourceActionRepository;
 import ee.midaiganes.services.ResourceRepository;
 import ee.midaiganes.services.ThemeRepository;
@@ -113,6 +114,7 @@ public class PortalConfig {
         BeanRepositoryUtil.register(SecureLayoutRepository.class, secureLayoutRepository);
         BeanRepositoryUtil.register(ThemeVariablesService.class, new ThemeVariablesService(PortletURLFactory.getInstance()));
         BeanRepositoryUtil.register(UserRepository.class, userRepository);
+        BeanRepositoryUtil.register(RequestParser.class, new RequestParser());
     }
 
     @Bean(name = DB_INSTALL_SERVICE, autowire = Autowire.NO)
