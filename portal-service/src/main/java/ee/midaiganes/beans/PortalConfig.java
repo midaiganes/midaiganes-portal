@@ -115,6 +115,7 @@ public class PortalConfig {
     @Autowired
     private PageLayoutRepository pageLayoutRepository;
 
+    @Autowired
     private LayoutRepository layoutRepository;
 
     @PostConstruct
