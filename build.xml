@@ -198,7 +198,7 @@
 		</path>
 	</target>
 	
-	<target name="update-database" depends="set-liquibase-path">
+	<target name="update-database" depends="set-liquibase-path" description="Update database">
 		<taskdef resource="liquibasetasks.properties" classpathref="liquibase.path" />
 		<fail unless="liquibase.changeLogFile">liquibase.changeLogFile not set</fail>
 		<fail unless="jdbc.driverClassName">jdbc.driverClassName not set</fail>
