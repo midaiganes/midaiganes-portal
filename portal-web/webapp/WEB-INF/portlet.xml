@@ -131,11 +131,7 @@
 	<portlet>
 		<portlet-name>login</portlet-name>
 		<display-name>login</display-name>
-		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
-		<init-param>
-			<name>contextConfigLocation</name>
-			<value>/WEB-INF/portlet-context/login-portlet.xml</value>
-		</init-param>
+		<portlet-class>ee.midaiganes.portlets.login.LoginController</portlet-class>
 		<supports>
 			<mime-type>text/html</mime-type>
 			<portlet-mode>view</portlet-mode>

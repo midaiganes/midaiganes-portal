@@ -3,12 +3,12 @@
 
 <portlet:actionURL var="loginUrl" windowState="normal" />
 
-<form:form method="post" action="${loginUrl}" modelAttribute="loginData">
+<form method="post" action="${loginUrl}">
 	<portal-ui:form-content>
-		<portal-ui:form-input-row-spring message="Username:" path="username"/>
-		<portal-ui:form-input-row-spring message="Password:" path="password"/>
+		<portal-ui:form-input-row message="Username:" path="username"/>
+		<portal-ui:form-input-row message="Password:" path="password"/>
 		<div>
 			<button type="submit">Login</button>
 		</div>
 	</portal-ui:form-content>
-</form:form>
+</form>
