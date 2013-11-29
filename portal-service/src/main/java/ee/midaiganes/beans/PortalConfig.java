@@ -107,12 +107,12 @@ public class PortalConfig {
 
     @PostConstruct
     public void postConstruct() {
-        BeanUtil.addBean(PermissionRepository.class, permissionRepository);
-        BeanUtil.addBean(LanguageRepository.class, languageRepository);
-        BeanUtil.addBean(PortletInstanceRepository.class, portletInstanceRepository);
-        BeanUtil.addBean(SecureLayoutRepository.class, secureLayoutRepository);
-        BeanUtil.addBean(ThemeVariablesService.class, new ThemeVariablesService(PortletURLFactory.getInstance()));
-        BeanUtil.addBean(UserRepository.class, userRepository);
+        BeanRepositoryUtil.register(PermissionRepository.class, permissionRepository);
+        BeanRepositoryUtil.register(LanguageRepository.class, languageRepository);
+        BeanRepositoryUtil.register(PortletInstanceRepository.class, portletInstanceRepository);
+        BeanRepositoryUtil.register(SecureLayoutRepository.class, secureLayoutRepository);
+        BeanRepositoryUtil.register(ThemeVariablesService.class, new ThemeVariablesService(PortletURLFactory.getInstance()));
+        BeanRepositoryUtil.register(UserRepository.class, userRepository);
     }
 
     @Bean(name = DB_INSTALL_SERVICE, autowire = Autowire.NO)

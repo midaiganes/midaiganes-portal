@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.beans.BeanUtil;
+import ee.midaiganes.beans.BeanRepositoryUtil;
 import ee.midaiganes.model.User;
 import ee.midaiganes.portlets.BasePortlet;
 import ee.midaiganes.portlets.chat.Chat.AddUserToChatResponse;
@@ -51,7 +51,7 @@ public class ChatPortlet extends BasePortlet implements ResourceServingPortlet {
 	private final UserRepository userRepository;
 
 	public ChatPortlet() {
-		userRepository = BeanUtil.getBean(UserRepository.class);
+		userRepository = BeanRepositoryUtil.getBean(UserRepository.class);
 	}
 
 	@Override

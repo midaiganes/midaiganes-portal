@@ -21,6 +21,7 @@ import ee.midaiganes.model.PageDisplay;
 import ee.midaiganes.model.PortletName;
 import ee.midaiganes.services.LayoutPortletRepository;
 import ee.midaiganes.services.PortletRepository;
+import ee.midaiganes.util.LongUtil;
 import ee.midaiganes.util.PortalURLUtil;
 import ee.midaiganes.util.RequestUtil;
 import ee.midaiganes.util.StringUtil;
@@ -31,48 +32,69 @@ import ee.midaiganes.util.StringUtil;
 @Controller(value = "addRemovePortletController")
 @RequestMapping("view")
 public class AddRemovePortletController {
-	private static final Logger log = LoggerFactory.getLogger(AddRemovePortletController.class);
+    private static final Logger log = LoggerFactory.getLogger(AddRemovePortletController.class);
 
-	@Resource(name = PortalConfig.PORTLET_REPOSITORY)
-	private PortletRepository portletRepository;
+    @Resource(name = PortalConfig.PORTLET_REPOSITORY)
+    private PortletRepository portletRepository;
 
-	@Resource
-	private LayoutPortletRepository layoutPortletRepository;
+    @Resource(name = PortalConfig.LAYOUT_PORTLET_REPOSITORY)
+    private LayoutPortletRepository layoutPortletRepository;
 
-	@RenderMapping
-	public String portletListView() {
-		return "add-remove-portlet/view";
-	}
+    @RenderMapping
+    public String portletListView() {
+        return "add-remove-portlet/view";
+    }
 
-	@RenderMapping(params = { "action=add-portlet", "portletId", "portletBoxId" })
-	public void addPortletView() {
-		log.info("add portlet view");
-	}
+    @RenderMapping(params = { "action=add-portlet", "portletId", "portletBoxId" })
+    public void addPortletView() {
+        log.info("add portlet view");
+    }
 
-	@ActionMapping(params = { "action=add-portlet", "portletId", "portletBoxId" })
-	public void addPortlet(ActionRequest request, @RequestParam("portletId") String portletId, @RequestParam("portletBoxId") String portletBoxId) {
-		PortletName portletName = new PortletName(portletId);
-		PageDisplay pageDisplay = RequestUtil.getPageDisplay(request);
-		int rowId = StringUtil.isNumber(portletBoxId) ? Integer.parseInt(portletBoxId) : -1;
-		if (rowId > 0) {
-			if (portletRepository.getPortletNames().contains(portletName)) {
-				layoutPortletRepository.addLayoutPortlet(pageDisplay.getLayout().getId(), rowId, portletName);
-			} else {
-				log.warn("invalid portletId '{}'", portletId);
-			}
-		} else {
-			log.warn("invalid rowId '{}'", portletBoxId);
-		}
-	}
+    @RenderMapping(params = { "action=move" })
+    public void movePortletView() {
+        log.debug("move portlet view");
+    }
 
-	@ActionMapping(params = { "action=remove-portlet", "window-id" })
-	public void removePortletAction(@RequestParam("window-id") String windowID, ActionRequest request, ActionResponse response) throws IOException {
-		layoutPortletRepository.deleteLayoutPortlet(windowID);
-		response.sendRedirect(PortalURLUtil.getFullURLByFriendlyURL(RequestUtil.getPageDisplay(request).getLayout().getFriendlyUrl()));
-	}
+    @ActionMapping(params = { "action=add-portlet", "portletId", "portletBoxId" })
+    public void addPortlet(ActionRequest request, @RequestParam("portletId") String portletId, @RequestParam("portletBoxId") String portletBoxId,
+            @RequestParam("boxIndex") String boxIndex) {
+        PortletName portletName = new PortletName(portletId);
+        PageDisplay pageDisplay = RequestUtil.getPageDisplay(request);
+        int rowId = StringUtil.isNumber(portletBoxId) ? Integer.parseInt(portletBoxId) : -1;
+        if (rowId > 0) {
+            if (portletRepository.getPortletNames().contains(portletName)) {
+                int boxIndex_ = StringUtil.isNumber(boxIndex) ? Integer.parseInt(boxIndex) : -1;
+                layoutPortletRepository.addLayoutPortlet(pageDisplay.getLayout().getId(), rowId, portletName, boxIndex_);
+            } else {
+                log.warn("invalid portletId '{}'", portletId);
+            }
+        } else {
+            log.warn("invalid rowId '{}'", portletBoxId);
+        }
+    }
 
-	@ModelAttribute("portletNames")
-	public List<PortletName> getPortletNames() {
-		return portletRepository.getPortletNames();
-	}
+    @ActionMapping(params = { "action=move", "window-id", "portletBoxId", "boxIndex" })
+    public void movePortlet(ActionRequest request, @RequestParam("window-id") String windowID, @RequestParam("portletBoxId") String portletBoxId,
+            @RequestParam("boxIndex") String boxIndex) {
+        if (LongUtil.isNonNegativeLong(portletBoxId) && LongUtil.isNonNegativeLong(boxIndex)) {
+            long boxId = Long.parseLong(portletBoxId);
+            long boxIdx = Long.parseLong(boxIndex);
+            long layoutId = RequestUtil.getPageDisplay(request).getLayout().getId();
+            layoutPortletRepository.moveLayoutPortlet(windowID, layoutId, boxId, boxIdx);
+            log.info("Portlet with windowId '" + windowID + "' on layout '" + layoutId + "' moved in box '" + boxId + "' to '" + boxIdx + "'");
+        } else {
+            log.warn("Invalid boxId '{}' or boxIndex '{}'", portletBoxId, boxIndex);
+        }
+    }
+
+    @ActionMapping(params = { "action=remove-portlet", "window-id" })
+    public void removePortletAction(@RequestParam("window-id") String windowID, ActionRequest request, ActionResponse response) throws IOException {
+        layoutPortletRepository.deleteLayoutPortlet(windowID);
+        response.sendRedirect(PortalURLUtil.getFullURLByFriendlyURL(RequestUtil.getPageDisplay(request).getLayout().getFriendlyUrl()));
+    }
+
+    @ModelAttribute("portletNames")
+    public List<PortletName> getPortletNames() {
+        return portletRepository.getPortletNames();
+    }
 }

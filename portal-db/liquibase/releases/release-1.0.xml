@@ -325,6 +325,14 @@
 			]]>
 		</sql>
 	</changeSet>
-	
+	<changeSet id="8" author="-" runAlways="false" runOnChange="false" dbms="mysql" failOnError="true">
+		<sql>
+			<![CDATA[
+				ALTER TABLE LayoutPortlet ADD COLUMN boxIndex INTEGER UNSIGNED NOT NULL DEFAULT 0;
+				ALTER TABLE LayoutPortlet ADD CONSTRAINT uq_LP_layoutId_rowId_boxIndex UNIQUE uq_LP_layoutId_rowId_boxIndex (layoutId, rowId, boxIndex);
+				ALTER TABLE LayoutPortlet DROP KEY uq_LP_layoutId_rowId;
+			]]>
+		</sql>
+	</changeSet>
 	<include file="default-data-1.0.xml"/>
 </databaseChangeLog>

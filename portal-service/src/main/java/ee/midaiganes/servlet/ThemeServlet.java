@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.beans.BeanUtil;
+import ee.midaiganes.beans.BeanRepositoryUtil;
 import ee.midaiganes.model.Theme;
 import ee.midaiganes.services.ThemeVariablesService;
 
@@ -23,7 +23,7 @@ public class ThemeServlet extends HttpServlet {
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
-		this.themeVariablesService = BeanUtil.getBean(ThemeVariablesService.class);
+		this.themeVariablesService = BeanRepositoryUtil.getBean(ThemeVariablesService.class);
 	}
 
 	@Override

@@ -46,44 +46,93 @@
 			}
 		}
 	};
+	if(window.Midaiganes) {
+		jQuery.extend(window.Midaiganes, Midaiganes);
+		Midaiganes = window.Midaiganes;
+	} else {
+		window.Midaiganes = Midaiganes;
+	}
 	
-	window.Midaiganes = Midaiganes;
-	
-	
+	jQuery('.layout-hole').sortable({
+		placeholder: "ui-state-highlight",
+		revert: true,
+		update: function(event, ui) {
+			console.log('update..')
+			console.log(ui);
+			if(ui.item.hasClass('draggable-portlet-name')) {
+				// new portlet
+				var portletBoxId = jQuery(this).data('portlet-box');
+				jQuery.ajax({
+					url: jQuery(ui.item).data('add-portlet-url').replace('PORTLET_BOX_ID', portletBoxId),
+					success: function(data) {
+						// window.location.reload();
+						console.log('add portlet success');
+					},
+					error: function() {
+						// TODO
+						console.log('error add portlet');
+					}
+				});
+			} else if(ui.item.hasClass('portlet')) {
+				var prevIndex = ui.item.midaiganes.startIndex;
+				var currentIndex = jQuery(ui.item).index();
+				var portletBoxId = jQuery(this).data('portlet-box');
+				var windowId = jQuery(ui.item).data('window-id');
+				var movePortletUrl = window.Midaiganes.Admin.movePortletUrl;
+				movePortletUrl = movePortletUrl.replace('WINDOW_ID', windowId).replace('PORTLET_BOX_ID', portletBoxId).replace('BOX_INDEX', currentIndex);
+				jQuery.ajax({
+					url : movePortletUrl,
+					success: function(data) {
+						// window.location.reload()
+						console.log('move portlet success');
+					},
+					error: function() {
+						// TODO
+						console.log('error move portlet');
+					}
+				});
+			}
+		},
+		start: function(event, ui) {
+			console.log('start...');
+			console.log(ui);
+			var index = jQuery(ui.item).index();
+			ui.helper.midaiganes = {
+				'startIndex' : index
+			}
+		},
+		receive: function(event, ui) {
+			console.log('receive...');
+			console.log(ui);
+		},
+		over: function(event, ui) {
+			console.log('over...');
+			console.log(ui);
+		}
+	});
+	jQuery('.layout-hole').disableSelection();
 	Midaiganes.UI.Dialog.bodyFunctions.push(function(bodyContent) {
 		// TODO admin
 		jQuery('#add-portlet .draggable-portlet-name', bodyContent).draggable({
 			revert: "invalid",
-			start: function() {
+			//helper: 'clone',
+			helper: function() {
+				this.midaiganes = 'newthis';
+				var t = jQuery(this);
+				t.midaiganes = 'newjq';
+				var c = t.clone();
+				c.midaiganes = 'newclone';
+				return c;
+			},
+			connectToSortable: '.layout-hole',
+			start: function(event, ui) {
+				ui.helper.midaiganes = 'new';
 				jQuery('.layout-hole').css('background', 'yellow').css('padding', '10px 0 10px 0');
 			},
 			stop: function() {
 				jQuery('.layout-hole').css('background', '').css('padding', '');
 			}
 		});
-		// TODO end admin		
-	});
-	
-	// TODO admin
-	jQuery('.layout-hole').droppable({
-		accept: '.draggable-portlet-name',
-		activeClass: 'portlet-dropped',
-		greedy: true,
-		drop: function(event, ui) {
-			var portletBoxId = jQuery(this).data('portlet-box');
-			jQuery.ajax({
-				url: jQuery(ui.draggable).data('add-portlet-url').replace('PORTLET_BOX_ID', portletBoxId),
-				success: function(data) {
-					// window.location.reload();
-				}
-			});
-		},
-		activate: function(event, ui) {
-			
-		},
-		out: function(event, ui) {
-			
-		}
 	});
 	// TODO end admin
 	

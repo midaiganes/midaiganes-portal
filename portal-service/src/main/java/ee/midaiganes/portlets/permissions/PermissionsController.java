@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.portlet.bind.annotation.ActionMapping;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
 
-import ee.midaiganes.beans.BeanUtil;
+import ee.midaiganes.beans.BeanRepositoryUtil;
 import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.model.Group;
 import ee.midaiganes.model.PortalResource;
@@ -58,7 +58,7 @@ public class PermissionsController {
 	private final PortletInstanceRepository portletInstanceRepository;
 
 	public PermissionsController() {
-		this.portletInstanceRepository = BeanUtil.getBean(PortletInstanceRepository.class);
+		this.portletInstanceRepository = BeanRepositoryUtil.getBean(PortletInstanceRepository.class);
 	}
 
 	@RenderMapping

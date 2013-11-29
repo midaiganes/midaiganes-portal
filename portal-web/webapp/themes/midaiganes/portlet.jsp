@@ -8,7 +8,7 @@
 <c:set var="hasChangePermissionsPermission" value="${portalservice:hasUserPermission(pageDisplay.user.id, portletInstance.resource, portletInstance.id, 'PERMISSIONS')}"/>
 <c:choose>
 	<c:when test="${hasRemovePortletPermission or hasChangePermissionsPermission}">
-		<div class="portlet">
+		<div class="portlet" data-window-id="${portletNamespace.windowID}">
 			<div class="portlet-top">
 				<c:if test="${hasRemovePortletPermission}">
 					<portal-taglib:portlet-action-url portletName="midaiganes_w_add-remove-portlet" var="removePortletUrl">

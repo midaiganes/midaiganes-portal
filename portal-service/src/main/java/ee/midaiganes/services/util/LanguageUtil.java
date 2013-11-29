@@ -4,12 +4,12 @@ import java.util.Locale;
 
 import javax.servlet.ServletRequest;
 
-import ee.midaiganes.beans.BeanUtil;
+import ee.midaiganes.beans.BeanRepositoryUtil;
 import ee.midaiganes.services.LanguageRepository;
 
 public class LanguageUtil {
 	private static LanguageRepository getRepository() {
-		return BeanUtil.getBean(LanguageRepository.class);
+		return BeanRepositoryUtil.getBean(LanguageRepository.class);
 	}
 
 	public static Long getId(Locale locale) {

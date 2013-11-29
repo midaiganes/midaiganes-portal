@@ -7,7 +7,7 @@ import javax.portlet.PortletRequest;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
-import ee.midaiganes.beans.BeanUtil;
+import ee.midaiganes.beans.BeanRepositoryUtil;
 import ee.midaiganes.model.User;
 import ee.midaiganes.portlets.BasePortlet;
 import ee.midaiganes.services.UserRepository;
@@ -52,8 +52,8 @@ public class UserProfilePortlet extends BasePortlet {
 	private User getRequestedUser(PortletRequest request, long currentUserId) {
 		String username = request.getParameter("username");
 		if (StringUtil.isEmpty(username)) {
-			return BeanUtil.getBean(UserRepository.class).getUser(currentUserId);
+			return BeanRepositoryUtil.getBean(UserRepository.class).getUser(currentUserId);
 		}
-		return BeanUtil.getBean(UserRepository.class).getUser(username);
+		return BeanRepositoryUtil.getBean(UserRepository.class).getUser(username);
 	}
 }

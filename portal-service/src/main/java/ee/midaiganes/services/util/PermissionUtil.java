@@ -1,6 +1,6 @@
 package ee.midaiganes.services.util;
 
-import ee.midaiganes.beans.BeanUtil;
+import ee.midaiganes.beans.BeanRepositoryUtil;
 import ee.midaiganes.model.PortalResource;
 import ee.midaiganes.services.PermissionRepository;
 import ee.midaiganes.services.exceptions.ResourceActionNotFoundException;
@@ -8,7 +8,7 @@ import ee.midaiganes.services.exceptions.ResourceNotFoundException;
 
 public class PermissionUtil {
 	private static PermissionRepository getRepository() {
-		return BeanUtil.getBean(PermissionRepository.class);
+		return BeanRepositoryUtil.getBean(PermissionRepository.class);
 	}
 
 	public static boolean hasUserPermission(long userId, String resource, long resourcePrimKey, String action) throws ResourceNotFoundException,

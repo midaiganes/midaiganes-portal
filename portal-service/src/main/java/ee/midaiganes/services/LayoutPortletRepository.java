@@ -1,5 +1,8 @@
 package ee.midaiganes.services;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -15,59 +18,78 @@ import ee.midaiganes.services.dao.LayoutPortletDao;
 
 @Resource(name = PortalConfig.LAYOUT_PORTLET_REPOSITORY)
 public class LayoutPortletRepository {
-	private final PortletInstanceRepository portletInstanceRepository;
-	private final LayoutPortletDao layoutPortletDao;
-	private final Cache cache;
+    private final PortletInstanceRepository portletInstanceRepository;
+    private final LayoutPortletDao layoutPortletDao;
+    private final Cache cache;
 
-	public LayoutPortletRepository(LayoutPortletDao layoutPortletDao, PortletInstanceRepository portletInstanceRepository) {
-		this.layoutPortletDao = layoutPortletDao;
-		this.portletInstanceRepository = portletInstanceRepository;
-		this.cache = SingleVmPool.getCache(LayoutPortletRepository.class.getName());
-	}
+    public LayoutPortletRepository(LayoutPortletDao layoutPortletDao, PortletInstanceRepository portletInstanceRepository) {
+        this.layoutPortletDao = layoutPortletDao;
+        this.portletInstanceRepository = portletInstanceRepository;
+        this.cache = SingleVmPool.getCache(LayoutPortletRepository.class.getName());
+    }
 
-	@Transactional(propagation = Propagation.REQUIRED, readOnly = false, value = PortalConfig.TXMANAGER)
-	public void addLayoutPortlet(long layoutId, long rowId, PortletName portletName) {
-		try {
-			long portletInstanceId = portletInstanceRepository.addPortletInstance(portletName);
-			layoutPortletDao.addLayoutPortlet(layoutId, rowId, portletInstanceId);
-		} finally {
-			cache.clear();
-		}
-	}
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false, value = PortalConfig.TXMANAGER)
+    public void addLayoutPortlet(long layoutId, long rowId, PortletName portletName, int boxIndex) {
+        try {
+            long portletInstanceId = portletInstanceRepository.addPortletInstance(portletName);
+            layoutPortletDao.addLayoutPortlet(layoutId, rowId, portletInstanceId, boxIndex);
+        } finally {
+            cache.clear();
+        }
+    }
 
-	public void deleteLayoutPortlet(String windowID) {
-		try {
-			portletInstanceRepository.deletePortletInstance(windowID);
-		} finally {
-			cache.clear();
-		}
-	}
+    public void deleteLayoutPortlet(String windowID) {
+        try {
+            portletInstanceRepository.deletePortletInstance(windowID);
+        } finally {
+            cache.clear();
+        }
+    }
 
-	public LayoutPortlet getLayoutPortlet(long layoutId, long rowId) {
-		for (LayoutPortlet layoutPortlet : getLayoutPortlets(layoutId)) {
-			if (layoutPortlet.getRowId() == rowId) {
-				return layoutPortlet;
-			}
-		}
-		return null;
-	}
+    public List<LayoutPortlet> getLayoutPortlets(long layoutId, long rowId) {
+        List<LayoutPortlet> portlets = new ArrayList<>();
+        for (LayoutPortlet layoutPortlet : getLayoutPortlets(layoutId)) {
+            if (layoutPortlet.getRowId() == rowId) {
+                portlets.add(layoutPortlet);
+            }
+        }
+        Collections.sort(portlets, new Comparator<LayoutPortlet>() {
+            @Override
+            public int compare(LayoutPortlet l1, LayoutPortlet l2) {
+                return Long.compare(l1.getBoxIndex(), l2.getBoxIndex());
+            }
+        });
+        return portlets;
+    }
 
-	public LayoutPortlet getLayoutPortlet(long layoutId, String portletWindowID) {
-		for (LayoutPortlet layoutPortlet : getLayoutPortlets(layoutId)) {
-			if (layoutPortlet.getPortletInstance().getPortletNamespace().getWindowID().equals(portletWindowID)) {
-				return layoutPortlet;
-			}
-		}
-		return null;
-	}
+    // TODO layout/portletWindowId is not unique
+    public LayoutPortlet getLayoutPortlet(long layoutId, String portletWindowID) {
+        for (LayoutPortlet layoutPortlet : getLayoutPortlets(layoutId)) {
+            if (layoutPortlet.getPortletInstance().getPortletNamespace().getWindowID().equals(portletWindowID)) {
+                return layoutPortlet;
+            }
+        }
+        return null;
+    }
 
-	private List<LayoutPortlet> getLayoutPortlets(long layoutId) {
-		String cacheKey = Long.toString(layoutId);
-		List<LayoutPortlet> layoutPortlets = cache.get(cacheKey);
-		if (layoutPortlets == null) {
-			layoutPortlets = layoutPortletDao.loadLayoutPortlets(layoutId);
-			cache.put(cacheKey, layoutPortlets);
-		}
-		return layoutPortlets;
-	}
+    // TODO
+    @Transactional(readOnly = false, value = PortalConfig.TXMANAGER)
+    public void moveLayoutPortlet(String portletWindowID, long layoutId, long portletBoxId, long boxIndex) {
+        try {
+            LayoutPortlet layoutPortlet = getLayoutPortlet(layoutId, portletWindowID);
+            layoutPortletDao.moveLayoutPortlet(layoutPortlet.getId(), portletBoxId, boxIndex);
+        } finally {
+            cache.clear();
+        }
+    }
+
+    private List<LayoutPortlet> getLayoutPortlets(long layoutId) {
+        String cacheKey = Long.toString(layoutId);
+        List<LayoutPortlet> layoutPortlets = cache.get(cacheKey);
+        if (layoutPortlets == null) {
+            layoutPortlets = layoutPortletDao.loadLayoutPortlets(layoutId);
+            cache.put(cacheKey, layoutPortlets);
+        }
+        return layoutPortlets;
+    }
 }

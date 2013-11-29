@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.beans.BeanUtil;
+import ee.midaiganes.beans.BeanRepositoryUtil;
 import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.beans.RootApplicationContext;
 import ee.midaiganes.model.Layout;
@@ -55,7 +55,7 @@ public class PortalFilter extends HttpFilter {
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
 		super.init(filterConfig);
-		this.secureLayoutRepository = BeanUtil.getBean(SecureLayoutRepository.class);
+		this.secureLayoutRepository = BeanRepositoryUtil.getBean(SecureLayoutRepository.class);
 	}
 
 	@Override

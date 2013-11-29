@@ -4,18 +4,34 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="portlet" uri="http://java.sun.com/portlet_2_0" %>
 
+<c:set var="addPagePermission" value="${portalservice:hasUserPermission(pageDisplay.user.id, pageDisplay.layoutSet.resource, pageDisplay.layoutSet.id, 'EDIT')}" />
+<c:set var="changePageLayoutPermission" value="${portalservice:hasUserPermission(pageDisplay.user.id, pageDisplay.layout.resource, pageDisplay.layout.id, 'EDIT')}"/>
+<c:set var="addRemovePortletPermission" value="${portalservice:hasUserPermission(pageDisplay.user.id, pageDisplay.layout.resource, pageDisplay.layout.id, 'ADD_PORTLET')}"/>
+<c:set var="changePagePermissionsPermission" value="${portalservice:hasUserPermission(pageDisplay.user.id, pageDisplay.layout.resource, pageDisplay.layout.id, 'PERMISSIONS')}"/>
+
 <!DOCTYPE HTML>
 <html>
 	<head>
 		<title>MIDAIGANES</title>
 		<meta charset="utf-8">
 		<link rel="stylesheet" href="${pageDisplay.theme.cssDir}/css.css" type="text/css" />
+		<c:if test="${addRemovePortletPermission}">
+			<portal-taglib:portlet-action-url var="movePortletUrl" portletName="midaiganes_w_add-remove-portlet" windowState="exclusive" portletMode="view">
+				<portlet:param name="action" value="move"/>
+				<portlet:param name="window-id" value="WINDOW_ID" />
+				<portlet:param name="portletBoxId" value="PORTLET_BOX_ID" />
+				<portlet:param name="boxIndex" value="BOX_INDEX"/>
+			</portal-taglib:portlet-action-url>
+			<script type="text/javascript">
+				window.Midaiganes = {
+					Admin : {
+						movePortletUrl : '${movePortletUrl}'
+					}
+				};
+			</script>
+		</c:if>
 	</head>
 	<body>
-		<c:set var="addPagePermission" value="${portalservice:hasUserPermission(pageDisplay.user.id, pageDisplay.layoutSet.resource, pageDisplay.layoutSet.id, 'EDIT')}" />
-		<c:set var="changePageLayoutPermission" value="${portalservice:hasUserPermission(pageDisplay.user.id, pageDisplay.layout.resource, pageDisplay.layout.id, 'EDIT')}"/>
-		<c:set var="addRemovePortletPermission" value="${portalservice:hasUserPermission(pageDisplay.user.id, pageDisplay.layout.resource, pageDisplay.layout.id, 'ADD_PORTLET')}"/>
-		<c:set var="changePagePermissionsPermission" value="${portalservice:hasUserPermission(pageDisplay.user.id, pageDisplay.layout.resource, pageDisplay.layout.id, 'PERMISSIONS')}"/>
 		<c:if test="${addPagePermission or changePageLayoutPermission or addRemovePortletPermission or changePagePermissionsPermission}">
 			<div id="dockbar">
 				<ul>
