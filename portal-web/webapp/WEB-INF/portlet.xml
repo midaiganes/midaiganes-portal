@@ -7,11 +7,7 @@
 	<portlet>
 		<portlet-name>add-remove-portlet</portlet-name>
 		<display-name>add-remove-portlet</display-name>
-		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
-		<init-param>
-			<name>contextConfigLocation</name>
-			<value>/WEB-INF/portlet-context/add-remove-portlet-portlet.xml</value>
-		</init-param>
+		<portlet-class>ee.midaiganes.portlets.addremoveportlet.AddRemovePortletController</portlet-class>
 		<supports>
 			<mime-type>text/html</mime-type>
 			<portlet-mode>view</portlet-mode>
@@ -89,11 +85,7 @@
 	<portlet>
 		<portlet-name>registration</portlet-name>
 		<display-name>registration</display-name>
-		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
-		<init-param>
-			<name>contextConfigLocation</name>
-			<value>/WEB-INF/portlet-context/registration-portlet.xml</value>
-		</init-param>
+		<portlet-class>ee.midaiganes.portlets.registration.RegistrationController</portlet-class>
 		<supports>
 			<mime-type>text/html</mime-type>
 			<portlet-mode>view</portlet-mode>
