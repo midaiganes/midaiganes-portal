@@ -11,14 +11,14 @@
 		<div class="portlet" data-window-id="${portletNamespace.windowID}">
 			<div class="portlet-top">
 				<c:if test="${hasRemovePortletPermission}">
-					<portal-taglib:portlet-action-url portletName="midaiganes_w_add-remove-portlet" var="removePortletUrl">
+					<portal-taglib:portlet-action-url portletName="${portalservice:midaiganesPortletName('add-remove-portlet')}" var="removePortletUrl">
 						<portlet:param name="action" value="remove-portlet"/>
 						<portlet:param name="window-id" value="${portletNamespace.windowID}" />
 					</portal-taglib:portlet-action-url>
 					<a href="${removePortletUrl}" class="remove-portlet">X</a>
 				</c:if>
 				<c:if test="${hasChangePermissionsPermission}">
-					<portal-taglib:portlet-render-url portletName="midaiganes_w_permissions" windowState="exclusive" portletMode="view" var="permissionPortletUrl">
+					<portal-taglib:portlet-render-url portletName="${portalservice:midaiganesPortletName('permissions')}" windowState="exclusive" portletMode="view" var="permissionPortletUrl">
 						<portlet:param name="resource" value="${portletInstance.resource}"/>
 						<portlet:param name="resource-prim-key" value="${portletInstance.id}"/>
 					</portal-taglib:portlet-render-url>

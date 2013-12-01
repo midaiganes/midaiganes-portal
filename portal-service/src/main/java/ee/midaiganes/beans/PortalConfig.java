@@ -118,6 +118,12 @@ public class PortalConfig {
     @Autowired
     private LayoutRepository layoutRepository;
 
+    @Autowired
+    private SecurePortletRepository securePortletRepository;
+
+    @Autowired
+    private DbInstallService dbInstallService;
+
     @PostConstruct
     public void postConstruct() {
         BeanRepositoryUtil.register(PermissionRepository.class, permissionRepository);
@@ -131,6 +137,8 @@ public class PortalConfig {
         BeanRepositoryUtil.register(PortletRepository.class, portletRepository);
         BeanRepositoryUtil.register(PageLayoutRepository.class, pageLayoutRepository);
         BeanRepositoryUtil.register(LayoutRepository.class, layoutRepository);
+        BeanRepositoryUtil.register(SecurePortletRepository.class, securePortletRepository);
+        BeanRepositoryUtil.register(DbInstallService.class, dbInstallService);
     }
 
     @Bean(name = DB_INSTALL_SERVICE, autowire = Autowire.NO)

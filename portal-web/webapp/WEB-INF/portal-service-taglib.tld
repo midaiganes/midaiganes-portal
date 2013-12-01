@@ -39,4 +39,9 @@
 		<function-class>ee.midaiganes.util.LayoutUtil</function-class>
 		<function-signature>java.lang.String getLayoutTitle(ee.midaiganes.model.Layout, javax.servlet.http.HttpServletRequest)</function-signature>
 	</function>
+	<function>
+		<name>midaiganesPortletName</name>
+		<function-class>ee.midaiganes.tag.PortletNameFunctions</function-class>
+		<function-signature>java.lang.String getMidaiganesPortletName(java.lang.String)</function-signature>
+	</function>
 </taglib>

@@ -3,7 +3,6 @@ package ee.midaiganes.servlet;
 import java.io.IOException;
 import java.util.List;
 
-import javax.annotation.Resource;
 import javax.portlet.PortletMode;
 import javax.portlet.WindowState;
 import javax.servlet.ServletConfig;
@@ -14,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.beans.PortalConfig;
+import ee.midaiganes.beans.BeanRepositoryUtil;
 import ee.midaiganes.model.LayoutPortlet;
 import ee.midaiganes.model.PageDisplay;
 import ee.midaiganes.model.PortletInstance;
@@ -32,20 +31,14 @@ public class LayoutPortletServlet extends HttpServlet {
     public static final String ID = LayoutPortletServlet.class.getName() + ".ID";
     private static final Logger log = LoggerFactory.getLogger(LayoutPortletServlet.class);
 
-    @Resource(name = PortalConfig.LAYOUT_PORTLET_REPOSITORY)
     private LayoutPortletRepository layoutPortletRepository;
-
-    @Resource(name = PortalConfig.SECURE_PORTLET_REPOSITORY)
     private SecurePortletRepository portletRepository;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        try {
-            autowire();
-        } catch (RuntimeException e) {
-            log.error(e.getMessage(), e);
-        }
+        layoutPortletRepository = BeanRepositoryUtil.getBean(LayoutPortletRepository.class);
+        portletRepository = BeanRepositoryUtil.getBean(SecurePortletRepository.class);
     }
 
     @Override

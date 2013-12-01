@@ -16,7 +16,7 @@
 		<meta charset="utf-8">
 		<link rel="stylesheet" href="${pageDisplay.theme.cssDir}/css.css" type="text/css" />
 		<c:if test="${addRemovePortletPermission}">
-			<portal-taglib:portlet-action-url var="movePortletUrl" portletName="midaiganes_w_add-remove-portlet" windowState="exclusive" portletMode="view">
+			<portal-taglib:portlet-action-url var="movePortletUrl" portletName="${portalservice:midaiganesPortletName('add-remove-portlet')}" windowState="exclusive" portletMode="view">
 				<portlet:param name="action" value="move"/>
 				<portlet:param name="window-id" value="WINDOW_ID" />
 				<portlet:param name="portletBoxId" value="PORTLET_BOX_ID" />
@@ -48,7 +48,7 @@
 								<li><a href="${addRemovePortletUrl}" class="open-modal" data-modal-title="Add or remove portlet">Add or remove portlet</a></li>
 							</c:if>
 							<c:if test="${changePagePermissionsPermission}">
-								<portal-taglib:portlet-render-url portletName="midaiganes_w_permissions" windowState="exclusive" portletMode="view" var="permissionPortletUrl">
+								<portal-taglib:portlet-render-url portletName="${portalservice:midaiganesPortletName('permissions')}" windowState="exclusive" portletMode="view" var="permissionPortletUrl">
 									<portlet:param name="resource" value="${pageDisplay.layout.resource}"/>
 									<portlet:param name="resource-prim-key" value="${pageDisplay.layout.id}"/>
 								</portal-taglib:portlet-render-url>
@@ -62,7 +62,7 @@
 		<div class="content">
 			<header>
 				<c:if test="${!pageDisplay.user.defaultUser}">
-					<portal-taglib:portlet-action-url portletName="midaiganes_w_login" var="logoutUrl">
+					<portal-taglib:portlet-action-url portletName="${portalservice:midaiganesPortletName('login')}" var="logoutUrl">
 						<portlet:param name="action" value="logout"/>
 					</portal-taglib:portlet-action-url>
 					<a href="${logoutUrl}" style="float:right;color: white;margin: 13px; text-decoration: none;">log out</a>

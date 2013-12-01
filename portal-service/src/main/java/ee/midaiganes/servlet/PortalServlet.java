@@ -2,7 +2,6 @@ package ee.midaiganes.servlet;
 
 import java.io.IOException;
 
-import javax.annotation.Resource;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -13,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.beans.PortalConfig;
+import ee.midaiganes.beans.BeanRepositoryUtil;
 import ee.midaiganes.model.LayoutPortlet;
 import ee.midaiganes.model.MidaiganesWindowState;
 import ee.midaiganes.model.PageDisplay;
@@ -37,24 +36,18 @@ public class PortalServlet extends HttpServlet {
     private static final Logger log = LoggerFactory.getLogger(PortalServlet.class);
     private static final String WEBINF_THEME = "/WEB-INF/theme";
 
-    @Resource(name = PortalConfig.DB_INSTALL_SERVICE)
-    private DbInstallService dbInstallService;
-
-    @Resource(name = PortalConfig.LAYOUT_PORTLET_REPOSITORY)
     private LayoutPortletRepository layoutPortletRepository;
-
-    @Resource(name = PortalConfig.SECURE_PORTLET_REPOSITORY)
     private SecurePortletRepository portletRepository;
-
-    @Resource(name = PortalConfig.PORTLET_INSTANCE_REPOSITORY)
     private PortletInstanceRepository portletInstanceRepository;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
+        layoutPortletRepository = BeanRepositoryUtil.getBean(LayoutPortletRepository.class);
+        portletRepository = BeanRepositoryUtil.getBean(SecurePortletRepository.class);
+        portletInstanceRepository = BeanRepositoryUtil.getBean(PortletInstanceRepository.class);
         try {
-            autowire();
-            dbInstallService.install(config.getServletContext());
+            BeanRepositoryUtil.getBean(DbInstallService.class).install(config.getServletContext());
         } catch (RuntimeException | DbInstallFailedException e) {
             log.error(e.getMessage(), e);
         }

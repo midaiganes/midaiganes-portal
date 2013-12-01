@@ -20,50 +20,51 @@ import ee.midaiganes.util.ContextUtil;
 import ee.midaiganes.util.StringUtil;
 
 public class RuntimePortletTag extends SimpleTag {
-	private static final Logger log = LoggerFactory.getLogger(RuntimePortletTag.class);
-	private String name;
+    private static final Logger log = LoggerFactory.getLogger(RuntimePortletTag.class);
+    private String name;
 
-	@Override
-	public int doEndTag() {
-		if (!StringUtil.isEmpty(name)) {
-			try {
-				includeRuntimePortletServlet();
-			} catch (ServletException e) {
-				log.error(e.getMessage(), e);
-			} catch (IOException e) {
-				log.error(e.getMessage(), e);
-			} catch (RuntimeException e) {
-				log.error(e.getMessage(), e);
-			}
-		}
-		return Tag.EVAL_PAGE;
-	}
+    @Override
+    public int doEndTag() {
+        if (!StringUtil.isEmpty(name)) {
+            try {
+                includeRuntimePortletServlet();
+            } catch (ServletException e) {
+                log.error(e.getMessage(), e);
+            } catch (IOException e) {
+                log.error(e.getMessage(), e);
+            } catch (RuntimeException e) {
+                log.error(e.getMessage(), e);
+            }
+        }
+        return Tag.EVAL_PAGE;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	private void includeRuntimePortletServlet() throws ServletException, IOException {
-		ServletContext servletContext = ContextUtil.getPortalServletContext(getHttpServletRequest());
-		RequestDispatcher requestDispatcher = servletContext.getNamedDispatcher(RuntimePortletServlet.class.getName());
-		HttpServletResponse response = new WrappedOutputHttpServletResponse(getHttpServletResponse(), getPageContext().getOut());
-		requestDispatcher.include(new RuntimePortletServletRequest(getHttpServletRequest(), new PortletName(name)), response);
-	}
+    private void includeRuntimePortletServlet() throws ServletException, IOException {
+        HttpServletRequest request = getHttpServletRequest();
+        ServletContext servletContext = ContextUtil.getPortalServletContext(request);
+        RequestDispatcher requestDispatcher = servletContext.getNamedDispatcher(RuntimePortletServlet.class.getName());
+        HttpServletResponse response = new WrappedOutputHttpServletResponse(getHttpServletResponse(), getPageContext().getOut());
+        requestDispatcher.include(new RuntimePortletServletRequest(request, new PortletName(name)), response);
+    }
 
-	private static final class RuntimePortletServletRequest extends HttpServletRequestWrapper {
-		private final PortletName name;
+    private static final class RuntimePortletServletRequest extends HttpServletRequestWrapper {
+        private final PortletName name;
 
-		public RuntimePortletServletRequest(HttpServletRequest request, PortletName name) {
-			super(request);
-			this.name = name;
-		}
+        public RuntimePortletServletRequest(HttpServletRequest request, PortletName name) {
+            super(request);
+            this.name = name;
+        }
 
-		@Override
-		public Object getAttribute(String name) {
-			if (RuntimePortletServlet.PORTLET_NAME.equals(name)) {
-				return this.name;
-			}
-			return super.getAttribute(name);
-		}
-	}
+        @Override
+        public Object getAttribute(String name) {
+            if (RuntimePortletServlet.PORTLET_NAME.equals(name)) {
+                return this.name;
+            }
+            return super.getAttribute(name);
+        }
+    }
 }

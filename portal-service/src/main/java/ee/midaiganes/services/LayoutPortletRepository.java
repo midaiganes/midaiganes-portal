@@ -7,7 +7,6 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import ee.midaiganes.beans.PortalConfig;
@@ -28,7 +27,7 @@ public class LayoutPortletRepository {
         this.cache = SingleVmPool.getCache(LayoutPortletRepository.class.getName());
     }
 
-    @Transactional(propagation = Propagation.REQUIRED, readOnly = false, value = PortalConfig.TXMANAGER)
+    @Transactional(readOnly = false, value = PortalConfig.TXMANAGER)
     public void addLayoutPortlet(long layoutId, long rowId, PortletName portletName, int boxIndex) {
         try {
             long portletInstanceId = portletInstanceRepository.addPortletInstance(portletName);
@@ -64,12 +63,17 @@ public class LayoutPortletRepository {
 
     // TODO layout/portletWindowId is not unique
     public LayoutPortlet getLayoutPortlet(long layoutId, String portletWindowID) {
+        LayoutPortlet lp = null;
         for (LayoutPortlet layoutPortlet : getLayoutPortlets(layoutId)) {
             if (layoutPortlet.getPortletInstance().getPortletNamespace().getWindowID().equals(portletWindowID)) {
-                return layoutPortlet;
+                if (lp != null) {
+                    throw new IllegalStateException("Found multiple LayoutPortlets in layout(" + layoutId + ") with windowId(" + portletWindowID + "): " + lp + " and "
+                            + layoutPortlet);
+                }
+                lp = layoutPortlet;
             }
         }
-        return null;
+        return lp;
     }
 
     // TODO
@@ -87,8 +91,18 @@ public class LayoutPortletRepository {
         String cacheKey = Long.toString(layoutId);
         List<LayoutPortlet> layoutPortlets = cache.get(cacheKey);
         if (layoutPortlets == null) {
-            layoutPortlets = layoutPortletDao.loadLayoutPortlets(layoutId);
-            cache.put(cacheKey, layoutPortlets);
+            try {
+                layoutPortlets = new ArrayList<>(layoutPortletDao.loadLayoutPortlets(layoutId));
+                Collections.sort(layoutPortlets, new Comparator<LayoutPortlet>() {
+                    @Override
+                    public int compare(LayoutPortlet l1, LayoutPortlet l2) {
+                        int i = Long.compare(l1.getRowId(), l2.getRowId());
+                        return i == 0 ? Long.compare(l1.getBoxIndex(), l2.getBoxIndex()) : i;
+                    }
+                });
+            } finally {
+                cache.put(cacheKey, layoutPortlets);
+            }
         }
         return layoutPortlets;
     }
