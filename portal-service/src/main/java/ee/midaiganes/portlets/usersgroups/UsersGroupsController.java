@@ -4,104 +4,126 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Resource;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
+import javax.portlet.PortletException;
 import javax.portlet.RenderRequest;
+import javax.portlet.RenderResponse;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.portlet.bind.annotation.ActionMapping;
-import org.springframework.web.portlet.bind.annotation.RenderMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.beans.PortalConfig;
+import ee.midaiganes.beans.BeanRepositoryUtil;
 import ee.midaiganes.model.Group;
 import ee.midaiganes.model.User;
+import ee.midaiganes.portlets.BasePortlet;
 import ee.midaiganes.services.GroupRepository;
 import ee.midaiganes.services.UserRepository;
 import ee.midaiganes.util.PortalURLUtil;
 import ee.midaiganes.util.RequestUtil;
 import ee.midaiganes.util.StringUtil;
 
-@Controller("usersGroupsController")
-@RequestMapping("VIEW")
-public class UsersGroupsController {
+public class UsersGroupsController extends BasePortlet {
+    private static final Logger log = LoggerFactory.getLogger(UsersGroupsController.class);
 
-	@Resource(name = PortalConfig.GROUP_REPOSITORY)
-	private GroupRepository groupRepository;
+    private final GroupRepository groupRepository;
+    private final UserRepository userRepository;
 
-	@Resource(name = PortalConfig.USER_REPOSITORY)
-	private UserRepository userRepository;
+    public UsersGroupsController() {
+        this.userRepository = BeanRepositoryUtil.getBean(UserRepository.class);
+        this.groupRepository = BeanRepositoryUtil.getBean(GroupRepository.class);
 
-	@RenderMapping
-	public String viewUsers(RenderRequest request) {
-		List<User> users = userRepository.getUsers(0, userRepository.getUsersCount());
-		List<Group> groups = groupRepository.getGroups();
-		List<UsersListData> usersList = new ArrayList<>(users.size());
-		for (User user : users) {
-			long[] userGroupIds = groupRepository.getUserGroupIds(user.getId());
+    }
 
-			List<Group> userGroups = new ArrayList<>();
-			List<Group> notUserGroups = new ArrayList<>();
-			for (Group g : groups) {
-				if (g.isUserGroup()) {
-					boolean added = false;
-					for (long userGroupId : userGroupIds) {
-						if (g.getId() == userGroupId) {
-							userGroups.add(g);
-							added = true;
-							break;
-						}
-					}
-					if (!added) {
-						notUserGroups.add(g);
-					}
-				}
-			}
-			usersList.add(new UsersListData(user, userGroups, notUserGroups));
-		}
-		request.setAttribute("users", usersList);
-		return "users-groups/view-users";
-	}
+    @Override
+    public void render(RenderRequest request, RenderResponse response) throws PortletException, IOException {
+        String action = request.getParameter("action");
+        if ("view-groups".equals(action)) {
+            this.viewGroups(request, response);
+        } else {
+            this.viewUsers(request, response);
+        }
+    }
 
-	@RenderMapping(params = { "action=view-groups" })
-	public String viewGroups(RenderRequest request) {
-		List<Group> groups = groupRepository.getGroups();
-		request.setAttribute("groups", groups);
-		return "users-groups/view-groups";
-	}
+    private void viewUsers(RenderRequest request, RenderResponse response) throws PortletException, IOException {
+        List<User> users = userRepository.getUsers(0, userRepository.getUsersCount());
+        List<Group> groups = groupRepository.getGroups();
+        List<UsersListData> usersList = new ArrayList<>(users.size());
+        for (User user : users) {
+            long[] userGroupIds = groupRepository.getUserGroupIds(user.getId());
 
-	@ActionMapping(params = { "action=add-user-group", "user-id", "group-id" })
-	public void addUserGroup(@RequestParam("user-id") String userId, @RequestParam("group-id") String groupId, ActionRequest request, ActionResponse response)
-			throws IOException {
-		groupRepository.addUserGroup(Long.parseLong(userId), Long.parseLong(groupId));
-		sendRedirect(request, response);
-	}
+            List<Group> userGroups = new ArrayList<>();
+            List<Group> notUserGroups = new ArrayList<>();
+            for (Group g : groups) {
+                if (g.isUserGroup()) {
+                    boolean added = false;
+                    for (long userGroupId : userGroupIds) {
+                        if (g.getId() == userGroupId) {
+                            userGroups.add(g);
+                            added = true;
+                            break;
+                        }
+                    }
+                    if (!added) {
+                        notUserGroups.add(g);
+                    }
+                }
+            }
+            usersList.add(new UsersListData(user, userGroups, notUserGroups));
+        }
+        request.setAttribute("users", usersList);
+        super.include("users-groups/view-users", request, response);
+    }
 
-	@ActionMapping(params = { "action=remove-user-group", "user-id", "group-id" })
-	public void removeUserGroup(@RequestParam("user-id") String userId, @RequestParam("group-id") String groupId, ActionRequest request, ActionResponse response)
-			throws IOException {
-		groupRepository.removeUserGroup(Long.parseLong(userId), Long.parseLong(groupId));
-		sendRedirect(request, response);
-	}
+    private void viewGroups(RenderRequest request, RenderResponse response) throws PortletException, IOException {
+        List<Group> groups = groupRepository.getGroups();
+        request.setAttribute("groups", groups);
+        super.include("users-groups/view-groups", request, response);
+    }
 
-	@ActionMapping(params = { "action=add-group", "groupName", "userGroup" })
-	public void addGroup(@RequestParam("groupName") String groupName, @RequestParam("userGroup") String userGroup, ActionRequest request,
-			ActionResponse response) throws IOException {
-		groupRepository.addGroup(groupName, Boolean.parseBoolean(userGroup));
-		sendRedirect(request, response);
-	}
+    @Override
+    public void processAction(ActionRequest request, ActionResponse response) throws IOException {
+        String action = request.getParameter("action");
+        String userId = request.getParameter("user-id");
+        String groupId = request.getParameter("group-id");
+        String groupName = request.getParameter("groupName");
+        String userGroup = request.getParameter("userGroup");
+        if ("add-user-group".equals(action) && userId != null && groupId != null) {
+            addUserGroup(userId, groupId, request, response);
+        } else if ("remove-user-group".equals(action) && userId != null && groupId != null) {
+            removeUserGroup(userId, groupId, request, response);
+        } else if ("delete-group".equals(action) && groupId != null) {
+            deleteGroup(groupId, request, response);
+        } else if ("add-group".equals(action) && groupName != null && userGroup != null) {
+            addGroup(groupName, userGroup, request, response);
+        } else {
+            log.warn("Invalid request parameters");
+        }
+    }
 
-	@ActionMapping(params = { "action=delete-group", "group-id" })
-	public void deleteGroup(@RequestParam("group-id") String groupId, ActionRequest request, ActionResponse response) throws IOException {
-		if (StringUtil.isNumber(groupId)) {
-			groupRepository.deleteGroup(Long.parseLong(groupId, 10));
-		}
-		sendRedirect(request, response);
-	}
+    private void addUserGroup(String userId, String groupId, ActionRequest request, ActionResponse response) throws IOException {
+        groupRepository.addUserGroup(Long.parseLong(userId), Long.parseLong(groupId));
+        sendRedirect(request, response);
+    }
 
-	private void sendRedirect(ActionRequest request, ActionResponse response) throws IOException {
-		response.sendRedirect(PortalURLUtil.getFullURLByFriendlyURL(RequestUtil.getPageDisplay(request).getLayout().getFriendlyUrl()));
-	}
+    private void removeUserGroup(String userId, String groupId, ActionRequest request, ActionResponse response) throws IOException {
+        groupRepository.removeUserGroup(Long.parseLong(userId), Long.parseLong(groupId));
+        sendRedirect(request, response);
+    }
+
+    private void addGroup(String groupName, String userGroup, ActionRequest request, ActionResponse response) throws IOException {
+        groupRepository.addGroup(groupName, Boolean.parseBoolean(userGroup));
+        sendRedirect(request, response);
+    }
+
+    private void deleteGroup(String groupId, ActionRequest request, ActionResponse response) throws IOException {
+        if (StringUtil.isNumber(groupId)) {
+            groupRepository.deleteGroup(Long.parseLong(groupId, 10));
+        }
+        sendRedirect(request, response);
+    }
+
+    private void sendRedirect(ActionRequest request, ActionResponse response) throws IOException {
+        response.sendRedirect(PortalURLUtil.getFullURLByFriendlyURL(RequestUtil.getPageDisplay(request).getLayout().getFriendlyUrl()));
+    }
 }

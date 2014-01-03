@@ -43,193 +43,191 @@ import ee.midaiganes.util.XmlUtil;
 
 @Resource(name = PortalConfig.PORTLET_REPOSITORY)
 public class PortletRepository {
-	private static final Logger log = LoggerFactory.getLogger(PortletRepository.class);
-	private final ConcurrentHashMap<PortletName, PortletAndConfiguration> portlets = new ConcurrentHashMap<>();
-	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    private static final Logger log = LoggerFactory.getLogger(PortletRepository.class);
+    private final ConcurrentHashMap<PortletName, PortletAndConfiguration> portlets = new ConcurrentHashMap<>();
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
-	private final PortletPreferencesRepository portletPreferencesRepository;
+    private final PortletPreferencesRepository portletPreferencesRepository;
 
-	private final PortletInstanceRepository portletInstanceRepository;
+    private final PortletInstanceRepository portletInstanceRepository;
 
-	public PortletRepository(PortletPreferencesRepository portletPreferencesRepository, PortletInstanceRepository portletInstanceRepository) {
-		this.portletPreferencesRepository = portletPreferencesRepository;
-		this.portletInstanceRepository = portletInstanceRepository;
-	}
+    public PortletRepository(PortletPreferencesRepository portletPreferencesRepository, PortletInstanceRepository portletInstanceRepository) {
+        this.portletPreferencesRepository = portletPreferencesRepository;
+        this.portletInstanceRepository = portletInstanceRepository;
+    }
 
-	public List<PortletName> getPortletNames() {
-		lock.readLock().lock();
-		try {
-			return new ArrayList<>(portlets.keySet());
-		} finally {
-			lock.readLock().unlock();
-		}
-	}
+    public List<PortletName> getPortletNames() {
+        lock.readLock().lock();
+        try {
+            return new ArrayList<>(portlets.keySet());
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
 
-	public void registerPortlets(ServletContext servletContext, InputStream portletXmlInputStream) {
-		try {
-			PortletAppType portletAppType = XmlUtil.unmarshal(PortletAppType.class, portletXmlInputStream);
-			if (portletAppType != null) {
-				initializePortletApp(servletContext, portletAppType);
-			}
-		} catch (JAXBException e) {
-			log.error(e.getMessage(), e);
-		} catch (RuntimeException e) {
-			log.error(e.getMessage(), e);
-		}
-	}
+    public void registerPortlets(ServletContext servletContext, InputStream portletXmlInputStream) {
+        try {
+            PortletAppType portletAppType = XmlUtil.unmarshal(PortletAppType.class, portletXmlInputStream);
+            if (portletAppType != null) {
+                initializePortletApp(servletContext, portletAppType);
+            }
+        } catch (JAXBException e) {
+            log.error(e.getMessage(), e);
+        } catch (RuntimeException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
 
-	// TODO Before the portlet container calls the destroy method, it should
-	// allow any threads that are currently processing requests within the
-	// portlet object to complete execution
-	public void unregisterPortlets(ServletContext sc) {
-		String contextPath = sc.getContextPath();
-		for (PortletName entry : getPortletNames()) {
-			if (entry.getContextWithSlash().equals(contextPath)) {
-				try {
-					lock.writeLock().lock();
-					PortletAndConfiguration conf = null;
-					try {
-						conf = portlets.remove(entry);
-					} finally {
-						lock.writeLock().unlock();
-					}
-					if (conf != null) {
-						conf.getMidaiganesPortlet().destroy();
-						log.info("portlet destroyed: {}", entry);
-					}
-				} catch (RuntimeException e) {
-					log.error(e.getMessage(), e);
-				}
-			}
-		}
-	}
+    // TODO Before the portlet container calls the destroy method, it should
+    // allow any threads that are currently processing requests within the
+    // portlet object to complete execution
+    public void unregisterPortlets(ServletContext sc) {
+        String contextPath = sc.getContextPath();
+        for (PortletName entry : getPortletNames()) {
+            if (entry.getContextWithSlash().equals(contextPath)) {
+                try {
+                    lock.writeLock().lock();
+                    PortletAndConfiguration conf = null;
+                    try {
+                        conf = portlets.remove(entry);
+                    } finally {
+                        lock.writeLock().unlock();
+                    }
+                    if (conf != null) {
+                        conf.getMidaiganesPortlet().destroy();
+                        log.info("portlet destroyed: {}", entry);
+                    }
+                } catch (RuntimeException e) {
+                    log.error(e.getMessage(), e);
+                }
+            }
+        }
+    }
 
-	public PortletApp getPortletApp(PortletInstance portletInstance, PortletMode portletMode, WindowState windowState) {
-		if (portletInstance != null) {
-			PortletAndConfiguration portlet = getPortlet(portletInstance.getPortletNamespace().getPortletName());
-			if (portlet != null) {
-				return new PortletApp(portletInstance, portletMode, windowState, portletPreferencesRepository, portlet);
-			}
-		}
-		return null;
-	}
+    public PortletApp getPortletApp(PortletInstance portletInstance, PortletMode portletMode, WindowState windowState) {
+        if (portletInstance != null) {
+            PortletAndConfiguration portlet = getPortlet(portletInstance.getPortletNamespace().getPortletName());
+            if (portlet != null) {
+                return new PortletApp(portletInstance, portletMode, windowState, portletPreferencesRepository, portlet);
+            }
+        }
+        return null;
+    }
 
-	public PortletApp getPortletApp(LayoutPortlet layoutPortlet, PortletMode portletMode, WindowState windowState) {
-		return getPortletApp(layoutPortlet.getPortletInstance(), portletMode, windowState);
-	}
+    public PortletApp getPortletApp(LayoutPortlet layoutPortlet, PortletMode portletMode, WindowState windowState) {
+        return getPortletApp(layoutPortlet.getPortletInstance(), portletMode, windowState);
+    }
 
-	private PortletAndConfiguration getPortlet(PortletName portletName) {
-		lock.readLock().lock();
-		try {
-			PortletAndConfiguration portlet = portlets.get(portletName);
-			if (portlet != null) {
-				return portlet;
-			}
-		} finally {
-			lock.readLock().unlock();
-		}
-		log.warn("no portlet with name = {};", portletName);
-		return null;
-	}
+    private PortletAndConfiguration getPortlet(PortletName portletName) {
+        lock.readLock().lock();
+        try {
+            PortletAndConfiguration portlet = portlets.get(portletName);
+            if (portlet != null) {
+                return portlet;
+            }
+        } finally {
+            lock.readLock().unlock();
+        }
+        log.warn("no portlet with name = {};", portletName);
+        return null;
+    }
 
-	private void initializePortletApp(ServletContext servletContext, PortletAppType portletAppType) {
-		for (PortletType portletType : portletAppType.getPortlet()) {
-			initializePortletType(servletContext, portletType);
-		}
-	}
+    private void initializePortletApp(ServletContext servletContext, PortletAppType portletAppType) {
+        for (PortletType portletType : portletAppType.getPortlet()) {
+            initializePortletType(servletContext, portletType);
+        }
+    }
 
-	private void initializePortletType(ServletContext servletContext, PortletType portletType) {
-		log.debug("portlet = {}", portletType);
-		try {
-			PortletName portletName = initializePortlet(servletContext, portletType);
-			log.debug("full portlet name = {}", portletName);
-			if (portletName != null) {
-				portletInstanceRepository.addDefaultPortletInstance(portletName);
-			}
-		} catch (ClassNotFoundException e) {
-			log.error(e.getMessage(), e);
-		} catch (IllegalAccessException e) {
-			log.error(e.getMessage(), e);
-		} catch (InstantiationException e) {
-			log.error(e.getMessage(), e);
-		} catch (RuntimeException e) {
-			log.error(e.getMessage(), e);
-		}
-	}
+    private void initializePortletType(ServletContext servletContext, PortletType portletType) {
+        log.debug("portlet = {}", portletType);
+        try {
+            PortletName portletName = initializePortlet(servletContext, portletType);
+            log.debug("full portlet name = {}", portletName);
+            if (portletName != null) {
+                portletInstanceRepository.addDefaultPortletInstance(portletName);
+            }
+        } catch (ClassNotFoundException e) {
+            log.error(e.getMessage(), e);
+        } catch (IllegalAccessException e) {
+            log.error(e.getMessage(), e);
+        } catch (InstantiationException e) {
+            log.error(e.getMessage(), e);
+        } catch (RuntimeException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
 
-	private static <A extends Portlet & ResourceServingPortlet> A castToResourceServingPortlet(Portlet portlet) {
-		@SuppressWarnings("unchecked")
-		A obj = (A) portlet;
-		return obj;
-	}
+    private static <A extends Portlet & ResourceServingPortlet> A castToResourceServingPortlet(Portlet portlet) {
+        @SuppressWarnings("unchecked")
+        A obj = (A) portlet;
+        return obj;
+    }
 
-	private MidaiganesPortlet getMidaiganesPortlet(Portlet portlet, Class<?> obj, PortletName portletName) {
-		if (ResourceServingPortlet.class.isAssignableFrom(obj)) {
-			return new MidaiganesResourcePortlet(castToResourceServingPortlet(portlet), portletName);
-		}
-		return new MidaiganesPortlet(portlet, portletName);
-	}
+    private MidaiganesPortlet getMidaiganesPortlet(Portlet portlet, Class<?> obj, PortletName portletName) {
+        if (ResourceServingPortlet.class.isAssignableFrom(obj)) {
+            return new MidaiganesResourcePortlet(castToResourceServingPortlet(portlet), portletName);
+        }
+        return new MidaiganesPortlet(portlet, portletName);
+    }
 
-	private PortletName initializePortlet(ServletContext servletContext, PortletType portletType) throws ClassNotFoundException, InstantiationException,
-			IllegalAccessException {
-		Class<?> obj = Class.forName(portletType.getPortletClass());
-		if (Portlet.class.isAssignableFrom(obj)) {
-			Portlet portlet = (Portlet) obj.newInstance();
-			try {
-				PortletConfig portletConfig = getPortletConfig(servletContext, portletType);
-				PortletName portletName = new PortletName(getContextPathName(servletContext), portletType.getPortletName().getValue());
-				MidaiganesPortlet midaiganesPortlet = getMidaiganesPortlet(portlet, obj, portletName);
-				long start = System.currentTimeMillis();
-				midaiganesPortlet.init(portletConfig);
-				log.info("Portlet '{}' init took: {}ms", portletName, Long.valueOf(System.currentTimeMillis() - start));
-				PortletAndConfiguration portletAndConfiguration = new PortletAndConfiguration(midaiganesPortlet, portletConfig, portletType);
-				lock.writeLock().lock();
-				try {
-					portlets.put(portletName, portletAndConfiguration);
-				} finally {
-					lock.writeLock().unlock();
-				}
-				return portletName;
-			} catch (PortletException e) {
-				log.error(e.getMessage(), e);
-			} catch (IOException e) {
-				log.error(e.getMessage(), e);
-			}
-			return null;
-		} else {
-			throw new IllegalArgumentException(portletType.getPortletClass() + " is not implementing " + Portlet.class.getName());
-		}
-	}
+    private PortletName initializePortlet(ServletContext servletContext, PortletType portletType) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+        Class<?> obj = Class.forName(portletType.getPortletClass());
+        if (Portlet.class.isAssignableFrom(obj)) {
+            Portlet portlet = (Portlet) obj.newInstance();
+            try {
+                PortletConfig portletConfig = getPortletConfig(servletContext, portletType);
+                PortletName portletName = new PortletName(getContextPathName(servletContext), portletType.getPortletName().getValue());
+                MidaiganesPortlet midaiganesPortlet = getMidaiganesPortlet(portlet, obj, portletName);
+                long start = System.currentTimeMillis();
+                midaiganesPortlet.init(portletConfig);
+                log.info("Portlet '{}' init took: {}ms", portletName, Long.valueOf(System.currentTimeMillis() - start));
+                PortletAndConfiguration portletAndConfiguration = new PortletAndConfiguration(midaiganesPortlet, portletConfig, portletType);
+                lock.writeLock().lock();
+                try {
+                    portlets.put(portletName, portletAndConfiguration);
+                } finally {
+                    lock.writeLock().unlock();
+                }
+                return portletName;
+            } catch (PortletException e) {
+                log.error(e.getMessage(), e);
+            } catch (IOException e) {
+                log.error(e.getMessage(), e);
+            }
+            return null;
+        }
+        throw new IllegalArgumentException(portletType.getPortletClass() + " is not implementing " + Portlet.class.getName());
+    }
 
-	private PortletConfig getPortletConfig(ServletContext servletContext, PortletType portletType) throws IOException {
-		return new PortletConfigImpl(servletContext, portletType.getPortletName().getValue(), getInitParameters(portletType), getSupportedLocales(portletType));
-	}
+    private PortletConfig getPortletConfig(ServletContext servletContext, PortletType portletType) throws IOException {
+        return new PortletConfigImpl(servletContext, portletType.getPortletName().getValue(), getInitParameters(portletType), getSupportedLocales(portletType));
+    }
 
-	private List<PortletInitParameter> getInitParameters(PortletType portletType) {
-		CopyOnWriteArrayList<PortletInitParameter> initParameters = new CopyOnWriteArrayList<PortletInitParameter>();
-		for (InitParamType initParam : portletType.getInitParam()) {
-			CopyOnWriteArrayList<Description> descriptions = new CopyOnWriteArrayList<>();
-			for (DescriptionType description : initParam.getDescription()) {
-				descriptions.add(new Description(description.getLang(), description.getValue()));
-			}
-			initParameters.add(new PortletInitParameter(initParam.getId(), initParam.getName().getValue(), initParam.getValue().getValue(), descriptions));
-		}
-		return initParameters;
-	}
+    private List<PortletInitParameter> getInitParameters(PortletType portletType) {
+        CopyOnWriteArrayList<PortletInitParameter> initParameters = new CopyOnWriteArrayList<>();
+        for (InitParamType initParam : portletType.getInitParam()) {
+            CopyOnWriteArrayList<Description> descriptions = new CopyOnWriteArrayList<>();
+            for (DescriptionType description : initParam.getDescription()) {
+                descriptions.add(new Description(description.getLang(), description.getValue()));
+            }
+            initParameters.add(new PortletInitParameter(initParam.getId(), initParam.getName().getValue(), initParam.getValue().getValue(), descriptions));
+        }
+        return initParameters;
+    }
 
-	private List<Locale> getSupportedLocales(PortletType portletType) {
-		List<Locale> supportedLocales = new ArrayList<Locale>(portletType.getSupportedLocale().size());
-		for (SupportedLocaleType supportedLocaleType : portletType.getSupportedLocale()) {
-			supportedLocales.add(new Locale(supportedLocaleType.getValue()));
-		}
-		return supportedLocales;
-	}
+    private List<Locale> getSupportedLocales(PortletType portletType) {
+        List<Locale> supportedLocales = new ArrayList<>(portletType.getSupportedLocale().size());
+        for (SupportedLocaleType supportedLocaleType : portletType.getSupportedLocale()) {
+            supportedLocales.add(new Locale(supportedLocaleType.getValue()));
+        }
+        return supportedLocales;
+    }
 
-	private String getContextPathName(ServletContext servletContext) {
-		String contextPathName = servletContext.getContextPath();
-		if (contextPathName.startsWith(StringPool.SLASH)) {
-			contextPathName = contextPathName.substring(1);
-		}
-		return contextPathName;
-	}
+    private String getContextPathName(ServletContext servletContext) {
+        String contextPathName = servletContext.getContextPath();
+        if (contextPathName.startsWith(StringPool.SLASH)) {
+            contextPathName = contextPathName.substring(1);
+        }
+        return contextPathName;
+    }
 }

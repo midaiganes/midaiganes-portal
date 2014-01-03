@@ -1,189 +1,229 @@
 package ee.midaiganes.portlets.layout;
 
-import javax.annotation.Resource;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.portlet.ActionRequest;
+import javax.portlet.ActionResponse;
+import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
 import javax.portlet.RenderRequest;
+import javax.portlet.RenderResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.portlet.bind.annotation.ActionMapping;
-import org.springframework.web.portlet.bind.annotation.RenderMapping;
 
-import ee.midaiganes.beans.PortalConfig;
+import ee.midaiganes.beans.BeanRepositoryUtil;
 import ee.midaiganes.model.Layout;
 import ee.midaiganes.model.LayoutTitle;
 import ee.midaiganes.model.PageLayoutName;
+import ee.midaiganes.portlets.BasePortlet;
 import ee.midaiganes.services.LanguageRepository;
 import ee.midaiganes.services.LayoutRepository;
 import ee.midaiganes.services.PageLayoutRepository;
 import ee.midaiganes.services.exceptions.IllegalFriendlyUrlException;
-import ee.midaiganes.services.exceptions.IllegalLanguageIdException;
 import ee.midaiganes.services.exceptions.IllegalPageLayoutException;
 import ee.midaiganes.util.RequestUtil;
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.StringUtil;
 
-@Controller("layoutsController")
-@RequestMapping("VIEW")
-public class LayoutsController {
-	private static final Logger log = LoggerFactory.getLogger(LayoutsController.class);
+public class LayoutsController extends BasePortlet {
+    private static final Logger log = LoggerFactory.getLogger(LayoutsController.class);
 
-	@Resource(name = PortalConfig.LAYOUT_REPOSITORY)
-	private LayoutRepository layoutRepository;
+    private final LayoutRepository layoutRepository;
+    private final LanguageRepository languageRepository;
+    private final PageLayoutRepository pageLayoutRepository;
 
-	@Resource(name = PortalConfig.LANGUAGE_REPOSITORY)
-	private LanguageRepository languageRepository;
+    public LayoutsController() {
+        this.layoutRepository = BeanRepositoryUtil.getBean(LayoutRepository.class);
+        this.languageRepository = BeanRepositoryUtil.getBean(LanguageRepository.class);
+        this.pageLayoutRepository = BeanRepositoryUtil.getBean(PageLayoutRepository.class);
+    }
 
-	@Resource(name = PortalConfig.PAGE_LAYOUT_REPOSITORY)
-	private PageLayoutRepository pageLayoutRepository;
+    @Override
+    public void render(RenderRequest request, RenderResponse response) throws PortletException, IOException {
+        String action = request.getParameter("action");
+        String id = request.getParameter("id");
+        if ("edit-layout".equals(action) && id != null) {
+            editLayoutView(id, request, response);
+        } else {
+            addLayoutView(request, response);
+        }
+    }
 
-	@RenderMapping
-	public String addLayoutView(RenderRequest request) {
-		request.setAttribute("layouts", LayoutItem.getLayoutItems(layoutRepository.getLayouts(RequestUtil.getPageDisplay(request).getLayoutSet().getId())));
-		return "layouts/add-page";
-	}
+    private void addLayoutView(RenderRequest request, RenderResponse response) throws PortletException, IOException {
+        request.setAttribute("layouts", LayoutItem.getLayoutItems(layoutRepository.getLayouts(RequestUtil.getPageDisplay(request).getLayoutSet().getId())));
+        super.include("layouts/add-page", request, response);
+    }
 
-	@RenderMapping(params = { "action=edit-layout", "id" })
-	public String editLayoutView(@RequestParam("id") String id, RenderRequest request) {
-		if (StringUtil.isNumber(id)) {
-			Layout layout = layoutRepository.getLayout(Long.parseLong(id));
-			LayoutModel layoutModel = new LayoutModel();
-			layoutModel.setDefaultLayoutTitleLanguageId(languageRepository.getLanguageId(layout.getDefaultLayoutTitleLanguageId()));
-			Long parentId = layout.getParentId();
-			layoutModel.setParentId(Long.toString(parentId == null ? 0 : parentId.longValue()));
-			layoutModel.setUrl(layout.getFriendlyUrl());
-			for (String languageId : languageRepository.getSupportedLanguageIds()) {
-				layoutModel.getLayoutTitles().put(languageId, StringPool.EMPTY);
-			}
-			for (LayoutTitle lt : layout.getLayoutTitles()) {
-				layoutModel.getLayoutTitles().put(languageRepository.getLanguageId(lt.getLanguageId()), lt.getTitle());
-			}
-			request.setAttribute("editLayoutModel", layoutModel);
-			request.setAttribute("layout", layout);
-			request.setAttribute("layouts", layoutRepository.getLayouts(RequestUtil.getPageDisplay(request).getLayoutSet().getId()));
+    private void editLayoutView(String id, RenderRequest request, RenderResponse response) throws PortletException, IOException {
+        if (StringUtil.isNumber(id)) {
+            Layout layout = layoutRepository.getLayout(Long.parseLong(id));
+            LayoutModel layoutModel = new LayoutModel();
+            layoutModel.setDefaultLayoutTitleLanguageId(languageRepository.getLanguageId(layout.getDefaultLayoutTitleLanguageId()));
+            Long parentId = layout.getParentId();
+            layoutModel.setParentId(Long.toString(parentId == null ? 0 : parentId.longValue()));
+            layoutModel.setUrl(layout.getFriendlyUrl());
+            for (String languageId : languageRepository.getSupportedLanguageIds()) {
+                layoutModel.getLayoutTitles().put(languageId, StringPool.EMPTY);
+            }
+            for (LayoutTitle lt : layout.getLayoutTitles()) {
+                layoutModel.getLayoutTitles().put(languageRepository.getLanguageId(lt.getLanguageId()), lt.getTitle());
+            }
+            request.setAttribute("editLayoutModel", layoutModel);
+            request.setAttribute("layout", layout);
+            request.setAttribute("layouts", layoutRepository.getLayouts(RequestUtil.getPageDisplay(request).getLayoutSet().getId()));
 
-			return "layouts/edit-layout";
-		}
-		return addLayoutView(request);
-	}
+            super.include("layouts/edit-layout", request, response);
+        } else {
+            addLayoutView(request, response);
+        }
+    }
 
-	@ActionMapping
-	public void addLayoutAction(@ModelAttribute("addLayoutModel") LayoutModel layout, PortletRequest request) throws IllegalFriendlyUrlException,
-			IllegalLanguageIdException, IllegalPageLayoutException {
-		if (layoutRepository.isFriendlyUrlValid(layout.getUrl())) {
-			Long parentId = getParentId(layout.getParentId());
-			long layoutSetId = RequestUtil.getPageDisplay(request).getLayoutSet().getId();
-			PageLayoutName defaultPageLayoutName = pageLayoutRepository.getDefaultPageLayout().getPageLayoutName();
-			// TODO
-			long languageId = languageRepository.getId(languageRepository.getSupportedLanguageIds().get(0)).longValue();
-			layoutRepository.addLayout(layoutSetId, layout.getUrl(), null, defaultPageLayoutName, parentId, languageId);
-		} else {
-			log.warn("invalid friendly url '{}'", layout.getUrl());
-		}
-	}
+    @Override
+    public void processAction(ActionRequest request, ActionResponse response) {
+        String action = request.getParameter("action");
+        String id = request.getParameter("id");
+        if ("delete".equals(action) && id != null) {
+            deleteLayoutAction(id);
+        } else if ("move-up".equals(action) && id != null) {
+            moveUpAction(id);
+        } else if ("move-down".equals(action) && id != null) {
+            moveDownAction(id);
+        } else if ("edit-layout".equals(action) && id != null) {
+            try {
+                editLayoutAction(id, this.getAddLayoutModel(request));
+            } catch (IllegalFriendlyUrlException | IllegalPageLayoutException e) {
+                log.warn(e.getMessage(), e);
+            }
+        } else {
+            try {
+                addLayoutAction(this.getAddLayoutModel(request), request);
+            } catch (IllegalFriendlyUrlException | IllegalPageLayoutException e) {
+                log.warn(e.getMessage(), e);
+            }
+        }
+    }
 
-	@ActionMapping(params = { "action=delete", "id" })
-	public void deleteLayoutAction(@RequestParam("id") String id) {
-		if (StringUtil.isNumber(id)) {
-			layoutRepository.deleteLayout(Long.parseLong(id));
-		}
-	}
+    private void addLayoutAction(LayoutModel layout, PortletRequest request) throws IllegalFriendlyUrlException, IllegalPageLayoutException {
+        if (layoutRepository.isFriendlyUrlValid(layout.getUrl())) {
+            Long parentId = getParentId(layout.getParentId());
+            long layoutSetId = RequestUtil.getPageDisplay(request).getLayoutSet().getId();
+            PageLayoutName defaultPageLayoutName = pageLayoutRepository.getDefaultPageLayout().getPageLayoutName();
+            // TODO
+            long languageId = languageRepository.getId(languageRepository.getSupportedLanguageIds().get(0)).longValue();
+            layoutRepository.addLayout(layoutSetId, layout.getUrl(), null, defaultPageLayoutName, parentId, languageId);
+        } else {
+            log.warn("invalid friendly url '{}'", layout.getUrl());
+        }
+    }
 
-	@ActionMapping(params = { "action=edit-layout", "id" })
-	public void editLayoutAction(@RequestParam("id") String id, @ModelAttribute("addLayoutModel") LayoutModel layoutModel) throws NumberFormatException,
-			IllegalFriendlyUrlException, IllegalLanguageIdException, IllegalPageLayoutException {
-		if (StringUtil.isNumber(id)) {
-			Layout layout = layoutRepository.getLayout(Long.parseLong(id));
-			if (layout != null) {
-				updateLayout(layoutModel, layout);
-			} else {
-				log.warn("Invalid layout id '{}'", id);
-			}
-		}
-	}
+    private void deleteLayoutAction(String id) {
+        if (StringUtil.isNumber(id)) {
+            layoutRepository.deleteLayout(Long.parseLong(id));
+        }
+    }
 
-	@ActionMapping(params = { "action=move-up", "id" })
-	public void moveUpAction(@RequestParam("id") String id) {
-		if (StringUtil.isNumber(id)) {
-			if (!layoutRepository.moveLayoutUp(Long.parseLong(id))) {
-				log.warn("Layout not moved up: '{}'", id);
-			}
-		} else {
-			log.warn("Can't move layout up: invalid id '{}'", id);
-		}
-	}
+    private void editLayoutAction(String id, LayoutModel layoutModel) throws IllegalFriendlyUrlException, IllegalPageLayoutException {
+        if (StringUtil.isNumber(id)) {
+            Layout layout = layoutRepository.getLayout(Long.parseLong(id));
+            if (layout != null) {
+                updateLayout(layoutModel, layout);
+            } else {
+                log.warn("Invalid layout id '{}'", id);
+            }
+        }
+    }
 
-	@ActionMapping(params = { "action=move-down", "id" })
-	public void moveDownAction(@RequestParam("id") String id) {
-		if (StringUtil.isNumber(id)) {
-			if (!layoutRepository.moveLayoutDown(Long.parseLong(id))) {
-				log.warn("Layout not moved down: '{}'", id);
-			}
-		} else {
-			log.warn("Can't move layout down: invalid id '{}'", id);
-		}
-	}
+    private void moveUpAction(String id) {
+        if (StringUtil.isNumber(id)) {
+            if (!layoutRepository.moveLayoutUp(Long.parseLong(id))) {
+                log.warn("Layout not moved up: '{}'", id);
+            }
+        } else {
+            log.warn("Can't move layout up: invalid id '{}'", id);
+        }
+    }
 
-	private void updateLayout(LayoutModel layoutModel, Layout layout) throws IllegalFriendlyUrlException, IllegalLanguageIdException,
-			IllegalPageLayoutException {
-		PageLayoutName pageLayoutName = new PageLayoutName(layout.getPageLayoutId());
-		Long parentId = StringUtil.isEmpty(layoutModel.getParentId()) ? null : Long.valueOf(layoutModel.getParentId());
-		long defaultLayoutTitleLanguageId = languageRepository.getId(layoutModel.getDefaultLayoutTitleLanguageId()).longValue();
-		layoutRepository.updateLayout(layoutModel.getUrl(), pageLayoutName, parentId, defaultLayoutTitleLanguageId, layout.getId());
-		updateLayoutTitles(layoutModel, layout);
-	}
+    private void moveDownAction(String id) {
+        if (StringUtil.isNumber(id)) {
+            if (!layoutRepository.moveLayoutDown(Long.parseLong(id))) {
+                log.warn("Layout not moved down: '{}'", id);
+            }
+        } else {
+            log.warn("Can't move layout down: invalid id '{}'", id);
+        }
+    }
 
-	private void updateLayoutTitles(LayoutModel layoutModel, Layout layout) {
-		for (String languageId : languageRepository.getSupportedLanguageIds()) {
-			Long l = languageRepository.getId(languageId);
-			String layoutTitle = layoutModel.getLayoutTitles().get(languageId);
-			if (!StringUtil.isEmpty(layoutTitle)) {
-				addOrUpdateLayoutTitle(layout, languageId, layoutTitle);
-			} else if (layout.getLayoutTitle(l.longValue()) != null) {
-				deleteLayoutTitle(layout.getId(), languageId);
-			}
-		}
-	}
+    private void updateLayout(LayoutModel layoutModel, Layout layout) throws IllegalFriendlyUrlException, IllegalPageLayoutException {
+        PageLayoutName pageLayoutName = new PageLayoutName(layout.getPageLayoutId());
+        Long parentId = StringUtil.isEmpty(layoutModel.getParentId()) ? null : Long.valueOf(layoutModel.getParentId());
+        long defaultLayoutTitleLanguageId = languageRepository.getId(layoutModel.getDefaultLayoutTitleLanguageId()).longValue();
+        layoutRepository.updateLayout(layoutModel.getUrl(), pageLayoutName, parentId, defaultLayoutTitleLanguageId, layout.getId());
+        updateLayoutTitles(layoutModel, layout);
+    }
 
-	private void deleteLayoutTitle(long layoutId, String languageId) {
-		Long lid = languageRepository.getId(languageId);
-		if (lid != null) {
-			layoutRepository.deleteLayoutTitle(layoutId, lid.longValue());
-		} else {
-			log.warn("Can't delete LayoutTitle ({}). Invalid language id '{}'", Long.valueOf(layoutId), languageId);
-		}
-	}
+    private void updateLayoutTitles(LayoutModel layoutModel, Layout layout) {
+        for (String languageId : languageRepository.getSupportedLanguageIds()) {
+            Long l = languageRepository.getId(languageId);
+            String layoutTitle = layoutModel.getLayoutTitles().get(languageId);
+            if (!StringUtil.isEmpty(layoutTitle)) {
+                addOrUpdateLayoutTitle(layout, languageId, layoutTitle);
+            } else if (layout.getLayoutTitle(l.longValue()) != null) {
+                deleteLayoutTitle(layout.getId(), languageId);
+            }
+        }
+    }
 
-	private void addOrUpdateLayoutTitle(Layout layout, String languageId, String layoutTitle) {
-		Long lid = languageRepository.getId(languageId);
-		if (lid != null) {
-			addOrUpdateLayoutTitle(layout, layoutTitle, lid.longValue());
-		} else {
-			log.warn("Can't add/update LayoutTitle. Invalid language id '{}'", languageId);
-		}
-	}
+    private void deleteLayoutTitle(long layoutId, String languageId) {
+        Long lid = languageRepository.getId(languageId);
+        if (lid != null) {
+            layoutRepository.deleteLayoutTitle(layoutId, lid.longValue());
+        } else {
+            log.warn("Can't delete LayoutTitle ({}). Invalid language id '{}'", Long.valueOf(layoutId), languageId);
+        }
+    }
 
-	private void addOrUpdateLayoutTitle(Layout layout, String val, long lid) {
-		if (layout.getLayoutTitle(lid) == null) {
-			layoutRepository.addLayoutTitle(layout.getId(), lid, val);
-		} else {
-			layoutRepository.updateLayoutTitle(layout.getId(), lid, val);
-		}
-	}
+    private void addOrUpdateLayoutTitle(Layout layout, String languageId, String layoutTitle) {
+        Long lid = languageRepository.getId(languageId);
+        if (lid != null) {
+            addOrUpdateLayoutTitle(layout, layoutTitle, lid.longValue());
+        } else {
+            log.warn("Can't add/update LayoutTitle. Invalid language id '{}'", languageId);
+        }
+    }
 
-	@ModelAttribute("addLayoutModel")
-	public LayoutModel getAddLayoutModel() {
-		return new LayoutModel();
-	}
+    private void addOrUpdateLayoutTitle(Layout layout, String val, long lid) {
+        if (layout.getLayoutTitle(lid) == null) {
+            layoutRepository.addLayoutTitle(layout.getId(), lid, val);
+        } else {
+            layoutRepository.updateLayoutTitle(layout.getId(), lid, val);
+        }
+    }
 
-	private Long getParentId(String parentId) {
-		if (StringUtil.isEmpty(parentId)) {
-			return null;
-		}
-		return Long.valueOf(parentId);
-	}
+    private LayoutModel getAddLayoutModel(PortletRequest request) {
+        LayoutModel model = new LayoutModel();
+        model.setDefaultLayoutTitleLanguageId(request.getParameter("defaultLayoutTitleLanguageId"));
+        model.setParentId(request.getParameter("parentId"));
+        model.setUrl(request.getParameter("url"));
+        Map<String, String> layoutTitles = new HashMap<>();
+        for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
+            String key = entry.getKey();
+            if (key.length() > 14 && key.startsWith("layoutTitles[") && key.endsWith("]")) {
+                String[] values = entry.getValue();
+                layoutTitles.put(key.substring(12, key.length() - 2), values != null && values.length > 0 ? values[1] : null);
+            }
+        }
+        log.debug("Layout titles are: '{}'", layoutTitles);
+        model.setLayoutTitles(layoutTitles);
+        return model;
+    }
+
+    private Long getParentId(String parentId) {
+        if (StringUtil.isEmpty(parentId)) {
+            return null;
+        }
+        return Long.valueOf(parentId);
+    }
 }

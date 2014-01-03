@@ -23,11 +23,7 @@
 	<portlet>
 		<portlet-name>layout-set</portlet-name>
 		<display-name>layout-set</display-name>
-		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
-		<init-param>
-			<name>contextConfigLocation</name>
-			<value>/WEB-INF/portlet-context/layout-set-portlet.xml</value>
-		</init-param>
+		<portlet-class>ee.midaiganes.portlets.layoutset.LayoutSetController</portlet-class>
 		<supports>
 			<mime-type>text/html</mime-type>
 			<portlet-mode>view</portlet-mode>
@@ -43,11 +39,7 @@
 	<portlet>
 		<portlet-name>layout</portlet-name>
 		<display-name>layout</display-name>
-		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
-		<init-param>
-			<name>contextConfigLocation</name>
-			<value>/WEB-INF/portlet-context/layout-portlet.xml</value>
-		</init-param>
+		<portlet-class>ee.midaiganes.portlets.layout.LayoutsController</portlet-class>
 		<supports>
 			<mime-type>text/html</mime-type>
 			<portlet-mode>view</portlet-mode>
@@ -136,11 +128,7 @@
 	<portlet>
 		<portlet-name>permissions</portlet-name>
 		<display-name>permissions</display-name>
-		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
-		<init-param>
-			<name>contextConfigLocation</name>
-			<value>/WEB-INF/portlet-context/permissions-portlet.xml</value>
-		</init-param>
+		<portlet-class>ee.midaiganes.portlets.permissions.PermissionsController</portlet-class>
 		<supports>
 			<mime-type>text/html</mime-type>
 			<portlet-mode>view</portlet-mode>
@@ -157,11 +145,7 @@
 	<portlet>
 		<portlet-name>users-groups</portlet-name>
 		<display-name>users-groups</display-name>
-		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
-		<init-param>
-			<name>contextConfigLocation</name>
-			<value>/WEB-INF/portlet-context/users-groups-portlet.xml</value>
-		</init-param>
+		<portlet-class>ee.midaiganes.portlets.usersgroups.UsersGroupsController</portlet-class>
 		<supports>
 			<mime-type>text/html</mime-type>
 			<portlet-mode>view</portlet-mode>

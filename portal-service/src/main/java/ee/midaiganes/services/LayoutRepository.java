@@ -24,7 +24,6 @@ import ee.midaiganes.services.SingleVmPool.Cache;
 import ee.midaiganes.services.SingleVmPool.Cache.Element;
 import ee.midaiganes.services.dao.LayoutDao;
 import ee.midaiganes.services.exceptions.IllegalFriendlyUrlException;
-import ee.midaiganes.services.exceptions.IllegalLanguageIdException;
 import ee.midaiganes.services.exceptions.IllegalPageLayoutException;
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.StringUtil;
@@ -137,7 +136,11 @@ public class LayoutRepository {
         List<Layout> layouts = new ArrayList<>();
         for (Layout layout : getLayouts(layoutSetId)) {
             Long layoutParentId = layout.getParentId();
-            if (parentId == null && layoutParentId == null || parentId.longValue() == layoutParentId.longValue()) {
+            if (parentId == null) {
+                if (layoutParentId == null) {
+                    layouts.add(layout);
+                }
+            } else if (layoutParentId != null && parentId.longValue() == layoutParentId.longValue()) {
                 layouts.add(layout);
             }
         }
@@ -160,7 +163,7 @@ public class LayoutRepository {
     }
 
     public long addLayout(long layoutSetId, String friendlyUrl, ThemeName themeName, PageLayoutName pageLayoutName, Long parentId, long defaultLayoutTitleLanguageId)
-            throws IllegalFriendlyUrlException, IllegalLanguageIdException, IllegalPageLayoutException {
+            throws IllegalFriendlyUrlException, IllegalPageLayoutException {
         validateLayoutData(friendlyUrl, pageLayoutName);
         try {
             return layoutDao.addLayout(layoutSetId, friendlyUrl, themeName, pageLayoutName, parentId, defaultLayoutTitleLanguageId);
@@ -170,7 +173,7 @@ public class LayoutRepository {
     }
 
     public void updateLayout(String friendlyUrl, PageLayoutName pageLayoutName, Long parentId, long defaultLayoutTitleLanguageId, long id) throws IllegalFriendlyUrlException,
-            IllegalLanguageIdException, IllegalPageLayoutException {
+            IllegalPageLayoutException {
         validateLayoutData(friendlyUrl, pageLayoutName);
         try {
             layoutDao.updateLayout(friendlyUrl, pageLayoutName, parentId, defaultLayoutTitleLanguageId, id);

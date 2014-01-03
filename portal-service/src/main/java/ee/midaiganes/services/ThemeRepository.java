@@ -25,85 +25,85 @@ import ee.midaiganes.util.XmlUtil;
 
 @Resource(name = PortalConfig.THEME_REPOSITORY)
 public class ThemeRepository {
-	private static final Logger log = LoggerFactory.getLogger(ThemeRepository.class);
-	private final Map<ThemeName, Theme> themes = new ConcurrentHashMap<>();
-	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    private static final Logger log = LoggerFactory.getLogger(ThemeRepository.class);
+    private final Map<ThemeName, Theme> themes = new ConcurrentHashMap<>();
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
-	private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
-	public ThemeRepository(JdbcTemplate jdbcTemplate) {
-		this.jdbcTemplate = jdbcTemplate;
-	}
+    public ThemeRepository(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
-	public Theme getTheme(ThemeName themeName) {
-		lock.readLock().lock();
-		try {
-			return themes.get(themeName);
-		} finally {
-			lock.readLock().unlock();
-		}
-	}
+    public Theme getTheme(ThemeName themeName) {
+        lock.readLock().lock();
+        try {
+            return themes.get(themeName);
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
 
-	public List<Theme> getThemes() {
-		lock.readLock().lock();
-		try {
-			return new ArrayList<>(themes.values());
-		} finally {
-			lock.readLock().unlock();
-		}
-	}
+    public List<Theme> getThemes() {
+        lock.readLock().lock();
+        try {
+            return new ArrayList<>(themes.values());
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
 
-	public Theme getDefaultTheme() {
-		lock.readLock().lock();
-		try {
-			return CollectionUtil.getFirstElement(themes.values());
-		} finally {
-			lock.readLock().unlock();
-		}
-	}
+    public Theme getDefaultTheme() {
+        lock.readLock().lock();
+        try {
+            return CollectionUtil.getFirstElement(themes.values());
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
 
-	private final Theme getThemeFromMidaiganesTheme(String contextPath, MidaiganesTheme.Theme theme) {
-		return new Theme(new ThemeName(contextPath, theme.getId()), theme.getPath(), theme.getJavascriptPath(), theme.getCssPath());
-	}
+    private final Theme getThemeFromMidaiganesTheme(String contextPath, MidaiganesTheme.Theme theme) {
+        return new Theme(new ThemeName(contextPath, theme.getId()), theme.getPath(), theme.getJavascriptPath(), theme.getCssPath());
+    }
 
-	public void registerThemes(String contextPath, InputStream themeXmlInputStream) {
-		try {
-			MidaiganesTheme theme = XmlUtil.unmarshalWithoutJAXBElement(MidaiganesTheme.class, themeXmlInputStream);
-			log.info("contextPath = {}, theme = {}", contextPath, theme);
-			if (theme != null) {
-				contextPath = contextPath.startsWith(StringPool.SLASH) ? contextPath.substring(1) : contextPath;
-				for (MidaiganesTheme.Theme t : theme.getTheme()) {
-					registerTheme(getThemeFromMidaiganesTheme(contextPath, t));
-				}
-			}
-		} catch (JAXBException e) {
-			log.error(e.getMessage(), e);
-		}
-	}
+    public void registerThemes(String contextPath, InputStream themeXmlInputStream) {
+        try {
+            MidaiganesTheme theme = XmlUtil.unmarshalWithoutJAXBElement(MidaiganesTheme.class, themeXmlInputStream);
+            log.info("contextPath = {}, theme = {}", contextPath, theme);
+            if (theme != null) {
+                String contextPathWithoutSlash = contextPath.startsWith(StringPool.SLASH) ? contextPath.substring(1) : contextPath;
+                for (MidaiganesTheme.Theme t : theme.getTheme()) {
+                    registerTheme(getThemeFromMidaiganesTheme(contextPathWithoutSlash, t));
+                }
+            }
+        } catch (JAXBException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
 
-	public void unregisterThemes(String contextPath) {
-		try {
-			lock.writeLock().lock();
-			Set<ThemeName> themeNames = themes.keySet();
-			for (ThemeName tn : themeNames) {
-				if (tn.getContextWithSlash().equals(contextPath)) {
-					themeNames.remove(tn);
-					log.info("removed theme: {}", tn);
-				}
-			}
-		} finally {
-			lock.writeLock().unlock();
-		}
-	}
+    public void unregisterThemes(String contextPath) {
+        try {
+            lock.writeLock().lock();
+            Set<ThemeName> themeNames = themes.keySet();
+            for (ThemeName tn : themeNames) {
+                if (tn.getContextWithSlash().equals(contextPath)) {
+                    themeNames.remove(tn);
+                    log.info("removed theme: {}", tn);
+                }
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
 
-	private void registerTheme(Theme theme) {
-		lock.writeLock().lock();
-		try {
-			themes.put(theme.getThemeName(), theme);
-			ThemeName themeName = theme.getThemeName();
-			jdbcTemplate.update("INSERT IGNORE INTO Theme(context, name) VALUES(?, ?)", themeName.getContext(), themeName.getName());
-		} finally {
-			lock.writeLock().unlock();
-		}
-	}
+    private void registerTheme(Theme theme) {
+        lock.writeLock().lock();
+        try {
+            themes.put(theme.getThemeName(), theme);
+            ThemeName themeName = theme.getThemeName();
+            jdbcTemplate.update("INSERT IGNORE INTO Theme(context, name) VALUES(?, ?)", themeName.getContext(), themeName.getName());
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
 }
