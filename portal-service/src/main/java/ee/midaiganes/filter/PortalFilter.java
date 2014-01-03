@@ -110,7 +110,7 @@ public class PortalFilter extends HttpFilter {
             // TODO handle this..
             log.info("User '{}' is not allowd to access '{}'", Long.valueOf(userId), friendlyUrl);
         }
-        return layoutRepository.getDefaultLayout(layoutSetId, friendlyUrl);
+        return layoutRepository.get404Layout(layoutSetId, friendlyUrl);
     }
 
     private LayoutSet getLayoutSet(String virtualHost) {

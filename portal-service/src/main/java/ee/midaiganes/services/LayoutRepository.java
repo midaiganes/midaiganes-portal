@@ -259,12 +259,9 @@ public class LayoutRepository {
         }
     }
 
-    /**
-     * TODO remove me
-     */
-    @Deprecated
-    public Layout getDefaultLayout(long layoutSetId, String friendlyUrl) {
-        log.warn("get default layout; layoutsetid = {}; friendlyUrl = {}", Long.valueOf(layoutSetId), friendlyUrl);
+    @Transactional
+    public Layout get404Layout(long layoutSetId, String friendlyUrl) {
+        log.info("get 404 layout; layoutsetid = {}; friendlyUrl = {}", Long.valueOf(layoutSetId), friendlyUrl);
         Theme defaultTheme = themeRepository.getDefaultTheme();
         String pageLayoutId = pageLayoutRepository.getDefaultPageLayout().getPageLayoutName().getFullName();
         return Layout.getDefault(layoutSetId, friendlyUrl, defaultTheme.getThemeName(), pageLayoutId);
