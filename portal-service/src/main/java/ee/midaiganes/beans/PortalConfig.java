@@ -145,7 +145,7 @@ public class PortalConfig {
         BeanRepositoryUtil.register(LanguageRepository.class, languageRepository);
         BeanRepositoryUtil.register(PortletInstanceRepository.class, portletInstanceRepository);
         BeanRepositoryUtil.register(SecureLayoutRepository.class, secureLayoutRepository);
-        BeanRepositoryUtil.register(ThemeVariablesService.class, new ThemeVariablesService(PortletURLFactory.getInstance()));
+        BeanRepositoryUtil.register(ThemeVariablesService.class, new ThemeVariablesService(PortletURLFactory.getInstance(), secureLayoutRepository));
         BeanRepositoryUtil.register(UserRepository.class, userRepository);
         BeanRepositoryUtil.register(RequestParser.class, new RequestParser());
         BeanRepositoryUtil.register(LayoutPortletRepository.class, layoutPortletRepository);
