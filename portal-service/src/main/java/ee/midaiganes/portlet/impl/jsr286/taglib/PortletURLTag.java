@@ -18,123 +18,123 @@ import ee.midaiganes.util.PortletModeUtil;
 import ee.midaiganes.util.WindowStateUtil;
 
 public abstract class PortletURLTag extends BasePortletTag implements PortletUrlParamTarget {
-	private String portletMode;
-	private String secure;
-	private String windowState;
-	private String escapeXml;
-	private String var;
-	private Map<String, String> parameters;
+    private String portletMode;
+    private String secure;
+    private String windowState;
+    private String escapeXml;
+    private String var;
+    private Map<String, String> parameters;
 
-	@Override
-	public void release() {
-		this.portletMode = null;
-		this.secure = null;
-		this.windowState = null;
-		this.escapeXml = null;
-		this.var = null;
-		this.parameters = null;
-		super.release();
-	}
+    @Override
+    public void release() {
+        this.portletMode = null;
+        this.secure = null;
+        this.windowState = null;
+        this.escapeXml = null;
+        this.var = null;
+        this.parameters = null;
+        super.release();
+    }
 
-	@Override
-	public int doStartTag() {
-		return Tag.EVAL_BODY_INCLUDE;
-	}
+    @Override
+    public int doStartTag() {
+        return Tag.EVAL_BODY_INCLUDE;
+    }
 
-	@Override
-	public int doEndTag() throws JspException {
-		PortletURL portletUrl = getPortletURL();
-		try {
-			portletUrl.setPortletMode(getPortletMode());
-			portletUrl.setSecure(isSecure());
-			portletUrl.setWindowState(getWindowState());
-			setParameters(portletUrl);
-			if (var == null) {
-				portletUrl.write(getOut(), isEscapeXml());
-			} else {
-				getPageContext().setAttribute(var, portletUrl.toString());
-			}
-		} catch (PortletModeException e) {
-			throw new JspException(e);
-		} catch (PortletSecurityException e) {
-			throw new JspException(e);
-		} catch (WindowStateException e) {
-			throw new JspException(e);
-		} catch (IOException e) {
-			throw new JspException(e);
-		} finally {
-			release();
-		}
+    @Override
+    public int doEndTag() throws JspException {
+        PortletURL portletUrl = getPortletURL();
+        try {
+            portletUrl.setPortletMode(getPortletMode());
+            portletUrl.setSecure(isSecure());
+            portletUrl.setWindowState(getWindowState());
+            setParameters(portletUrl);
+            if (var == null) {
+                portletUrl.write(getOut(), isEscapeXml());
+            } else {
+                getPageContext().setAttribute(var, portletUrl.toString());
+            }
+        } catch (PortletModeException e) {
+            throw new JspException(e);
+        } catch (PortletSecurityException e) {
+            throw new JspException(e);
+        } catch (WindowStateException e) {
+            throw new JspException(e);
+        } catch (IOException e) {
+            throw new JspException(e);
+        } finally {
+            release();
+        }
 
-		return Tag.EVAL_PAGE;
-	}
+        return Tag.EVAL_PAGE;
+    }
 
-	private void setParameters(PortletURL portletUrl) {
-		if (this.parameters != null) {
-			for (Map.Entry<String, String> param : this.parameters.entrySet()) {
-				portletUrl.setParameter(param.getKey(), param.getValue());
-			}
-		}
-	}
+    private void setParameters(PortletURL portletUrl) {
+        if (this.parameters != null) {
+            for (Map.Entry<String, String> param : this.parameters.entrySet()) {
+                portletUrl.setParameter(param.getKey(), param.getValue());
+            }
+        }
+    }
 
-	protected boolean isEscapeXml() {
-		return Boolean.parseBoolean(escapeXml);
-	}
+    protected boolean isEscapeXml() {
+        return Boolean.parseBoolean(escapeXml);
+    }
 
-	protected PortletMode getPortletMode() {
-		if (portletMode == null) {
-			return getPortletRequest().getPortletMode();
-		}
-		return PortletModeUtil.getPortletMode(portletMode);
-	}
+    protected PortletMode getPortletMode() {
+        if (portletMode == null) {
+            return getPortletRequest().getPortletMode();
+        }
+        return PortletModeUtil.getPortletMode(portletMode);
+    }
 
-	protected WindowState getWindowState() {
-		if (windowState == null) {
-			return getPortletRequest().getWindowState();
-		}
-		return WindowStateUtil.getWindowState(windowState);
-	}
+    protected WindowState getWindowState() {
+        if (windowState == null) {
+            return getPortletRequest().getWindowState();
+        }
+        return WindowStateUtil.getWindowState(windowState);
+    }
 
-	protected boolean isSecure() {
-		return secure == null ? getPortletRequest().isSecure() : Boolean.parseBoolean(secure);
-	}
+    protected boolean isSecure() {
+        return secure == null ? getPortletRequest().isSecure() : Boolean.parseBoolean(secure);
+    }
 
-	@Override
-	public void addParam(String name, String value) {
-		if (this.parameters == null) {
-			this.parameters = new HashMap<String, String>();
-		}
-		this.parameters.put(name, value);
-	}
+    @Override
+    public void addParam(String name, String value) {
+        if (this.parameters == null) {
+            this.parameters = new HashMap<>();
+        }
+        this.parameters.put(name, value);
+    }
 
-	public void setPortletMode(String portletMode) {
-		this.portletMode = portletMode;
-	}
+    public void setPortletMode(String portletMode) {
+        this.portletMode = portletMode;
+    }
 
-	public void setSecure(String secure) {
-		this.secure = secure;
-	}
+    public void setSecure(String secure) {
+        this.secure = secure;
+    }
 
-	public void setVar(String var) {
-		this.var = var;
-	}
+    public void setVar(String var) {
+        this.var = var;
+    }
 
-	public void setWindowState(String windowState) {
-		this.windowState = windowState;
-	}
+    public void setWindowState(String windowState) {
+        this.windowState = windowState;
+    }
 
-	public void setEscapeXml(String escapeXml) {
-		this.escapeXml = escapeXml;
-	}
+    public void setEscapeXml(String escapeXml) {
+        this.escapeXml = escapeXml;
+    }
 
-	public void setCopyCurrentRenderParameters(String copyCurrentRenderParameters) {
-		// TODO
-		throw new RuntimeException("not implemented");
-	}
+    public void setCopyCurrentRenderParameters(String copyCurrentRenderParameters) {
+        // TODO
+        throw new RuntimeException("not implemented");
+    }
 
-	protected MimeResponse getMimeResponse() {
-		return (MimeResponse) getPortletResponse();
-	}
+    protected MimeResponse getMimeResponse() {
+        return (MimeResponse) getPortletResponse();
+    }
 
-	protected abstract PortletURL getPortletURL();
+    protected abstract PortletURL getPortletURL();
 }

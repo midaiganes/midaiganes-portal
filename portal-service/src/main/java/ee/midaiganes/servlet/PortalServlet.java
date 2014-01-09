@@ -96,9 +96,8 @@ public class PortalServlet extends HttpServlet {
                 log.debug("Found PortletApp '{}'", portletApp);
                 portletApp.serveResource(request, response);
                 return true;
-            } else {
-                log.debug("Didn't find portletApp for portletUrl '{}'", portletURL);
             }
+            log.debug("Didn't find portletApp for portletUrl '{}'", portletURL);
         } else if (MidaiganesWindowState.EXCLUSIVE.equals(portletURL.getWindowState())) {
             PortletApp portletApp = getPortletApp(pageDisplay, portletURL);
             log.debug("portletApp = {}", portletApp);
@@ -116,16 +115,14 @@ public class PortalServlet extends HttpServlet {
             if (portletURL.getPortletName() != null) {
                 PortletInstance instance = portletInstanceRepository.getDefaultPortletInstance(portletURL.getPortletName());
                 return portletRepository.getPortletApp(pageDisplay.getUser().getId(), instance, portletURL.getPortletMode(), portletURL.getWindowState());
-            } else {
-                log.debug("portletURL.getPortletName is empty");
             }
+            log.debug("portletURL.getPortletName is empty");
         } else {
             LayoutPortlet layoutPortlet = getLayoutPortlet(pageDisplay, portletURL);
             if (layoutPortlet != null) {
                 return portletRepository.getPortletApp(pageDisplay.getUser().getId(), layoutPortlet, portletURL.getPortletMode(), portletURL.getWindowState());
-            } else {
-                log.debug("layoutPortlet = null");
             }
+            log.debug("layoutPortlet = null");
         }
         return null;
     }

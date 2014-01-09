@@ -25,80 +25,79 @@ import ee.midaiganes.util.IOUtil;
 import ee.midaiganes.util.StringPool;
 
 public class StaticContentServlet extends HttpServlet {
-	private static final Logger log = LoggerFactory.getLogger(StaticContentServlet.class);
+    private static final Logger log = LoggerFactory.getLogger(StaticContentServlet.class);
 
-	@Resource(name = PortalConfig.THEME_REPOSITORY)
-	private ThemeRepository themeRepository;
+    @Resource(name = PortalConfig.THEME_REPOSITORY)
+    private ThemeRepository themeRepository;
 
-	@Resource(name = PortalConfig.SERVLET_CONTEXT_RESOURCE_REPOSITORY)
-	private ServletContextResourceRepository servletContextResourceRepository;
+    @Resource(name = PortalConfig.SERVLET_CONTEXT_RESOURCE_REPOSITORY)
+    private ServletContextResourceRepository servletContextResourceRepository;
 
-	@Override
-	public void init(ServletConfig config) throws ServletException {
-		super.init(config);
-		try {
-			autowire();
-		} catch (RuntimeException e) {
-			log.error(e.getMessage(), e);
-		}
-	}
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        try {
+            autowire();
+        } catch (RuntimeException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
 
-	@Override
-	protected void service(HttpServletRequest request, HttpServletResponse response) {
-		try {
-			String requestURI = request.getRequestURI();
-			Map<String, Theme> staticFiles = getThemesStaticContents();
-			log.debug("requestURI = {}; staticFiles = {}", requestURI, staticFiles);
-			if (staticFiles.containsKey(requestURI)) {
-				try (InputStream is = getResourceAsStream(staticFiles.get(requestURI), requestURI)) {
-					copyToOutputStream(response, is);
-				}
-			} else {
-				log.error("file not found: {}", requestURI);
-			}
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            String requestURI = request.getRequestURI();
+            Map<String, Theme> staticFiles = getThemesStaticContents();
+            log.debug("requestURI = {}; staticFiles = {}", requestURI, staticFiles);
+            if (staticFiles.containsKey(requestURI)) {
+                try (InputStream is = getResourceAsStream(staticFiles.get(requestURI), requestURI)) {
+                    copyToOutputStream(response, is);
+                }
+            } else {
+                log.error("file not found: {}", requestURI);
+            }
 
-		} catch (IOException | RuntimeException e) {
-			log.error(e.getMessage(), e);
-		}
-	}
+        } catch (IOException | RuntimeException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
 
-	private void copyToOutputStream(HttpServletResponse response, InputStream is) throws IOException {
-		try (ServletOutputStream os = response.getOutputStream()) {
-			IOUtil.copy(is, os);
-			os.flush();
-		}
-	}
+    private void copyToOutputStream(HttpServletResponse response, InputStream is) throws IOException {
+        try (ServletOutputStream os = response.getOutputStream()) {
+            IOUtil.copy(is, os);
+            os.flush();
+        }
+    }
 
-	private InputStream getResourceAsStream(Theme theme, String requestURI) {
-		return getContext(theme.getThemeName().getContextWithSlash()).getResourceAsStream(
-				requestURI.substring(theme.getThemeName().getContextWithSlash().length()));
-	}
+    private InputStream getResourceAsStream(Theme theme, String requestURI) {
+        return getContext(theme.getThemeName().getContextWithSlash()).getResourceAsStream(requestURI.substring(theme.getThemeName().getContextWithSlash().length()));
+    }
 
-	private ServletContext getContext(String contextPath) {
-		return getServletContext().getContext(contextPath);
-	}
+    private ServletContext getContext(String contextPath) {
+        return getServletContext().getContext(contextPath);
+    }
 
-	private Map<String, Theme> getThemesStaticContents() {
-		Map<String, Theme> files = new HashMap<String, Theme>();
-		ServletContext context = getServletContext();
-		for (Theme theme : themeRepository.getThemes()) {
-			ServletContext ctx = context.getContext(theme.getThemeName().getContextWithSlash());
-			files.putAll(getStaticContents(ctx, theme, theme.getThemePath() + StringPool.SLASH + theme.getJavascriptPath()));
-			files.putAll(getStaticContents(ctx, theme, theme.getThemePath() + StringPool.SLASH + theme.getCssPath()));
-		}
-		return files;
-	}
+    private Map<String, Theme> getThemesStaticContents() {
+        Map<String, Theme> files = new HashMap<>();
+        ServletContext context = getServletContext();
+        for (Theme theme : themeRepository.getThemes()) {
+            ServletContext ctx = context.getContext(theme.getThemeName().getContextWithSlash());
+            files.putAll(getStaticContents(ctx, theme, theme.getThemePath() + StringPool.SLASH + theme.getJavascriptPath()));
+            files.putAll(getStaticContents(ctx, theme, theme.getThemePath() + StringPool.SLASH + theme.getCssPath()));
+        }
+        return files;
+    }
 
-	private Map<String, Theme> getStaticContents(ServletContext ctx, Theme theme, String resourcePath) {
-		List<String> list = servletContextResourceRepository.getContextResourcePaths(ctx, resourcePath);
-		// ctx.getResourcePaths(theme.getThemePath() + StringPool.SLASH +
-		// theme.getJavascriptPath());
-		Map<String, Theme> files = new HashMap<String, Theme>();
-		if (list != null) {
-			for (String path : list) {
-				files.put(theme.getThemeName().getContextWithSlash() + path, theme);
-			}
-		}
-		return files;
-	}
+    private Map<String, Theme> getStaticContents(ServletContext ctx, Theme theme, String resourcePath) {
+        List<String> list = servletContextResourceRepository.getContextResourcePaths(ctx, resourcePath);
+        // ctx.getResourcePaths(theme.getThemePath() + StringPool.SLASH +
+        // theme.getJavascriptPath());
+        Map<String, Theme> files = new HashMap<>();
+        if (list != null) {
+            for (String path : list) {
+                files.put(theme.getThemeName().getContextWithSlash() + path, theme);
+            }
+        }
+        return files;
+    }
 }

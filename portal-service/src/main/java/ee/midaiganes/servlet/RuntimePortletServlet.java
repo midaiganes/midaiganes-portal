@@ -59,9 +59,8 @@ public class RuntimePortletServlet extends HttpServlet {
         log.debug("portletName = '{}'; portletURL = '{}'", portletName, portletURL);
         if (portletURL != null && StringPool.DEFAULT_PORTLET_WINDOWID.equals(portletURL.getWindowID()) && portletName.equals(portletURL.getPortletName())) {
             return getPortletApp(pageDisplay, portletURL);
-        } else {
-            return getPortletApp(pageDisplay, portletName);
         }
+        return getPortletApp(pageDisplay, portletName);
     }
 
     private PortletApp getPortletApp(PageDisplay pageDisplay, PortletName portletName) throws PrincipalException {

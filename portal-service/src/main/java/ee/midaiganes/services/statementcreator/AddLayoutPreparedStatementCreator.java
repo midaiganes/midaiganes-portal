@@ -55,7 +55,7 @@ public class AddLayoutPreparedStatementCreator implements PreparedStatementCreat
         }
         ps.setString(i++, pageLayoutName.getFullName());
         if (parentId != null) {
-            ps.setLong(i++, parentId);
+            ps.setLong(i++, parentId.longValue());
         } else {
             ps.setNull(i++, Types.INTEGER);
         }
