@@ -3,17 +3,22 @@ package ee.midaiganes.beans;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.dbcp.BasicDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.EnableLoadTimeWeaving;
-import org.springframework.context.annotation.EnableLoadTimeWeaving.AspectJWeaving;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.annotation.TransactionManagementConfigurer;
 
 import ee.midaiganes.factory.PortletURLFactory;
 import ee.midaiganes.secureservices.SecureLayoutRepository;
@@ -48,10 +53,11 @@ import ee.midaiganes.services.dao.UserDao;
 
 @Configuration(value = "portalConfig")
 @PropertySource(value = "classpath:portal.properties", name = "portalProperties")
-@EnableLoadTimeWeaving(aspectjWeaving = AspectJWeaving.ENABLED)
+// @EnableLoadTimeWeaving(aspectjWeaving = AspectJWeaving.ENABLED)
 // @EnableAspectJAutoProxy(proxyTargetClass = true)
-public class PortalConfig {
-
+@EnableTransactionManagement(mode = AdviceMode.ASPECTJ)
+public class PortalConfig implements TransactionManagementConfigurer {
+    private static final Logger log = LoggerFactory.getLogger(PortalConfig.class);
     public static final String PORTAL_DATASOURCE = "portalDataSource";
     public static final String PORTLET_REPOSITORY = "portletRepository";
     public static final String SECURE_PORTLET_REPOSITORY = "securePortletRepository";
@@ -139,8 +145,15 @@ public class PortalConfig {
     @Autowired
     private ResourceRepository resourceRepository;
 
+    @Autowired
+    @Qualifier("testSetup")
+    private Object test;
+
     @PostConstruct
     public void postConstruct() {
+        if (test == null) {
+            throw new IllegalStateException("test bean is missing");
+        }
         BeanRepositoryUtil.register(PermissionRepository.class, permissionRepository);
         BeanRepositoryUtil.register(LanguageRepository.class, languageRepository);
         BeanRepositoryUtil.register(PortletInstanceRepository.class, portletInstanceRepository);
@@ -159,6 +172,31 @@ public class PortalConfig {
         BeanRepositoryUtil.register(GroupRepository.class, groupRepository);
         BeanRepositoryUtil.register(ResourceActionRepository.class, resourceActionRepository);
         BeanRepositoryUtil.register(ResourceRepository.class, resourceRepository);
+    }
+
+    @Bean(name = "testSetup", autowire = Autowire.NO)
+    public Object testSetup() {
+        log.info("testing spring setup...");
+        try {
+            testSetup2();
+            testSetup2();
+            // TODO test transaction
+        } catch (RuntimeException e) {
+            throw new RuntimeException("spring setup is incorrect", e);
+        }
+        log.info("spring setup looks ok");
+        return new Object();
+    }
+
+    private static boolean testSetup = false;
+
+    @Bean(name = "testSetup2", autowire = Autowire.NO)
+    public Object testSetup2() {
+        if (testSetup) {
+            throw new IllegalStateException("Not allowed to call testSetup2 more than once. Spring proxy not working?");
+        }
+        testSetup = true;
+        return new Object();
     }
 
     @Bean(name = DB_INSTALL_SERVICE, autowire = Autowire.NO)
@@ -186,6 +224,11 @@ public class PortalConfig {
         DataSourceTransactionManager txManager = new DataSourceTransactionManager(portalDataSource());
         txManager.setDefaultTimeout(txManagerDefaultTimeout);
         return txManager;
+    }
+
+    @Override
+    public PlatformTransactionManager annotationDrivenTransactionManager() {
+        return dataSourceTransactionManager();
     }
 
     @Bean(name = PORTAL_DATASOURCE, destroyMethod = "close", autowire = Autowire.NO)
