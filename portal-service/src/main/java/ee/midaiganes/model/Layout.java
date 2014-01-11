@@ -15,8 +15,6 @@ public class Layout implements Serializable, PortalResource {
     private final long nr;
     private final Long parentId;
     private final long defaultLayoutTitleLanguageId;
-
-    // TODO
     private final List<LayoutTitle> layoutTitles;
 
     private static final long DEFAULT_LAYOUT_TITLE_LANGUAGE_ID = -1;
