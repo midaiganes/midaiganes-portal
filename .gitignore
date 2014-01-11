@@ -2,6 +2,7 @@
 bin
 build
 dist
+report
 portal-gen*
 portal-web/webapp/META-INF/tmpxsd
 portal-web/webapp/WEB-INF/lib
