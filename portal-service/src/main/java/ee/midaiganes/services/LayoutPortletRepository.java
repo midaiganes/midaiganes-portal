@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import ee.midaiganes.beans.PortalConfig;
@@ -27,7 +28,7 @@ public class LayoutPortletRepository {
         this.cache = SingleVmPool.getCache(LayoutPortletRepository.class.getName());
     }
 
-    @Transactional(readOnly = false, value = PortalConfig.TXMANAGER)
+    @Transactional(readOnly = false, value = PortalConfig.TXMANAGER, propagation = Propagation.REQUIRED)
     public void addLayoutPortlet(long layoutId, long rowId, PortletName portletName, int boxIndex) {
         try {
             long portletInstanceId = portletInstanceRepository.addPortletInstance(portletName);
@@ -76,7 +77,6 @@ public class LayoutPortletRepository {
         return lp;
     }
 
-    // TODO
     @Transactional(readOnly = false, value = PortalConfig.TXMANAGER)
     public void moveLayoutPortlet(String portletWindowID, long layoutId, long portletBoxId, long boxIndex) {
         try {
