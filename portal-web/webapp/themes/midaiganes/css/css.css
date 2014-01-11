@@ -322,8 +322,11 @@ ul.chat li.selected{
 	z-index: 1;
 }
 
-
+.layout-hole {
+	min-height: 10px;
+}
 .ui-state-highlight{
 	height: 1.5em;
 	line-height: 1.2em;
+	background: yellow;
 }

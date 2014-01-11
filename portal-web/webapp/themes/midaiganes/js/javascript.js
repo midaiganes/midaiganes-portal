@@ -117,20 +117,15 @@
 			revert: "invalid",
 			//helper: 'clone',
 			helper: function() {
-				this.midaiganes = 'newthis';
 				var t = jQuery(this);
-				t.midaiganes = 'newjq';
 				var c = t.clone();
-				c.midaiganes = 'newclone';
 				return c;
 			},
 			connectToSortable: '.layout-hole',
 			start: function(event, ui) {
 				ui.helper.midaiganes = 'new';
-				jQuery('.layout-hole').css('background', 'yellow').css('padding', '10px 0 10px 0');
 			},
 			stop: function() {
-				jQuery('.layout-hole').css('background', '').css('padding', '');
 			}
 		});
 	});
