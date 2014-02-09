@@ -37,6 +37,7 @@ import ee.midaiganes.util.LongUtil;
 import ee.midaiganes.util.RequestUtil;
 import ee.midaiganes.util.SessionUtil;
 import ee.midaiganes.util.StringUtil;
+import ee.midaiganes.util.TimeProviderUtil;
 
 public class ChatPortlet extends BasePortlet implements ResourceServingPortlet {
     private static final Logger log = LoggerFactory.getLogger(ChatPortlet.class);
@@ -182,7 +183,7 @@ public class ChatPortlet extends BasePortlet implements ResourceServingPortlet {
 
         private ChatAsyncCallback(AsyncContext asyncContext) {
             this.asyncContext = asyncContext;
-            this.timeoutTimeInMillis = System.currentTimeMillis() + (1000 * 30);
+            this.timeoutTimeInMillis = TimeProviderUtil.currentTimeMillis() + (1000 * 30);
         }
 
         @Override

@@ -23,6 +23,7 @@ import ee.midaiganes.portlets.chat.ChatCmd.PrivMsgChatCmd;
 import ee.midaiganes.portlets.chat.ChatCmd.UserLeftPrivateChatCmd;
 import ee.midaiganes.util.Pair;
 import ee.midaiganes.util.ThreadUtil;
+import ee.midaiganes.util.TimeProviderUtil;
 import gnu.trove.iterator.TLongObjectIterator;
 import gnu.trove.map.hash.TLongObjectHashMap;
 
@@ -177,7 +178,7 @@ public class ChatImpl implements Chat {
     private void startUserCallbackThread() {
         new Thread(new Runnable() {
             private void removeTimedOutUsers(ArrayList<ChatUser> chatUsers) {
-                long currentTimeMillis = System.currentTimeMillis();
+                long currentTimeMillis = TimeProviderUtil.currentTimeMillis();
                 for (int i = chatUsers.size() - 1; i >= 0; i--) {
                     if (chatUsers.get(i).isTimedOut(currentTimeMillis)) {
                         // maybe it is faster to create new list?
@@ -251,7 +252,7 @@ public class ChatImpl implements Chat {
     private void updateUserActiveTime(long userId) {
         for (ChatUser u : this.chatUsers) {
             if (u.getUser().getId() == userId) {
-                u.updateActiveTime(System.currentTimeMillis());
+                u.updateActiveTime(TimeProviderUtil.currentTimeMillis());
                 return;
             }
         }
@@ -261,7 +262,7 @@ public class ChatImpl implements Chat {
         if (!cmds.isEmpty()) {
             ArrayList<ChatCmd<?>> chatCommands = new ArrayList<>();
             Iterator<ChatMessage> cmdsIterator = cmds.iterator();
-            long currentTimeMillis = System.currentTimeMillis();
+            long currentTimeMillis = TimeProviderUtil.currentTimeMillis();
             while (cmdsIterator.hasNext()) {
                 ChatMessage cm = cmdsIterator.next();
                 if (cm.isTimedOut(currentTimeMillis)) {
