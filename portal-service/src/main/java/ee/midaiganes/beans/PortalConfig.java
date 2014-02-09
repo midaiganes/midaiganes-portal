@@ -1,8 +1,9 @@
 package ee.midaiganes.beans;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.sql.DataSource;
 
-import org.apache.commons.dbcp.BasicDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowire;
@@ -16,10 +17,12 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.TransactionManagementConfigurer;
 
+import ee.midaiganes.cache.SingleVmPoolUtil;
 import ee.midaiganes.factory.PortletURLFactory;
 import ee.midaiganes.secureservices.SecureLayoutRepository;
 import ee.midaiganes.secureservices.SecurePortletRepository;
@@ -93,6 +96,9 @@ public class PortalConfig implements TransactionManagementConfigurer {
 
     @Value("${jdbc.password}")
     private String password;
+
+    @Value("${jdbc.maxActive}")
+    private int maxActive;
 
     @Value("${txManager.defaultTimeout}")
     private int txManagerDefaultTimeout;
@@ -174,6 +180,11 @@ public class PortalConfig implements TransactionManagementConfigurer {
         BeanRepositoryUtil.register(ResourceRepository.class, resourceRepository);
     }
 
+    @PreDestroy
+    public void preDestroy() {
+        SingleVmPoolUtil.destroy();
+    }
+
     @Bean(name = "testSetup", autowire = Autowire.NO)
     public Object testSetup() {
         log.info("testing spring setup...");
@@ -232,24 +243,35 @@ public class PortalConfig implements TransactionManagementConfigurer {
     }
 
     @Bean(name = PORTAL_DATASOURCE, destroyMethod = "close", autowire = Autowire.NO)
-    public BasicDataSource portalDataSource() {
-        BasicDataSource portalDataSource = new PortalDataSource();
-        portalDataSource.setDriverClassName(driver);
-        portalDataSource.setUrl(url);
-        portalDataSource.setUsername(username);
-        portalDataSource.setPassword(password);
-        portalDataSource.setMaxActive(1);
-        portalDataSource.setMaxIdle(1);
-        portalDataSource.setMinIdle(1);
-        portalDataSource.setInitialSize(1);
-        portalDataSource.setMaxWait(1000);
-        portalDataSource.setTestOnBorrow(true);
-        portalDataSource.setTestOnReturn(true);
-        portalDataSource.setTimeBetweenEvictionRunsMillis(5000);
-        portalDataSource.setTestWhileIdle(true);
-        portalDataSource.setValidationQuery("SELECT 1");
-        portalDataSource.setValidationQueryTimeout(1);
-        return portalDataSource;
+    public DataSource portalDataSource() {
+        final org.apache.tomcat.jdbc.pool.DataSource ds = new org.apache.tomcat.jdbc.pool.DataSource();
+        ds.setDriverClassName(driver);
+        ds.setUrl(url);
+        ds.setUsername(username);
+        ds.setPassword(password);
+        ds.setMaxActive(maxActive);
+        ds.setMaxIdle(maxActive);
+        ds.setMinIdle(1);
+        ds.setInitialSize(1);
+        ds.setMaxWait(1000);
+        ds.setTestOnBorrow(true);
+        ds.setTestOnReturn(true);
+        ds.setTestWhileIdle(true);
+        ds.setTimeBetweenEvictionRunsMillis(5000);
+        ds.setValidationInterval(30000);
+        ds.setValidationQuery("SELECT 1");
+        ds.setValidationQueryTimeout(1);
+        ds.setJmxEnabled(true);
+        ds.setLogAbandoned(true);//
+        ds.setSuspectTimeout(5);
+
+        return new LazyConnectionDataSourceProxy(ds) {
+            @SuppressWarnings("unused")
+            public void close() {
+                ds.close();
+            }
+        };
+
     }
 
     @Bean(name = PORTAL_JDBC_TEMPLATE, autowire = Autowire.NO)
