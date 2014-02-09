@@ -18,9 +18,9 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import ee.midaiganes.beans.PortalConfig;
-import ee.midaiganes.services.SingleVmPool;
-import ee.midaiganes.services.SingleVmPool.Cache;
-import ee.midaiganes.services.SingleVmPool.Cache.Element;
+import ee.midaiganes.cache.Element;
+import ee.midaiganes.cache.SingleVmCache;
+import ee.midaiganes.cache.SingleVmPoolUtil;
 
 @Repository(value = "webContentRepository")
 public class WebContentRepository {
@@ -28,13 +28,13 @@ public class WebContentRepository {
     @Resource(name = PortalConfig.PORTAL_JDBC_TEMPLATE)
     private JdbcTemplate jdbcTemplate;
 
-    private final Cache cache;
-    private final Cache webContentCache;
+    private final SingleVmCache cache;
+    private final SingleVmCache webContentCache;
     private static final WebContentRowMapper webContentRowMapper = new WebContentRowMapper();
 
     public WebContentRepository() {
-        cache = SingleVmPool.getCache(WebContentRepository.class.getName());
-        webContentCache = SingleVmPool.getCache(WebContentRepository.class.getName() + "." + WebContent.class.getName());
+        cache = SingleVmPoolUtil.getCache(WebContentRepository.class.getName());
+        webContentCache = SingleVmPoolUtil.getCache(WebContentRepository.class.getName() + "." + WebContent.class.getName());
     }
 
     public WebContent getWebContent(long id) {
@@ -62,13 +62,17 @@ public class WebContentRepository {
 
             } finally {
                 wcs = wcs == null ? Collections.<WebContent> emptyList() : wcs;
-                cache.put(Long.toString(layoutSetId), wcs);
-                for (WebContent wc : wcs) {
-                    webContentCache.put(Long.toString(wc.getId()), wc);
-                }
+                cacheWebContents(layoutSetId, wcs);
             }
         }
         return wcs;
+    }
+
+    private void cacheWebContents(long layoutSetId, List<WebContent> wcs) {
+        cache.put(Long.toString(layoutSetId), wcs);
+        for (WebContent wc : wcs) {
+            webContentCache.put(Long.toString(wc.getId()), wc);
+        }
     }
 
     public long addWebContent(final long layoutSet, final String title, final String content) {
@@ -99,7 +103,7 @@ public class WebContentRepository {
         }
     }
 
-    private static class WebContentRowMapper implements RowMapper<WebContent> {
+    private static final class WebContentRowMapper implements RowMapper<WebContent> {
         @Override
         public WebContent mapRow(ResultSet rs, int rowNum) throws SQLException {
             return new WebContent(rs.getLong(1), rs.getLong(2), rs.getString(3), rs.getString(4), new DateTime(rs.getTimestamp(5).getTime()));
