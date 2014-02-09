@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="portal" default="deploy" xmlns:ivy="antlib:org.apache.ivy.ant">
+<project name="portal" default="deploy" xmlns:ivy="antlib:org.apache.ivy.ant" xmlns:fa="antlib:de.thetaphi.forbiddenapis">
 	<property name="project.basedir" location="${basedir}" />
+	<property name="jdk.version" value="1.7"/>
 
 	<property file="conf/portal.properties" />
 	<property name="liquibase.changeLogFile" value="portal-db/liquibase/master.xml" />
@@ -35,8 +36,8 @@
     			includejavaruntime="false"
     			listfiles="true"
     			nowarn="false"
-    			source="1.7"
-    			target="1.7"
+    			source="${jdk.version}"
+    			target="${jdk.version}"
     			srcdir="@{srcdir}"
     			>
     			<compilerarg value="-Xlint:serial"/>
@@ -102,6 +103,7 @@
 		<ivy:cachepath pathid="ivy.gen.path" conf="gen"/>
 		<ivy:cachepath pathid="ivy.compile.path" conf="compile"/>
 		<ivy:cachepath pathid="ivy.dbupdate.path" conf="dbupdate"/>
+		<ivy:cachepath pathid="ivy.test.path" conf="test" />
 	</target>
 	
 	
@@ -236,7 +238,8 @@
 			<path refid="server-jetty.ivy.path" />
 			<path refid="portal.global.ivy.path" />
 		</path>
-		<property name="javaweaver.path" location="${jetty.run.dir}/spring-instrument.jar" />
+		<!-- property name="javaweaver.path" location="${jetty.run.dir}/spring-instrument.jar" / -->
+		<property name="javaweaver.path" location="${jetty.run.dir}/aspectjweaver.jar" />
 	</target>
 	
 	<target name="start-jetty" depends="prepare-start-jetty" description="start jetty server">
@@ -254,5 +257,21 @@
 	    <mkdir dir="report" />
 	    <ivy:resolve />
 	    <ivy:report todir="report" />
+	</target>
+	
+	
+	
+	<target name="forbidden-checks" depends="compile-service">
+		<taskdef uri="antlib:de.thetaphi.forbiddenapis" classpathref="ivy.test.path"/>
+		<fa:forbiddenapis internalRuntimeForbidden="true" classpathref="compile.classpath" dir="portal-service/build/classes">
+			<bundledsignatures name="jdk-unsafe-${jdk.version}"/>
+			<bundledsignatures name="jdk-deprecated-${jdk.version}"/>
+			<bundledsignatures name="jdk-system-out"/>
+			<!-- bundledsignatures name="commons-io-unsafe-2.4"/ -->
+			<!-- signaturesFileset file="path/to/signatures.txt"/ -->
+		</fa:forbiddenapis>
+	</target>
+	
+	<target name="test" depends="forbidden-checks">
 	</target>
 </project>
