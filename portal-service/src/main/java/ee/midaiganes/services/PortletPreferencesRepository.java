@@ -15,7 +15,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import ee.midaiganes.beans.PortalConfig;
-import ee.midaiganes.services.SingleVmPool.Cache;
+import ee.midaiganes.cache.Element;
+import ee.midaiganes.cache.SingleVmCache;
+import ee.midaiganes.cache.SingleVmPoolUtil;
 import ee.midaiganes.services.rowmapper.PortletPreferencesResultSetExtractor;
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.StringUtil;
@@ -29,7 +31,7 @@ public class PortletPreferencesRepository {
     private static final String INSERT_INTO_PORTLETPREFERENCE = "INSERT INTO PortletPreference(portletInstanceId, preferenceName) VALUES(?, ?)";
     private static final String INSERT_INTO_PORTLETPREFERENCEVALUES = "INSERT INTO PortletPreferenceValue (portletPreferenceId, preferenceValue) VALUES ((SELECT id FROM PortletPreference WHERE preferenceName = ? AND portletInstanceId = ?), ?)";
 
-    private final Cache cache = SingleVmPool.getCache(PortletPreferencesRepository.class.getName());
+    private final SingleVmCache cache = SingleVmPoolUtil.getCache(PortletPreferencesRepository.class.getName());
     private static final PortletPreferencesResultSetExtractor getPortletPreferencesExtractor = new PortletPreferencesResultSetExtractor();
 
     public PortletPreferencesRepository(JdbcTemplate jdbcTemplate) {
@@ -39,7 +41,7 @@ public class PortletPreferencesRepository {
     @Transactional(propagation = Propagation.REQUIRED, readOnly = true, isolation = Isolation.DEFAULT)
     public Map<String, String[]> getPortletPreferences(long portletInstanceId) {
         String key = Long.toString(portletInstanceId);
-        SingleVmPool.Cache.Element element = cache.getElement(key);
+        Element element = cache.getElement(key);
         if (element != null) {
             return element.get();
         }

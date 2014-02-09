@@ -15,13 +15,14 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import ee.midaiganes.beans.PortalConfig;
+import ee.midaiganes.cache.Element;
+import ee.midaiganes.cache.SingleVmCache;
+import ee.midaiganes.cache.SingleVmPoolUtil;
 import ee.midaiganes.model.Layout;
 import ee.midaiganes.model.LayoutTitle;
 import ee.midaiganes.model.PageLayoutName;
 import ee.midaiganes.model.Theme;
 import ee.midaiganes.model.ThemeName;
-import ee.midaiganes.services.SingleVmPool.Cache;
-import ee.midaiganes.services.SingleVmPool.Cache.Element;
 import ee.midaiganes.services.dao.LayoutDao;
 import ee.midaiganes.services.exceptions.IllegalFriendlyUrlException;
 import ee.midaiganes.services.exceptions.IllegalPageLayoutException;
@@ -39,17 +40,17 @@ public class LayoutRepository {
     private final ThemeRepository themeRepository;
     private final PageLayoutRepository pageLayoutRepository;
 
-    private final Cache cache;
-    private final Cache layoutTitleCache;
-    private final Cache layoutCache;
+    private final SingleVmCache cache;
+    private final SingleVmCache layoutTitleCache;
+    private final SingleVmCache layoutCache;
 
     public LayoutRepository(LayoutDao layoutDao, ThemeRepository themeRepository, PageLayoutRepository pageLayoutRepository) {
         this.layoutDao = layoutDao;
         this.themeRepository = themeRepository;
         this.pageLayoutRepository = pageLayoutRepository;
-        this.cache = SingleVmPool.getCache(LayoutRepository.class.getName());
-        this.layoutTitleCache = SingleVmPool.getCache(LayoutRepository.class.getName() + ".LayoutTitle");
-        this.layoutCache = SingleVmPool.getCache(LayoutRepository.class.getName() + ".Layout");
+        this.cache = SingleVmPoolUtil.getCache(LayoutRepository.class.getName());
+        this.layoutTitleCache = SingleVmPoolUtil.getCache(LayoutRepository.class.getName() + ".LayoutTitle");
+        this.layoutCache = SingleVmPoolUtil.getCache(LayoutRepository.class.getName() + ".Layout");
     }
 
     public List<LayoutTitle> getLayoutTitles(long layoutId) {

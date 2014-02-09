@@ -7,20 +7,21 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import ee.midaiganes.beans.PortalConfig;
+import ee.midaiganes.cache.Element;
+import ee.midaiganes.cache.SingleVmCache;
+import ee.midaiganes.cache.SingleVmPoolUtil;
 import ee.midaiganes.model.ResourceActionPermission;
-import ee.midaiganes.services.SingleVmPool.Cache;
-import ee.midaiganes.services.SingleVmPool.Cache.Element;
 import ee.midaiganes.services.dao.ResourceActionDao;
 import ee.midaiganes.services.exceptions.ResourceActionNotFoundException;
 import ee.midaiganes.services.exceptions.ResourceHasNoActionsException;
 
 @Resource(name = PortalConfig.RESOURCE_ACTION_REPOSITORY)
 public class ResourceActionRepository {
-    private final Cache cache;
+    private final SingleVmCache cache;
     private final ResourceActionDao resourceActionDao;
 
     public ResourceActionRepository(ResourceActionDao resourceActionDao) {
-        cache = SingleVmPool.getCache(ResourceActionRepository.class.getName());
+        cache = SingleVmPoolUtil.getCache(ResourceActionRepository.class.getName());
         this.resourceActionDao = resourceActionDao;
     }
 

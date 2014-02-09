@@ -6,8 +6,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import ee.midaiganes.beans.PortalConfig;
-import ee.midaiganes.services.SingleVmPool.Cache;
-import ee.midaiganes.services.SingleVmPool.Cache.Element;
+import ee.midaiganes.cache.Element;
+import ee.midaiganes.cache.SingleVmCache;
+import ee.midaiganes.cache.SingleVmPoolUtil;
 import ee.midaiganes.services.dao.PermissionDao;
 import ee.midaiganes.services.exceptions.ResourceActionNotFoundException;
 
@@ -15,14 +16,14 @@ import ee.midaiganes.services.exceptions.ResourceActionNotFoundException;
 public class PermissionService {
 
     private final PermissionDao permissionDao;
-    private final Cache cache;
+    private final SingleVmCache cache;
 
     private final ResourceActionRepository resourceActionPermissionRepository;
 
     public PermissionService(PermissionDao permissionDao, ResourceActionRepository resourceActionPermissionRepository) {
         this.permissionDao = permissionDao;
         this.resourceActionPermissionRepository = resourceActionPermissionRepository;
-        this.cache = SingleVmPool.getCache(PermissionService.class.getName());
+        this.cache = SingleVmPoolUtil.getCache(PermissionService.class.getName());
     }
 
     @Transactional(propagation = Propagation.REQUIRED, readOnly = true, value = PortalConfig.TXMANAGER)

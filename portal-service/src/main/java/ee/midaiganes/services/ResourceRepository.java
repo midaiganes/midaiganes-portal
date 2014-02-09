@@ -3,19 +3,20 @@ package ee.midaiganes.services;
 import javax.annotation.Resource;
 
 import ee.midaiganes.beans.PortalConfig;
-import ee.midaiganes.services.SingleVmPool.Cache;
-import ee.midaiganes.services.SingleVmPool.Cache.Element;
+import ee.midaiganes.cache.Element;
+import ee.midaiganes.cache.SingleVmCache;
+import ee.midaiganes.cache.SingleVmPoolUtil;
 import ee.midaiganes.services.dao.ResourceDao;
 import ee.midaiganes.services.exceptions.ResourceNotFoundException;
 
 @Resource(name = PortalConfig.RESOURCE_REPOSITORY)
 public class ResourceRepository {
-    private final Cache cache;
+    private final SingleVmCache cache;
     private final ResourceDao resourceDao;
 
     public ResourceRepository(ResourceDao resourceDao) {
         this.resourceDao = resourceDao;
-        cache = SingleVmPool.getCache(ResourceRepository.class.getName());
+        cache = SingleVmPoolUtil.getCache(ResourceRepository.class.getName());
     }
 
     public long getResourceId(String resource) throws ResourceNotFoundException {

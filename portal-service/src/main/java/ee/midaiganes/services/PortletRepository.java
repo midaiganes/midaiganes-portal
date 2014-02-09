@@ -39,6 +39,7 @@ import ee.midaiganes.portlet.MidaiganesResourcePortlet;
 import ee.midaiganes.portlet.app.PortletApp;
 import ee.midaiganes.portlet.impl.PortletConfigImpl;
 import ee.midaiganes.util.StringPool;
+import ee.midaiganes.util.TimeProviderUtil;
 import ee.midaiganes.util.XmlUtil;
 
 @Resource(name = PortalConfig.PORTLET_REPOSITORY)
@@ -178,7 +179,7 @@ public class PortletRepository {
                 PortletConfig portletConfig = getPortletConfig(servletContext, portletType);
                 PortletName portletName = new PortletName(getContextPathName(servletContext), portletType.getPortletName().getValue());
                 MidaiganesPortlet midaiganesPortlet = getMidaiganesPortlet(portlet, obj, portletName);
-                long start = System.currentTimeMillis();
+                long start = TimeProviderUtil.currentTimeMillis();
                 midaiganesPortlet.init(portletConfig);
                 log.info("Portlet '{}' init took: {}ms", portletName, Long.valueOf(System.currentTimeMillis() - start));
                 PortletAndConfiguration portletAndConfiguration = new PortletAndConfiguration(midaiganesPortlet, portletConfig, portletType);

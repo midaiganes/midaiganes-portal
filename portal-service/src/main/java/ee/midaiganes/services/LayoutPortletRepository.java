@@ -11,21 +11,22 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import ee.midaiganes.beans.PortalConfig;
+import ee.midaiganes.cache.SingleVmCache;
+import ee.midaiganes.cache.SingleVmPoolUtil;
 import ee.midaiganes.model.LayoutPortlet;
 import ee.midaiganes.model.PortletName;
-import ee.midaiganes.services.SingleVmPool.Cache;
 import ee.midaiganes.services.dao.LayoutPortletDao;
 
 @Resource(name = PortalConfig.LAYOUT_PORTLET_REPOSITORY)
 public class LayoutPortletRepository {
     private final PortletInstanceRepository portletInstanceRepository;
     private final LayoutPortletDao layoutPortletDao;
-    private final Cache cache;
+    private final SingleVmCache cache;
 
     public LayoutPortletRepository(LayoutPortletDao layoutPortletDao, PortletInstanceRepository portletInstanceRepository) {
         this.layoutPortletDao = layoutPortletDao;
         this.portletInstanceRepository = portletInstanceRepository;
-        this.cache = SingleVmPool.getCache(LayoutPortletRepository.class.getName());
+        this.cache = SingleVmPoolUtil.getCache(LayoutPortletRepository.class.getName());
     }
 
     @Transactional(readOnly = false, value = PortalConfig.TXMANAGER, propagation = Propagation.REQUIRED)
