@@ -8,7 +8,6 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
 import ee.midaiganes.services.exceptions.DuplicateUsernameException;
-import ee.midaiganes.services.statementcreator.AddUserPreparedStatementCreator;
 import ee.midaiganes.util.StringUtil;
 
 public class UserDao {

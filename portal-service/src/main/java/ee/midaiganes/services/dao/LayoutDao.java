@@ -8,8 +8,8 @@ import org.springframework.jdbc.support.KeyHolder;
 
 import ee.midaiganes.model.Layout;
 import ee.midaiganes.model.LayoutTitle;
-import ee.midaiganes.model.PageLayoutName;
 import ee.midaiganes.model.ThemeName;
+import ee.midaiganes.portal.pagelayout.PageLayoutName;
 import ee.midaiganes.services.rowmapper.LayoutResultSetExtractor;
 import ee.midaiganes.services.rowmapper.LayoutRowMapper;
 import ee.midaiganes.services.rowmapper.LayoutTitleRowMapper;

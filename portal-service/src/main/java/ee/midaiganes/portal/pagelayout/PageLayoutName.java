@@ -1,4 +1,6 @@
-package ee.midaiganes.model;
+package ee.midaiganes.portal.pagelayout;
+
+import ee.midaiganes.model.ContextAndName;
 
 public class PageLayoutName extends ContextAndName {
 	private static final long serialVersionUID = 1L;

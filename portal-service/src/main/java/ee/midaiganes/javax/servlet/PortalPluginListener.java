@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import ee.midaiganes.beans.PortalConfig;
-import ee.midaiganes.services.PageLayoutRepository;
+import ee.midaiganes.portal.pagelayout.PageLayoutRepository;
 import ee.midaiganes.services.PortletRepository;
 import ee.midaiganes.services.ThemeRepository;
 

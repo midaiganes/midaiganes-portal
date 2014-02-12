@@ -1,4 +1,4 @@
-package ee.midaiganes.services;
+package ee.midaiganes.portal.pagelayout;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -16,8 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.generated.xml.pagelayout.MidaiganesLayout;
-import ee.midaiganes.model.PageLayout;
-import ee.midaiganes.model.PageLayoutName;
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.XmlUtil;
 

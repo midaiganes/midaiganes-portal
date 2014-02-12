@@ -10,8 +10,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import ee.midaiganes.beans.BeanRepositoryUtil;
-import ee.midaiganes.model.PageLayout;
-import ee.midaiganes.services.PageLayoutRepository;
+import ee.midaiganes.portal.pagelayout.PageLayout;
+import ee.midaiganes.portal.pagelayout.PageLayoutRepository;
 import ee.midaiganes.util.ContextUtil;
 import ee.midaiganes.util.RequestUtil;
 import ee.midaiganes.util.StringPool;

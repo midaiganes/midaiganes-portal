@@ -8,8 +8,8 @@ import java.sql.Types;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.SqlProvider;
 
-import ee.midaiganes.model.PageLayoutName;
 import ee.midaiganes.model.ThemeName;
+import ee.midaiganes.portal.pagelayout.PageLayoutName;
 import ee.midaiganes.util.StringPool;
 
 public class AddLayoutPreparedStatementCreator implements PreparedStatementCreator, SqlProvider {
