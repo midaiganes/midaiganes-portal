@@ -1,11 +1,10 @@
-package ee.midaiganes.services.rowmapper;
+package ee.midaiganes.portal.layoutportlet;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.springframework.jdbc.core.RowMapper;
 
-import ee.midaiganes.model.LayoutPortlet;
 import ee.midaiganes.model.PortletInstance;
 import ee.midaiganes.model.PortletName;
 import ee.midaiganes.model.PortletNamespace;

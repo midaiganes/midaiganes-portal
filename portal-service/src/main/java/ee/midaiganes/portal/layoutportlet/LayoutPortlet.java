@@ -1,6 +1,8 @@
-package ee.midaiganes.model;
+package ee.midaiganes.portal.layoutportlet;
 
 import java.io.Serializable;
+
+import ee.midaiganes.model.PortletInstance;
 
 public class LayoutPortlet implements Serializable {
     private static final long serialVersionUID = 1L;

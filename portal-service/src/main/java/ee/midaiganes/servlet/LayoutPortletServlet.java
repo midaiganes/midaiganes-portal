@@ -14,14 +14,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ee.midaiganes.beans.BeanRepositoryUtil;
-import ee.midaiganes.model.LayoutPortlet;
 import ee.midaiganes.model.PageDisplay;
 import ee.midaiganes.model.PortletInstance;
 import ee.midaiganes.model.PortletNamespace;
 import ee.midaiganes.model.RequestInfo.PortletURL;
+import ee.midaiganes.portal.layoutportlet.LayoutPortlet;
+import ee.midaiganes.portal.layoutportlet.LayoutPortletRepository;
 import ee.midaiganes.portlet.app.PortletApp;
 import ee.midaiganes.secureservices.SecurePortletRepository;
-import ee.midaiganes.services.LayoutPortletRepository;
 import ee.midaiganes.services.exceptions.PrincipalException;
 import ee.midaiganes.util.RequestUtil;
 import ee.midaiganes.util.StringPool;

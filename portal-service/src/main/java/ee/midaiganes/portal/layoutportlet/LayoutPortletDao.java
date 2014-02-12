@@ -1,4 +1,4 @@
-package ee.midaiganes.services.dao;
+package ee.midaiganes.portal.layoutportlet;
 
 import java.util.List;
 
@@ -6,10 +6,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.transaction.annotation.Transactional;
-
-import ee.midaiganes.model.LayoutPortlet;
-import ee.midaiganes.services.rowmapper.LayoutPortletRowMapper;
-import ee.midaiganes.services.statementcreator.AddLayoutPortletPrepareStatementCreator;
 
 public class LayoutPortletDao {
     private static final String GET_LAYOUT_PORTLETS = "SELECT LayoutPortlet.id, LayoutPortlet.layoutId, LayoutPortlet.rowId, LayoutPortlet.portletInstanceId, PortletInstance.portletContext, PortletInstance.portletName, PortletInstance.windowID, LayoutPortlet.boxIndex FROM LayoutPortlet JOIN PortletInstance ON (LayoutPortlet.portletInstanceId = PortletInstance.id) WHERE layoutId = ?";

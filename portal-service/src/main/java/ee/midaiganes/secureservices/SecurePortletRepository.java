@@ -8,8 +8,8 @@ import javax.portlet.WindowState;
 import org.springframework.stereotype.Component;
 
 import ee.midaiganes.beans.PortalConfig;
-import ee.midaiganes.model.LayoutPortlet;
 import ee.midaiganes.model.PortletInstance;
+import ee.midaiganes.portal.layoutportlet.LayoutPortlet;
 import ee.midaiganes.portlet.app.PortletApp;
 import ee.midaiganes.services.PermissionRepository;
 import ee.midaiganes.services.PortletRepository;
