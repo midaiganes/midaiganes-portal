@@ -1,4 +1,4 @@
-package ee.midaiganes.services;
+package ee.midaiganes.portal.group;
 
 import java.util.Collections;
 import java.util.List;
@@ -9,8 +9,6 @@ import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
-import ee.midaiganes.model.Group;
-import ee.midaiganes.services.dao.GroupDao;
 
 @Resource(name = PortalConfig.GROUP_REPOSITORY)
 public class GroupRepository {

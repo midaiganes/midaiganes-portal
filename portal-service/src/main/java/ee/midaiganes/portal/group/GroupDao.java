@@ -1,11 +1,9 @@
-package ee.midaiganes.services.dao;
+package ee.midaiganes.portal.group;
 
 import java.util.List;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import ee.midaiganes.model.Group;
-import ee.midaiganes.services.rowmapper.GroupRowMapper;
 import ee.midaiganes.services.rowmapper.TLongArrayListResultSetExtractor;
 import gnu.trove.list.array.TLongArrayList;
 

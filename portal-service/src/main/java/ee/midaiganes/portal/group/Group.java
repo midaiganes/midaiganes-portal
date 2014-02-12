@@ -1,6 +1,8 @@
-package ee.midaiganes.model;
+package ee.midaiganes.portal.group;
 
 import java.io.Serializable;
+
+import ee.midaiganes.model.PortalResource;
 
 public class Group implements Serializable, PortalResource {
 	private static final long serialVersionUID = 1L;

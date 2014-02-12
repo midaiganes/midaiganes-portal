@@ -3,7 +3,7 @@ package ee.midaiganes.portlets.usersgroups;
 import java.io.Serializable;
 import java.util.List;
 
-import ee.midaiganes.model.Group;
+import ee.midaiganes.portal.group.Group;
 import ee.midaiganes.portal.user.User;
 
 public class UsersListData implements Serializable {

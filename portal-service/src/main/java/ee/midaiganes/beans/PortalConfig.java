@@ -24,12 +24,13 @@ import org.springframework.transaction.annotation.TransactionManagementConfigure
 
 import ee.midaiganes.cache.SingleVmPoolUtil;
 import ee.midaiganes.factory.PortletURLFactory;
+import ee.midaiganes.portal.group.GroupDao;
+import ee.midaiganes.portal.group.GroupRepository;
 import ee.midaiganes.portal.user.UserDao;
 import ee.midaiganes.portal.user.UserRepository;
 import ee.midaiganes.secureservices.SecureLayoutRepository;
 import ee.midaiganes.secureservices.SecurePortletRepository;
 import ee.midaiganes.services.DbInstallService;
-import ee.midaiganes.services.GroupRepository;
 import ee.midaiganes.services.LanguageRepository;
 import ee.midaiganes.services.LayoutPortletRepository;
 import ee.midaiganes.services.LayoutRepository;
@@ -45,7 +46,6 @@ import ee.midaiganes.services.ResourceActionRepository;
 import ee.midaiganes.services.ResourceRepository;
 import ee.midaiganes.services.ThemeRepository;
 import ee.midaiganes.services.ThemeVariablesService;
-import ee.midaiganes.services.dao.GroupDao;
 import ee.midaiganes.services.dao.LayoutDao;
 import ee.midaiganes.services.dao.LayoutPortletDao;
 import ee.midaiganes.services.dao.LayoutSetDao;

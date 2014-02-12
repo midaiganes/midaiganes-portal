@@ -6,8 +6,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import ee.midaiganes.beans.PortalConfig;
-import ee.midaiganes.model.Group;
 import ee.midaiganes.model.PortalResource;
+import ee.midaiganes.portal.group.Group;
+import ee.midaiganes.portal.group.GroupRepository;
 import ee.midaiganes.portal.user.User;
 import ee.midaiganes.services.exceptions.ResourceActionNotFoundException;
 import ee.midaiganes.services.exceptions.ResourceNotFoundException;
