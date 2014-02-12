@@ -1,4 +1,4 @@
-package ee.midaiganes.services.statementcreator;
+package ee.midaiganes.portal.layout;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

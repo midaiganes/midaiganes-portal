@@ -1,4 +1,4 @@
-package ee.midaiganes.services.dao;
+package ee.midaiganes.portal.layout;
 
 import java.util.List;
 
@@ -6,14 +6,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
-import ee.midaiganes.model.Layout;
-import ee.midaiganes.model.LayoutTitle;
 import ee.midaiganes.model.ThemeName;
 import ee.midaiganes.portal.pagelayout.PageLayoutName;
-import ee.midaiganes.services.rowmapper.LayoutResultSetExtractor;
-import ee.midaiganes.services.rowmapper.LayoutRowMapper;
-import ee.midaiganes.services.rowmapper.LayoutTitleRowMapper;
-import ee.midaiganes.services.statementcreator.AddLayoutPreparedStatementCreator;
 
 public class LayoutDao {
 	private final JdbcTemplate jdbcTemplate;

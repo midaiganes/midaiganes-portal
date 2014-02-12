@@ -15,13 +15,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ee.midaiganes.beans.BeanRepositoryUtil;
-import ee.midaiganes.model.Layout;
-import ee.midaiganes.model.LayoutTitle;
+import ee.midaiganes.portal.layout.Layout;
+import ee.midaiganes.portal.layout.LayoutRepository;
+import ee.midaiganes.portal.layout.LayoutTitle;
 import ee.midaiganes.portal.pagelayout.PageLayoutName;
 import ee.midaiganes.portal.pagelayout.PageLayoutRepository;
 import ee.midaiganes.portlets.BasePortlet;
 import ee.midaiganes.services.LanguageRepository;
-import ee.midaiganes.services.LayoutRepository;
 import ee.midaiganes.services.exceptions.IllegalFriendlyUrlException;
 import ee.midaiganes.services.exceptions.IllegalPageLayoutException;
 import ee.midaiganes.util.RequestUtil;

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import ee.midaiganes.portal.layout.Layout;
 import ee.midaiganes.util.PortalURLUtil;
 
 public class NavItem implements Serializable, Comparable<NavItem> {

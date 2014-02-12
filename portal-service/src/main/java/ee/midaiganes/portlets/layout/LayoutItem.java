@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import ee.midaiganes.model.Layout;
+import ee.midaiganes.portal.layout.Layout;
 
 public class LayoutItem implements Serializable, Comparable<LayoutItem> {
 	private static final long serialVersionUID = 1L;

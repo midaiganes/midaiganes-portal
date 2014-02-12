@@ -1,4 +1,4 @@
-package ee.midaiganes.services;
+package ee.midaiganes.portal.layout;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,13 +18,11 @@ import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
-import ee.midaiganes.model.Layout;
-import ee.midaiganes.model.LayoutTitle;
 import ee.midaiganes.model.Theme;
 import ee.midaiganes.model.ThemeName;
 import ee.midaiganes.portal.pagelayout.PageLayoutName;
 import ee.midaiganes.portal.pagelayout.PageLayoutRepository;
-import ee.midaiganes.services.dao.LayoutDao;
+import ee.midaiganes.services.ThemeRepository;
 import ee.midaiganes.services.exceptions.IllegalFriendlyUrlException;
 import ee.midaiganes.services.exceptions.IllegalPageLayoutException;
 import ee.midaiganes.util.StringPool;

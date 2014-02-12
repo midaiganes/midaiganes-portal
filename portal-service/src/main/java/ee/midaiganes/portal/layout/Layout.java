@@ -1,7 +1,10 @@
-package ee.midaiganes.model;
+package ee.midaiganes.portal.layout;
 
 import java.io.Serializable;
 import java.util.List;
+
+import ee.midaiganes.model.PortalResource;
+import ee.midaiganes.model.ThemeName;
 
 public class Layout implements Serializable, PortalResource {
     private static final long serialVersionUID = 1L;

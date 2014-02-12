@@ -1,11 +1,9 @@
-package ee.midaiganes.services.rowmapper;
+package ee.midaiganes.portal.layout;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.springframework.jdbc.core.RowMapper;
-
-import ee.midaiganes.model.LayoutTitle;
 
 public class LayoutTitleRowMapper implements RowMapper<LayoutTitle> {
 	@Override

@@ -2,7 +2,7 @@ package ee.midaiganes.util;
 
 import javax.servlet.http.HttpServletRequest;
 
-import ee.midaiganes.model.Layout;
+import ee.midaiganes.portal.layout.Layout;
 import ee.midaiganes.services.util.LanguageUtil;
 
 public class LayoutUtil {

@@ -1,11 +1,9 @@
-package ee.midaiganes.services.rowmapper;
+package ee.midaiganes.portal.layout;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.springframework.jdbc.core.ResultSetExtractor;
-
-import ee.midaiganes.model.Layout;
 
 public class LayoutResultSetExtractor implements ResultSetExtractor<Layout> {
 	@Override

@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import ee.midaiganes.beans.PortalConfig;
-import ee.midaiganes.model.Layout;
-import ee.midaiganes.services.LayoutRepository;
+import ee.midaiganes.portal.layout.Layout;
+import ee.midaiganes.portal.layout.LayoutRepository;
 import ee.midaiganes.services.PermissionRepository;
 import ee.midaiganes.services.exceptions.PrincipalException;
 import ee.midaiganes.services.exceptions.ResourceActionNotFoundException;

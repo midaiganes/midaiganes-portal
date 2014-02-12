@@ -14,11 +14,11 @@ import org.slf4j.LoggerFactory;
 
 import ee.midaiganes.beans.BeanRepositoryUtil;
 import ee.midaiganes.model.ContextAndName;
-import ee.midaiganes.model.Layout;
+import ee.midaiganes.portal.layout.Layout;
+import ee.midaiganes.portal.layout.LayoutRepository;
 import ee.midaiganes.portal.pagelayout.PageLayout;
 import ee.midaiganes.portal.pagelayout.PageLayoutRepository;
 import ee.midaiganes.portlets.BasePortlet;
-import ee.midaiganes.services.LayoutRepository;
 import ee.midaiganes.util.PortalURLUtil;
 import ee.midaiganes.util.RequestUtil;
 

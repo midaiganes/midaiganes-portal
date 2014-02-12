@@ -1,4 +1,4 @@
-package ee.midaiganes.model;
+package ee.midaiganes.portal.layout;
 
 import java.io.Serializable;
 
