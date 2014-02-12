@@ -68,7 +68,7 @@
 		
 		<!-- dependency org="org.springframework" name="spring-instrument" rev="${spring.version}" conf="aspect->default"/ -->
 
-		<dependency org="cglib" name="cglib" rev="3.0" conf="server->default" />
+		<dependency org="cglib" name="cglib" rev="3.1" conf="server->default" />
 		<dependency org="com.sun.xml.bind" name="jaxb-xjc" rev="2.2.7" conf="gen->default"/>
 		<dependency org="javax.xml.bind" name="jaxb-api" rev="2.2.7" conf="gen->default"/>
 		<dependency org="com.sun.xml.bind" name="jaxb-impl" rev="2.2.7" conf="gen->default"/>
@@ -77,7 +77,7 @@
 		<dependency org="org.testng" name="testng" rev="6.8.7" conf="test->default"/>
 		<dependency org="org.mockito" name="mockito-all" rev="1.9.5" conf="test->default"/>
 		<!-- dependency org="org.aspectj" name="aspectjweaver" rev="1.7.3" conf="server->default" / -->
-		<dependency org="org.aspectj" name="aspectjweaver" rev="1.7.3" conf="aspect->default" />
+		<dependency org="org.aspectj" name="aspectjweaver" rev="1.7.4" conf="aspect->default" />
 		
 		<dependency org="org.thymeleaf" name="thymeleaf" rev="2.0.18" conf="global->default"> 
 			<exclude module="servlet-api"/>
