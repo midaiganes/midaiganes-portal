@@ -12,10 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ee.midaiganes.beans.BeanRepositoryUtil;
-import ee.midaiganes.model.LayoutSet;
 import ee.midaiganes.model.ThemeName;
+import ee.midaiganes.portal.layoutset.LayoutSet;
+import ee.midaiganes.portal.layoutset.LayoutSetRepository;
 import ee.midaiganes.portlets.BasePortlet;
-import ee.midaiganes.services.LayoutSetRepository;
 import ee.midaiganes.services.ThemeRepository;
 import ee.midaiganes.util.StringUtil;
 

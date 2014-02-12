@@ -1,11 +1,10 @@
-package ee.midaiganes.services.rowmapper;
+package ee.midaiganes.portal.layoutset;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.springframework.jdbc.core.RowMapper;
 
-import ee.midaiganes.model.LayoutSet;
 import ee.midaiganes.model.ThemeName;
 import ee.midaiganes.util.StringUtil;
 

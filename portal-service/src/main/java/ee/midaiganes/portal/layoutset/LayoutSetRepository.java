@@ -1,4 +1,4 @@
-package ee.midaiganes.services;
+package ee.midaiganes.portal.layoutset;
 
 import java.util.List;
 
@@ -11,9 +11,7 @@ import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
-import ee.midaiganes.model.LayoutSet;
 import ee.midaiganes.model.ThemeName;
-import ee.midaiganes.services.dao.LayoutSetDao;
 
 @Resource(name = PortalConfig.LAYOUT_SET_REPOSITORY)
 public class LayoutSetRepository {

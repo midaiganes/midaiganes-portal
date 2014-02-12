@@ -1,4 +1,4 @@
-package ee.midaiganes.services.dao;
+package ee.midaiganes.portal.layoutset;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,9 +10,7 @@ import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
-import ee.midaiganes.model.LayoutSet;
 import ee.midaiganes.model.ThemeName;
-import ee.midaiganes.services.rowmapper.LayoutSetRowMapper;
 import ee.midaiganes.util.StringPool;
 
 public class LayoutSetDao {
