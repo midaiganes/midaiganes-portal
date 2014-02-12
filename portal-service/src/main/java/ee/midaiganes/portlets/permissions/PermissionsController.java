@@ -19,14 +19,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import ee.midaiganes.beans.BeanRepositoryUtil;
 import ee.midaiganes.model.PortalResource;
-import ee.midaiganes.model.PortletInstance;
 import ee.midaiganes.portal.group.Group;
 import ee.midaiganes.portal.group.GroupRepository;
+import ee.midaiganes.portal.portletinstance.PortletInstance;
+import ee.midaiganes.portal.portletinstance.PortletInstanceRepository;
 import ee.midaiganes.portal.user.User;
 import ee.midaiganes.portal.user.UserRepository;
 import ee.midaiganes.portlets.BasePortlet;
 import ee.midaiganes.services.PermissionRepository;
-import ee.midaiganes.services.PortletInstanceRepository;
 import ee.midaiganes.services.ResourceActionRepository;
 import ee.midaiganes.services.ResourceRepository;
 import ee.midaiganes.services.exceptions.ResourceActionNotFoundException;

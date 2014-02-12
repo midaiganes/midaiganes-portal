@@ -1,4 +1,4 @@
-package ee.midaiganes.services;
+package ee.midaiganes.portal.portletinstance;
 
 import java.security.SecureRandom;
 import java.util.List;
@@ -13,10 +13,8 @@ import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
-import ee.midaiganes.model.PortletInstance;
 import ee.midaiganes.model.PortletName;
 import ee.midaiganes.model.PortletNamespace;
-import ee.midaiganes.services.dao.PortletInstanceDao;
 import ee.midaiganes.util.CharsetPool;
 import ee.midaiganes.util.StringPool;
 

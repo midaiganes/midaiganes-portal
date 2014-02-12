@@ -14,7 +14,7 @@ import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
 import ee.midaiganes.model.PortletName;
-import ee.midaiganes.services.PortletInstanceRepository;
+import ee.midaiganes.portal.portletinstance.PortletInstanceRepository;
 
 @Resource(name = PortalConfig.LAYOUT_PORTLET_REPOSITORY)
 public class LayoutPortletRepository {

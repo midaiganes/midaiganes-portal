@@ -1,4 +1,4 @@
-package ee.midaiganes.services.dao;
+package ee.midaiganes.portal.portletinstance;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,12 +9,9 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
-import ee.midaiganes.model.PortletInstance;
 import ee.midaiganes.model.PortletName;
 import ee.midaiganes.model.PortletNamespace;
 import ee.midaiganes.services.rowmapper.LongResultSetExtractor;
-import ee.midaiganes.services.rowmapper.PortletInstanceRowMapper;
-import ee.midaiganes.services.statementcreator.AddPortletPreparedStatementCreator;
 import ee.midaiganes.util.CollectionUtil;
 import ee.midaiganes.util.StringPool;
 
