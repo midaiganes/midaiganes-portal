@@ -1,11 +1,9 @@
-package ee.midaiganes.services.rowmapper;
+package ee.midaiganes.portal.user;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.springframework.jdbc.core.RowMapper;
-
-import ee.midaiganes.model.User;
 
 public class UserRowMapper implements RowMapper<User> {
 	@Override

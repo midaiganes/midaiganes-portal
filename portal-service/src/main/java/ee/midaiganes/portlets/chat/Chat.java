@@ -2,7 +2,7 @@ package ee.midaiganes.portlets.chat;
 
 import java.util.List;
 
-import ee.midaiganes.model.User;
+import ee.midaiganes.portal.user.User;
 
 public interface Chat {
 	public static class AddUserToChatResponse {

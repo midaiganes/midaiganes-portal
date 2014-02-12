@@ -1,6 +1,6 @@
 package ee.midaiganes.portlets.chat;
 
-import ee.midaiganes.model.User;
+import ee.midaiganes.portal.user.User;
 import ee.midaiganes.util.TimeProviderUtil;
 
 public class ChatUser {

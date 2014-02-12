@@ -1,4 +1,4 @@
-package ee.midaiganes.services;
+package ee.midaiganes.portal.user;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,8 +10,6 @@ import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
-import ee.midaiganes.model.User;
-import ee.midaiganes.services.dao.UserDao;
 import ee.midaiganes.services.exceptions.DuplicateUsernameException;
 
 @Resource(name = PortalConfig.USER_REPOSITORY)

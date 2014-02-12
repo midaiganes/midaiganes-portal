@@ -12,8 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ee.midaiganes.beans.BeanRepositoryUtil;
+import ee.midaiganes.portal.user.UserRepository;
 import ee.midaiganes.portlets.BasePortlet;
-import ee.midaiganes.services.UserRepository;
 import ee.midaiganes.services.exceptions.DuplicateUsernameException;
 import ee.midaiganes.util.StringUtil;
 

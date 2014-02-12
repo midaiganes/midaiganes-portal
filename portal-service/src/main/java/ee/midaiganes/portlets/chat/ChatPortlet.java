@@ -20,7 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ee.midaiganes.beans.BeanRepositoryUtil;
-import ee.midaiganes.model.User;
+import ee.midaiganes.portal.user.User;
+import ee.midaiganes.portal.user.UserRepository;
 import ee.midaiganes.portlets.BasePortlet;
 import ee.midaiganes.portlets.chat.Chat.AddUserToChatResponse;
 import ee.midaiganes.portlets.chat.Chat.AddUserToChatResponse.AddUserToChatResponseStatus;
@@ -31,7 +32,6 @@ import ee.midaiganes.portlets.chat.Chat.SendAndRemoveUserChatMessagesRequest.Asy
 import ee.midaiganes.portlets.chat.Chat.SendAndRemoveUserChatMessagesRequest.GetAsyncCallback;
 import ee.midaiganes.portlets.chat.Chat.SendMessageToChat;
 import ee.midaiganes.portlets.chat.Chat.SendPrivateMessageToUserResponse;
-import ee.midaiganes.services.UserRepository;
 import ee.midaiganes.util.CharsetPool;
 import ee.midaiganes.util.LongUtil;
 import ee.midaiganes.util.RequestUtil;

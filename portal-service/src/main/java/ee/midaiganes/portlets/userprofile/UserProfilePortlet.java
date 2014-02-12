@@ -8,9 +8,9 @@ import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
 import ee.midaiganes.beans.BeanRepositoryUtil;
-import ee.midaiganes.model.User;
+import ee.midaiganes.portal.user.User;
+import ee.midaiganes.portal.user.UserRepository;
 import ee.midaiganes.portlets.BasePortlet;
-import ee.midaiganes.services.UserRepository;
 import ee.midaiganes.util.SessionUtil;
 import ee.midaiganes.util.StringUtil;
 

@@ -3,7 +3,7 @@ package ee.midaiganes.portlets.chat;
 import java.util.ArrayList;
 import java.util.List;
 
-import ee.midaiganes.model.User;
+import ee.midaiganes.portal.user.User;
 import ee.midaiganes.portlets.chat.ChatCmd.MsgChatCmd;
 import ee.midaiganes.util.TimeProviderUtil;
 

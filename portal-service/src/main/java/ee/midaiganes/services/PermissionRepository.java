@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.model.Group;
 import ee.midaiganes.model.PortalResource;
-import ee.midaiganes.model.User;
+import ee.midaiganes.portal.user.User;
 import ee.midaiganes.services.exceptions.ResourceActionNotFoundException;
 import ee.midaiganes.services.exceptions.ResourceNotFoundException;
 import ee.midaiganes.util.PortalUtil;

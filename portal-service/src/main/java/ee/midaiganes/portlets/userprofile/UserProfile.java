@@ -2,7 +2,7 @@ package ee.midaiganes.portlets.userprofile;
 
 import java.io.Serializable;
 
-import ee.midaiganes.model.User;
+import ee.midaiganes.portal.user.User;
 
 public class UserProfile implements Serializable {
 	private static final long serialVersionUID = 1L;

@@ -6,7 +6,7 @@ import javax.portlet.PortletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import ee.midaiganes.model.User;
+import ee.midaiganes.portal.user.User;
 
 public class SessionUtil {
 	private static final String USER_ID = "USERID";

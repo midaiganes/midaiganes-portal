@@ -1,4 +1,4 @@
-package ee.midaiganes.services.dao;
+package ee.midaiganes.portal.user;
 
 import java.util.List;
 
@@ -7,9 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
-import ee.midaiganes.model.User;
 import ee.midaiganes.services.exceptions.DuplicateUsernameException;
-import ee.midaiganes.services.rowmapper.UserRowMapper;
 import ee.midaiganes.services.statementcreator.AddUserPreparedStatementCreator;
 import ee.midaiganes.util.StringUtil;
 

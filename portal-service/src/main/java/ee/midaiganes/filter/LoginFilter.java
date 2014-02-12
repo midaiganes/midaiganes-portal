@@ -12,8 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ee.midaiganes.beans.PortalConfig;
-import ee.midaiganes.model.User;
-import ee.midaiganes.services.UserRepository;
+import ee.midaiganes.portal.user.User;
+import ee.midaiganes.portal.user.UserRepository;
 import ee.midaiganes.util.RequestUtil;
 import ee.midaiganes.util.SessionUtil;
 import ee.midaiganes.util.StringUtil;

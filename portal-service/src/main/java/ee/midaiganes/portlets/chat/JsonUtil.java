@@ -11,7 +11,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-import ee.midaiganes.model.User;
+import ee.midaiganes.portal.user.User;
 import ee.midaiganes.portlets.chat.ChatCmd.Cmd;
 import ee.midaiganes.portlets.chat.ChatCmd.JoinChatCmd;
 import ee.midaiganes.portlets.chat.ChatCmd.MsgChatCmd;

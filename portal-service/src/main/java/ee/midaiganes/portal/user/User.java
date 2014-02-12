@@ -1,7 +1,8 @@
-package ee.midaiganes.model;
+package ee.midaiganes.portal.user;
 
 import java.io.Serializable;
 
+import ee.midaiganes.model.PortalResource;
 import ee.midaiganes.util.StringPool;
 
 public class User implements Serializable, PortalResource {

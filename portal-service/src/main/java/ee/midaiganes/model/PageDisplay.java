@@ -1,6 +1,7 @@
 package ee.midaiganes.model;
 
 import ee.midaiganes.model.RequestInfo.PortletURL;
+import ee.midaiganes.portal.user.User;
 
 public class PageDisplay {
 	private LayoutSet layoutSet;
