@@ -6,8 +6,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
-import ee.midaiganes.model.ThemeName;
 import ee.midaiganes.portal.pagelayout.PageLayoutName;
+import ee.midaiganes.portal.theme.ThemeName;
 
 public class LayoutDao {
 	private final JdbcTemplate jdbcTemplate;

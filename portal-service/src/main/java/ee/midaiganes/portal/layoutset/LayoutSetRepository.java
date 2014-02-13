@@ -11,7 +11,7 @@ import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
-import ee.midaiganes.model.ThemeName;
+import ee.midaiganes.portal.theme.ThemeName;
 
 @Resource(name = PortalConfig.LAYOUT_SET_REPOSITORY)
 public class LayoutSetRepository {

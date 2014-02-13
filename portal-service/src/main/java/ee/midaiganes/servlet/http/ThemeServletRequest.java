@@ -3,7 +3,7 @@ package ee.midaiganes.servlet.http;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
-import ee.midaiganes.model.Theme;
+import ee.midaiganes.portal.theme.Theme;
 import ee.midaiganes.servlet.ThemeServlet;
 
 public class ThemeServletRequest extends HttpServletRequestWrapper {

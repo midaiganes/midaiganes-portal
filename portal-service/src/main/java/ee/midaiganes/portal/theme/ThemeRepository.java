@@ -1,4 +1,4 @@
-package ee.midaiganes.services;
+package ee.midaiganes.portal.theme;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -17,8 +17,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.generated.xml.theme.MidaiganesTheme;
-import ee.midaiganes.model.Theme;
-import ee.midaiganes.model.ThemeName;
 import ee.midaiganes.util.CollectionUtil;
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.XmlUtil;

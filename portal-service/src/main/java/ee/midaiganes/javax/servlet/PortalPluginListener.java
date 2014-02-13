@@ -14,8 +14,8 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.portal.pagelayout.PageLayoutRepository;
+import ee.midaiganes.portal.theme.ThemeRepository;
 import ee.midaiganes.services.PortletRepository;
-import ee.midaiganes.services.ThemeRepository;
 
 public class PortalPluginListener implements ServletContextListener {
 	private static final Logger log = LoggerFactory.getLogger(PortalPluginListener.class);

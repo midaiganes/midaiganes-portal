@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ee.midaiganes.beans.BeanRepositoryUtil;
-import ee.midaiganes.model.Theme;
+import ee.midaiganes.portal.theme.Theme;
 import ee.midaiganes.services.ThemeVariablesService;
 
 public class ThemeServlet extends HttpServlet {

@@ -5,7 +5,7 @@ import java.sql.SQLException;
 
 import org.springframework.jdbc.core.RowMapper;
 
-import ee.midaiganes.model.ThemeName;
+import ee.midaiganes.portal.theme.ThemeName;
 import ee.midaiganes.util.StringUtil;
 
 public class LayoutRowMapper implements RowMapper<Layout> {

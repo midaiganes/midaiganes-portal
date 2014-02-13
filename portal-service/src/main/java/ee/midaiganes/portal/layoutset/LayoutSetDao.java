@@ -10,7 +10,7 @@ import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
-import ee.midaiganes.model.ThemeName;
+import ee.midaiganes.portal.theme.ThemeName;
 import ee.midaiganes.util.StringPool;
 
 public class LayoutSetDao {

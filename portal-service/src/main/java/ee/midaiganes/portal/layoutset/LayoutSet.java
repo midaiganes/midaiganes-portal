@@ -3,7 +3,7 @@ package ee.midaiganes.portal.layoutset;
 import java.io.Serializable;
 
 import ee.midaiganes.model.PortalResource;
-import ee.midaiganes.model.ThemeName;
+import ee.midaiganes.portal.theme.ThemeName;
 
 public final class LayoutSet implements Serializable, PortalResource {
 	private static final long serialVersionUID = 1L;

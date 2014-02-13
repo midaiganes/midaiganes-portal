@@ -3,6 +3,7 @@ package ee.midaiganes.model;
 import ee.midaiganes.model.RequestInfo.PortletURL;
 import ee.midaiganes.portal.layout.Layout;
 import ee.midaiganes.portal.layoutset.LayoutSet;
+import ee.midaiganes.portal.theme.Theme;
 import ee.midaiganes.portal.user.User;
 
 public class PageDisplay {

@@ -18,9 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ee.midaiganes.beans.PortalConfig;
-import ee.midaiganes.model.Theme;
+import ee.midaiganes.portal.theme.Theme;
+import ee.midaiganes.portal.theme.ThemeRepository;
 import ee.midaiganes.services.ServletContextResourceRepository;
-import ee.midaiganes.services.ThemeRepository;
 import ee.midaiganes.util.IOUtil;
 import ee.midaiganes.util.StringPool;
 

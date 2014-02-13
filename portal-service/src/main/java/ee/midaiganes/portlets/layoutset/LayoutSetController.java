@@ -12,11 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ee.midaiganes.beans.BeanRepositoryUtil;
-import ee.midaiganes.model.ThemeName;
 import ee.midaiganes.portal.layoutset.LayoutSet;
 import ee.midaiganes.portal.layoutset.LayoutSetRepository;
+import ee.midaiganes.portal.theme.ThemeName;
+import ee.midaiganes.portal.theme.ThemeRepository;
 import ee.midaiganes.portlets.BasePortlet;
-import ee.midaiganes.services.ThemeRepository;
 import ee.midaiganes.util.StringUtil;
 
 public class LayoutSetController extends BasePortlet {

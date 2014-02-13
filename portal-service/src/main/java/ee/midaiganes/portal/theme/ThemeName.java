@@ -1,4 +1,6 @@
-package ee.midaiganes.model;
+package ee.midaiganes.portal.theme;
+
+import ee.midaiganes.model.ContextAndName;
 
 public class ThemeName extends ContextAndName {
 	private static final long serialVersionUID = 1L;

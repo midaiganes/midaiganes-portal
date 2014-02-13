@@ -7,8 +7,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import ee.midaiganes.model.Theme;
 import ee.midaiganes.portal.portletinstance.PortletInstance;
+import ee.midaiganes.portal.theme.Theme;
 import ee.midaiganes.servlet.http.ThemePortletJspRequest;
 
 public class ThemeUtil {
