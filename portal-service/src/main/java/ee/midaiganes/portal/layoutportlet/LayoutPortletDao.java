@@ -30,8 +30,14 @@ public class LayoutPortletDao {
     @Transactional
     public long addLayoutPortlet(long layoutId, long rowId, long portletInstanceId, int boxIndex) {
         long layoutPortletId = addLayoutPortlet(layoutId, rowId, portletInstanceId);
-        moveLayoutPortlet(layoutPortletId, rowId, boxIndex);
+        if (isLayoutPortletMovableToPosition(boxIndex)) {
+            moveLayoutPortlet(layoutPortletId, rowId, boxIndex);
+        }
         return layoutPortletId;
+    }
+
+    private boolean isLayoutPortletMovableToPosition(int boxIndex) {
+        return boxIndex >= 0;
     }
 
     @Transactional

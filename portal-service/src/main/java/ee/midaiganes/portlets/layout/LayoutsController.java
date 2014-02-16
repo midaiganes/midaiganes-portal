@@ -54,6 +54,7 @@ public class LayoutsController extends BasePortlet {
 
     private void addLayoutView(RenderRequest request, RenderResponse response) throws PortletException, IOException {
         request.setAttribute("layouts", LayoutItem.getLayoutItems(layoutRepository.getLayouts(RequestUtil.getPageDisplay(request).getLayoutSet().getId())));
+        request.setAttribute("addLayoutModel", new LayoutModel());
         super.include("layouts/add-page", request, response);
     }
 
