@@ -1,4 +1,4 @@
-package ee.midaiganes.io;
+package ee.midaiganes.servlet.io;
 
 import java.io.IOException;
 import java.io.OutputStream;

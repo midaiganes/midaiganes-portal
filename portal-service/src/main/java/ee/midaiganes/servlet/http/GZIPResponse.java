@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponseWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.io.ServletOutputStreamImpl;
+import ee.midaiganes.servlet.io.ServletOutputStreamImpl;
 
 public class GZIPResponse extends HttpServletResponseWrapper {
 	private static final Logger log = LoggerFactory.getLogger(GZIPResponse.class);

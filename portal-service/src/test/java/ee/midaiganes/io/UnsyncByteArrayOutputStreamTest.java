@@ -5,6 +5,8 @@ import java.io.IOException;
 import org.junit.Test;
 import org.testng.Assert;
 
+import ee.midaiganes.servlet.io.UnsyncByteArrayOutputStream;
+
 public class UnsyncByteArrayOutputStreamTest {
 	@Test
 	public void sizeTest() throws IOException {

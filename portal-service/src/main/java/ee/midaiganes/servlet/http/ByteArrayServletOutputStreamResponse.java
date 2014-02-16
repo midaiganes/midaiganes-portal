@@ -6,7 +6,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
-import ee.midaiganes.io.ServletOutputStreamImpl;
+import ee.midaiganes.servlet.io.ServletOutputStreamImpl;
 
 public class ByteArrayServletOutputStreamResponse extends HttpServletResponseWrapper {
 

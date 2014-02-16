@@ -1,4 +1,4 @@
-package ee.midaiganes.filter;
+package ee.midaiganes.servlet.filter;
 
 import java.io.IOException;
 

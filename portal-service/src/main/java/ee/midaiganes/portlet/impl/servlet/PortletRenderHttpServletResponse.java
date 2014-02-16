@@ -8,7 +8,7 @@ import javax.portlet.MimeResponse;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
-import ee.midaiganes.io.ServletOutputStreamImpl;
+import ee.midaiganes.servlet.io.ServletOutputStreamImpl;
 
 public class PortletRenderHttpServletResponse extends PortletHttpServletResponse {
 	private final MimeResponse mimeResponse;
