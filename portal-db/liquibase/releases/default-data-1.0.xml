@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
 
 	<changeSet id="1" author="-" runAlways="false" runOnChange="false" dbms="mysql" failOnError="true">
 		<preConditions onFail="HALT">
@@ -21,17 +21,17 @@
 				INSERT INTO Group_(name) VALUES('${guest.group.name}');
 				INSERT INTO Permission(resourceId, resourcePrimKey, resource2Id, resource2PrimKey, permission) 
 							VALUES(
-								(SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.Group'),
+								(SELECT id FROM Resource WHERE resource = 'ee.midaiganes.portal.group.Group'),
 								(SELECT id FROM Group_ WHERE name = 'GUEST'),
-								(SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.PortletInstance'),
+								(SELECT id FROM Resource WHERE resource = 'ee.midaiganes.portal.portletinstance.PortletInstance'),
 								(SELECT id FROM PortletInstance WHERE portletContext = '${portal.context.withoutslash}' AND portletName = 'login' AND windowID = '0000'),
 								1
 								);
 				INSERT INTO Permission(resourceId, resourcePrimKey, resource2Id, resource2PrimKey, permission) 
 							VALUES(
-								(SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.Group'),
+								(SELECT id FROM Resource WHERE resource = 'ee.midaiganes.portal.group.Group'),
 								(SELECT id FROM Group_ WHERE name = 'GUEST'),
-								(SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.Layout'),
+								(SELECT id FROM Resource WHERE resource = 'ee.midaiganes.portal.layout.Layout'),
 								(SELECT id FROM Layout WHERE friendlyUrl = '/test'),
 								1
 								);

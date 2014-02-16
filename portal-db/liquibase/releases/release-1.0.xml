@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
 	
 	<changeSet id="1" author="-" runOnChange="false" runAlways="false" dbms="mysql" failOnError="true">
 		<sql>
@@ -263,12 +263,12 @@
 		<comment>Add PortletInstance resource and actions</comment>
 		<sql>
 			<![CDATA[
-				INSERT INTO Resource(resource) VALUES('ee.midaiganes.model.PortletInstance');
-				INSERT INTO Resource(resource) VALUES('ee.midaiganes.model.User');
-				INSERT INTO Resource(resource) VALUES('ee.midaiganes.model.Group');
-				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.PortletInstance'), 'VIEW', 1);
-				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.PortletInstance'), 'EDIT', 2);
-				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.PortletInstance'), 'PERMISSIONS', 4);
+				INSERT INTO Resource(resource) VALUES('ee.midaiganes.portal.portletinstance.PortletInstance');
+				INSERT INTO Resource(resource) VALUES('ee.midaiganes.portal.user.User');
+				INSERT INTO Resource(resource) VALUES('ee.midaiganes.portal.group.Group');
+				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.portal.portletinstance.PortletInstance'), 'VIEW', 1);
+				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.portal.portletinstance.PortletInstance'), 'EDIT', 2);
+				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.portal.portletinstance.PortletInstance'), 'PERMISSIONS', 4);
 			]]>
 		</sql>
 	</changeSet>
@@ -276,11 +276,11 @@
 		<comment>Add layout resource and actions</comment>
 		<sql>
 			<![CDATA[
-				INSERT INTO Resource(resource) VALUES('ee.midaiganes.model.Layout');
-				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.Layout'), 'VIEW', 1);
-				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.Layout'), 'EDIT', 2);
-				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.Layout'), 'ADD_PORTLET', 4);
-				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.Layout'), 'PERMISSIONS', 8);
+				INSERT INTO Resource(resource) VALUES('ee.midaiganes.portal.layout.Layout');
+				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.portal.layout.Layout'), 'VIEW', 1);
+				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.portal.layout.Layout'), 'EDIT', 2);
+				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.portal.layout.Layout'), 'ADD_PORTLET', 4);
+				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.portal.layout.Layout'), 'PERMISSIONS', 8);
 			]]>
 		</sql>
 	</changeSet>
@@ -318,10 +318,10 @@
 		<comment>Add layoutSet resource and actions</comment>
 		<sql>
 			<![CDATA[
-				INSERT INTO Resource(resource) VALUES('ee.midaiganes.model.LayoutSet');
-				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.LayoutSet'), 'VIEW', 1);
-				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.LayoutSet'), 'EDIT', 2);
-				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.model.LayoutSet'), 'PERMISSIONS', 4);
+				INSERT INTO Resource(resource) VALUES('ee.midaiganes.portal.layoutset.LayoutSet');
+				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.portal.layoutset.LayoutSet'), 'VIEW', 1);
+				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.portal.layoutset.LayoutSet'), 'EDIT', 2);
+				INSERT INTO ResourceAction(resourceId, action, permission) VALUES((SELECT id FROM Resource WHERE resource = 'ee.midaiganes.portal.layoutset.LayoutSet'), 'PERMISSIONS', 4);
 			]]>
 		</sql>
 	</changeSet>

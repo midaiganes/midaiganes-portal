@@ -55,58 +55,58 @@
 	</listener>
 	
 	<filter>
-		<filter-name>ee.midaiganes.filter.GZIPFilter</filter-name>
-		<filter-class>ee.midaiganes.filter.GZIPFilter</filter-class>
+		<filter-name>ee.midaiganes.servlet.filter.GZIPFilter</filter-name>
+		<filter-class>ee.midaiganes.servlet.filter.GZIPFilter</filter-class>
 		<async-supported>true</async-supported>
 	</filter>
 	
 	<filter>
-		<filter-name>ee.midaiganes.filter.PortalFilter</filter-name>
-		<filter-class>ee.midaiganes.filter.PortalFilter</filter-class>
+		<filter-name>ee.midaiganes.servlet.filter.PortalFilter</filter-name>
+		<filter-class>ee.midaiganes.servlet.filter.PortalFilter</filter-class>
 		<async-supported>true</async-supported>
 	</filter>
 	
 	<filter>
-		<filter-name>ee.midaiganes.filter.ContentTypeFilter</filter-name>
-		<filter-class>ee.midaiganes.filter.ContentTypeFilter</filter-class>
+		<filter-name>ee.midaiganes.servlet.filter.ContentTypeFilter</filter-name>
+		<filter-class>ee.midaiganes.servlet.filter.ContentTypeFilter</filter-class>
 		<async-supported>true</async-supported>
 	</filter>
 	
 	<filter>
-		<filter-name>ee.midaiganes.filter.LoginFilter</filter-name>
-		<filter-class>ee.midaiganes.filter.LoginFilter</filter-class>
+		<filter-name>ee.midaiganes.servlet.filter.LoginFilter</filter-name>
+		<filter-class>ee.midaiganes.servlet.filter.LoginFilter</filter-class>
 		<async-supported>true</async-supported>
 	</filter>
 	
 	<filter>
-		<filter-name>ee.midaiganes.filter.StaticContentFilter</filter-name>
-		<filter-class>ee.midaiganes.filter.StaticContentFilter</filter-class>
+		<filter-name>ee.midaiganes.servlet.filter.StaticContentFilter</filter-name>
+		<filter-class>ee.midaiganes.servlet.filter.StaticContentFilter</filter-class>
 		<async-supported>true</async-supported>
 	</filter>
 	<!-- 
 	<filter-mapping>
-		<filter-name>ee.midaiganes.filter.GZIPFilter</filter-name>
+		<filter-name>ee.midaiganes.servlet.filter.GZIPFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 	 -->
 	
 	<filter-mapping>
-		<filter-name>ee.midaiganes.filter.PortalFilter</filter-name>
+		<filter-name>ee.midaiganes.servlet.filter.PortalFilter</filter-name>
 		<servlet-name>ee.midaiganes.servlet.PortalServlet</servlet-name>
 	</filter-mapping>
 	
 	<filter-mapping>
-		<filter-name>ee.midaiganes.filter.LoginFilter</filter-name>
+		<filter-name>ee.midaiganes.servlet.filter.LoginFilter</filter-name>
 		<servlet-name>ee.midaiganes.servlet.PortalServlet</servlet-name>
 	</filter-mapping>
 
 	<filter-mapping>
-		<filter-name>ee.midaiganes.filter.ContentTypeFilter</filter-name>
+		<filter-name>ee.midaiganes.servlet.filter.ContentTypeFilter</filter-name>
 		<servlet-name>ee.midaiganes.servlet.PortalServlet</servlet-name>
-	</filter-mapping>	
+	</filter-mapping>
 	
 	<filter-mapping>
-		<filter-name>ee.midaiganes.filter.StaticContentFilter</filter-name>
+		<filter-name>ee.midaiganes.servlet.filter.StaticContentFilter</filter-name>
 		<servlet-name>ee.midaiganes.servlet.StaticContentServlet</servlet-name>
 	</filter-mapping>
 

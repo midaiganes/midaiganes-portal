@@ -22,7 +22,11 @@ public class ResourceRepository {
         final String cacheKey = resource;
         final Element el = cache.getElement(cacheKey);
         if (el != null) {
-            return el.<Long> get().longValue();
+            Long val = el.get();
+            if (val == null) {
+                throw new ResourceNotFoundException("Invalid resource from cache: '" + resource + "'");
+            }
+            return val.longValue();
         }
         Long value = null;
         try {
