@@ -17,8 +17,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import ee.midaiganes.model.PortletAndConfiguration;
 import ee.midaiganes.portal.portletinstance.PortletNamespace;
+import ee.midaiganes.portlet.PortletAndConfiguration;
 import ee.midaiganes.util.PortletConstant;
 
 public class PortletRequestImpl implements PortletRequest {

@@ -13,9 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ee.midaiganes.beans.BeanRepositoryUtil;
-import ee.midaiganes.model.MidaiganesWindowState;
 import ee.midaiganes.portal.user.User;
 import ee.midaiganes.portal.user.UserRepository;
+import ee.midaiganes.portlet.MidaiganesWindowState;
 import ee.midaiganes.portlets.BasePortlet;
 import ee.midaiganes.util.PortalURLUtil;
 import ee.midaiganes.util.SessionUtil;

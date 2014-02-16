@@ -11,8 +11,8 @@ import javax.portlet.PortletURL;
 import javax.portlet.ResourceURL;
 import javax.servlet.http.HttpServletResponse;
 
-import ee.midaiganes.model.PortletLifecycle;
 import ee.midaiganes.portal.portletinstance.PortletNamespace;
+import ee.midaiganes.portlet.PortletLifecycle;
 
 public class MimeResponseImpl extends PortletResponseImpl implements MimeResponse {
 	private final HttpServletResponse response;

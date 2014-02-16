@@ -1,4 +1,4 @@
-package ee.midaiganes.model;
+package ee.midaiganes.portlet;
 
 import java.io.Serializable;
 import java.util.Collections;

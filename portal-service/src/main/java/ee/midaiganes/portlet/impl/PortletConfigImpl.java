@@ -20,7 +20,7 @@ import javax.xml.namespace.QName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.model.PortletInitParameter;
+import ee.midaiganes.portlet.PortletInitParameter;
 
 public class PortletConfigImpl implements PortletConfig {
     private static final Logger log = LoggerFactory.getLogger(PortletConfigImpl.class);

@@ -1,4 +1,4 @@
-package ee.midaiganes.model;
+package ee.midaiganes.portlet;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,7 +12,6 @@ import ee.midaiganes.generated.xml.portlet.PortletModeType;
 import ee.midaiganes.generated.xml.portlet.PortletType;
 import ee.midaiganes.generated.xml.portlet.SupportsType;
 import ee.midaiganes.generated.xml.portlet.WindowStateType;
-import ee.midaiganes.portlet.MidaiganesPortlet;
 import ee.midaiganes.util.PortletModeUtil;
 import ee.midaiganes.util.WindowStateUtil;
 

@@ -1,6 +1,6 @@
 package ee.midaiganes.util;
 
-import ee.midaiganes.model.PortletName;
+import ee.midaiganes.portlet.PortletName;
 
 public enum MidaiganesPortlets {
 	LAYOUT_PORTLET("layout"), CHANGE_PAGE_LAYOUT("page-layout"), ADD_REMOVE_PORTLET("add-remove-portlet"), PERMISSIONS("permissions");

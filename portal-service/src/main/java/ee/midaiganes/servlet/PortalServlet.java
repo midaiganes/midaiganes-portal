@@ -13,15 +13,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ee.midaiganes.beans.BeanRepositoryUtil;
-import ee.midaiganes.model.MidaiganesWindowState;
 import ee.midaiganes.model.PageDisplay;
-import ee.midaiganes.model.PortletLifecycle;
 import ee.midaiganes.model.RequestInfo;
 import ee.midaiganes.portal.layoutportlet.LayoutPortlet;
 import ee.midaiganes.portal.layoutportlet.LayoutPortletRepository;
 import ee.midaiganes.portal.portletinstance.PortletInstance;
 import ee.midaiganes.portal.portletinstance.PortletInstanceRepository;
 import ee.midaiganes.portal.theme.Theme;
+import ee.midaiganes.portlet.MidaiganesWindowState;
+import ee.midaiganes.portlet.PortletLifecycle;
 import ee.midaiganes.portlet.app.PortletApp;
 import ee.midaiganes.secureservices.SecurePortletRepository;
 import ee.midaiganes.services.DbInstallService;

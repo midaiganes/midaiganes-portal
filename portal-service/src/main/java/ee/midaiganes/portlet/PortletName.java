@@ -1,5 +1,6 @@
-package ee.midaiganes.model;
+package ee.midaiganes.portlet;
 
+import ee.midaiganes.model.ContextAndName;
 import ee.midaiganes.util.StringUtil;
 
 public class PortletName extends ContextAndName {

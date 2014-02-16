@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.portlet.WindowState;
 
-import ee.midaiganes.model.MidaiganesWindowState;
+import ee.midaiganes.portlet.MidaiganesWindowState;
 
 public class WindowStateUtil {
 	private static final List<WindowState> portalSupportedWindowStates = Arrays.asList(WindowState.NORMAL, MidaiganesWindowState.EXCLUSIVE);

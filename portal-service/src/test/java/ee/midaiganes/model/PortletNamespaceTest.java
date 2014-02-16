@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.testng.Assert;
 
 import ee.midaiganes.portal.portletinstance.PortletNamespace;
+import ee.midaiganes.portlet.PortletName;
 
 public class PortletNamespaceTest {
 

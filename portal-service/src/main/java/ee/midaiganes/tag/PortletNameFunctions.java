@@ -1,6 +1,6 @@
 package ee.midaiganes.tag;
 
-import ee.midaiganes.model.PortletName;
+import ee.midaiganes.portlet.PortletName;
 import ee.midaiganes.util.PropsValues;
 import ee.midaiganes.util.StringPool;
 

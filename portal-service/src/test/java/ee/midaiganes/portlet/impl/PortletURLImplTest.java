@@ -13,9 +13,9 @@ import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.testng.Assert;
 
-import ee.midaiganes.model.PortletLifecycle;
-import ee.midaiganes.model.PortletName;
 import ee.midaiganes.portal.portletinstance.PortletNamespace;
+import ee.midaiganes.portlet.PortletLifecycle;
+import ee.midaiganes.portlet.PortletName;
 
 public class PortletURLImplTest {
 	private static final String URL = "http://localhost";

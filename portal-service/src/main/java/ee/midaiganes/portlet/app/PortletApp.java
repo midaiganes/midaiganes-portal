@@ -17,11 +17,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.model.MidaiganesWindowState;
-import ee.midaiganes.model.PortletAndConfiguration;
 import ee.midaiganes.portal.portletinstance.PortletInstance;
 import ee.midaiganes.portal.portletinstance.PortletNamespace;
 import ee.midaiganes.portlet.MidaiganesPortlet;
+import ee.midaiganes.portlet.MidaiganesWindowState;
+import ee.midaiganes.portlet.PortletAndConfiguration;
 import ee.midaiganes.portlet.impl.ActionRequestImpl;
 import ee.midaiganes.portlet.impl.ActionResponseImpl;
 import ee.midaiganes.portlet.impl.PortletPreferencesImpl;

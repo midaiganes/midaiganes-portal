@@ -12,7 +12,7 @@ import javax.servlet.jsp.tagext.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.model.PortletName;
+import ee.midaiganes.portlet.PortletName;
 import ee.midaiganes.servlet.RuntimePortletServlet;
 import ee.midaiganes.servlet.http.WrappedOutputHttpServletResponse;
 import ee.midaiganes.util.ContextUtil;

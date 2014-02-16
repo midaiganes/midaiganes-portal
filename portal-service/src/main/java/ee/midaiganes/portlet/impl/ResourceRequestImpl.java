@@ -11,8 +11,8 @@ import javax.portlet.WindowState;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import ee.midaiganes.model.PortletAndConfiguration;
 import ee.midaiganes.portal.portletinstance.PortletNamespace;
+import ee.midaiganes.portlet.PortletAndConfiguration;
 
 public class ResourceRequestImpl extends ClientDataRequestImpl implements ResourceRequest {
 

@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.SqlProvider;
 
-import ee.midaiganes.model.PortletName;
+import ee.midaiganes.portlet.PortletName;
 import ee.midaiganes.util.StringPool;
 
 public class AddPortletPreparedStatementCreator implements PreparedStatementCreator, SqlProvider {

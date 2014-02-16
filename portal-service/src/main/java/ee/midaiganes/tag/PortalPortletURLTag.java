@@ -4,8 +4,8 @@ import javax.portlet.PortletMode;
 import javax.portlet.PortletURL;
 import javax.portlet.WindowState;
 
-import ee.midaiganes.model.PortletLifecycle;
-import ee.midaiganes.model.PortletName;
+import ee.midaiganes.portlet.PortletLifecycle;
+import ee.midaiganes.portlet.PortletName;
 import ee.midaiganes.portlet.impl.PortletURLImpl;
 import ee.midaiganes.portlet.impl.jsr286.taglib.PortletURLTag;
 import ee.midaiganes.util.PortletModeUtil;

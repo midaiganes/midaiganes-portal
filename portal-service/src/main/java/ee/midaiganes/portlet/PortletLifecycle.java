@@ -1,4 +1,4 @@
-package ee.midaiganes.model;
+package ee.midaiganes.portlet;
 
 import ee.midaiganes.util.GetterUtil;
 

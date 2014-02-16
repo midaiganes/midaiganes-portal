@@ -9,7 +9,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
-import ee.midaiganes.model.PortletName;
+import ee.midaiganes.portlet.PortletName;
 import ee.midaiganes.services.rowmapper.LongResultSetExtractor;
 import ee.midaiganes.util.CollectionUtil;
 import ee.midaiganes.util.StringPool;

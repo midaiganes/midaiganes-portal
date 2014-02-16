@@ -12,9 +12,9 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.model.PortletLifecycle;
-import ee.midaiganes.model.PortletName;
 import ee.midaiganes.portal.portletinstance.PortletNamespace;
+import ee.midaiganes.portlet.PortletLifecycle;
+import ee.midaiganes.portlet.PortletName;
 import ee.midaiganes.util.PortletConstant;
 import ee.midaiganes.util.PortletModeUtil;
 import ee.midaiganes.util.StringPool;

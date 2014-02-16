@@ -3,6 +3,9 @@ package ee.midaiganes.model;
 import javax.portlet.PortletMode;
 import javax.portlet.WindowState;
 
+import ee.midaiganes.portlet.PortletLifecycle;
+import ee.midaiganes.portlet.PortletName;
+
 public class RequestInfo {
 	private PortletURL portletURL;
 

@@ -13,8 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
-import ee.midaiganes.model.PortletName;
 import ee.midaiganes.portal.portletinstance.PortletInstanceRepository;
+import ee.midaiganes.portlet.PortletName;
 
 @Resource(name = PortalConfig.LAYOUT_PORTLET_REPOSITORY)
 public class LayoutPortletRepository {

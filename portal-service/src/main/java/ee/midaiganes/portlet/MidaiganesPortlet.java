@@ -24,8 +24,6 @@ import javax.portlet.ResourceServingPortlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.model.PortletName;
-
 public class MidaiganesPortlet implements MidaiganesPortletMBean, Portlet {
 	private static final Logger log = LoggerFactory.getLogger(MidaiganesPortlet.class);
 	private final Portlet portlet;

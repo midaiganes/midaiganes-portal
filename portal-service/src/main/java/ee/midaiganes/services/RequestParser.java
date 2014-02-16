@@ -4,9 +4,9 @@ import javax.portlet.PortletMode;
 import javax.portlet.WindowState;
 import javax.servlet.http.HttpServletRequest;
 
-import ee.midaiganes.model.PortletLifecycle;
-import ee.midaiganes.model.PortletName;
 import ee.midaiganes.model.RequestInfo;
+import ee.midaiganes.portlet.PortletLifecycle;
+import ee.midaiganes.portlet.PortletName;
 import ee.midaiganes.util.PortletConstant;
 import ee.midaiganes.util.PortletModeUtil;
 import ee.midaiganes.util.WindowStateUtil;

@@ -8,9 +8,9 @@ import javax.portlet.WindowState;
 import javax.portlet.WindowStateException;
 import javax.servlet.http.HttpServletRequest;
 
-import ee.midaiganes.model.MidaiganesWindowState;
-import ee.midaiganes.model.PortletLifecycle;
-import ee.midaiganes.model.PortletName;
+import ee.midaiganes.portlet.MidaiganesWindowState;
+import ee.midaiganes.portlet.PortletLifecycle;
+import ee.midaiganes.portlet.PortletName;
 import ee.midaiganes.portlet.impl.PortletURLImpl;
 import ee.midaiganes.util.StringPool;
 

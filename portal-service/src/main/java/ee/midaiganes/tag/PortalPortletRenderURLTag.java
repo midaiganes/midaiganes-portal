@@ -1,6 +1,6 @@
 package ee.midaiganes.tag;
 
-import ee.midaiganes.model.PortletLifecycle;
+import ee.midaiganes.portlet.PortletLifecycle;
 
 public class PortalPortletRenderURLTag extends PortalPortletURLTag {
 
