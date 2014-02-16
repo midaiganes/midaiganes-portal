@@ -17,20 +17,22 @@ import ee.midaiganes.util.ContextUtil;
 import ee.midaiganes.util.PropsValues;
 
 public class PageLayoutTag extends SimpleTag {
-	private static final Logger log = LoggerFactory.getLogger(PageLayoutTag.class);
+    private static final Logger log = LoggerFactory.getLogger(PageLayoutTag.class);
 
-	@Override
-	public int doEndTag() throws JspException {
-		try {
-			ServletContext servletContext = ContextUtil.getServletContext(getHttpServletRequest(), PropsValues.PORTAL_CONTEXT);
-			RequestDispatcher requestDispatcher = servletContext.getNamedDispatcher(PageLayoutServlet.class.getName());
-			requestDispatcher.include(getHttpServletRequest(), new WrappedOutputHttpServletResponse(getHttpServletResponse(), getPageContext().getOut()));
-		} catch (ServletException e) {
-			log.error(e.getMessage(), e);
-		} catch (IOException e) {
-			log.error(e.getMessage(), e);
-		}
-		return Tag.EVAL_PAGE;
-	}
+    @Override
+    public int doEndTag() throws JspException {
+        try {
+            ServletContext servletContext = ContextUtil.getServletContext(getHttpServletRequest(), PropsValues.PORTAL_CONTEXT);
+            RequestDispatcher requestDispatcher = servletContext.getNamedDispatcher(PageLayoutServlet.class.getName());
+            try (WrappedOutputHttpServletResponse resp = new WrappedOutputHttpServletResponse(getHttpServletResponse(), getPageContext().getOut())) {
+                requestDispatcher.include(getHttpServletRequest(), resp);
+            }
+        } catch (ServletException e) {
+            log.error(e.getMessage(), e);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
+        return Tag.EVAL_PAGE;
+    }
 
 }

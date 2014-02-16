@@ -1,4 +1,4 @@
-package ee.midaiganes.services;
+package ee.midaiganes.portal.permission;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,7 +11,6 @@ import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
 import ee.midaiganes.model.ResourceActionPermission;
-import ee.midaiganes.services.dao.ResourceActionDao;
 import ee.midaiganes.services.exceptions.ResourceActionNotFoundException;
 import ee.midaiganes.services.exceptions.ResourceHasNoActionsException;
 
@@ -21,16 +20,16 @@ public class ResourceActionRepository {
     private final ResourceActionDao resourceActionDao;
 
     public ResourceActionRepository(ResourceActionDao resourceActionDao) {
-        cache = SingleVmPoolUtil.getCache(ResourceActionRepository.class.getName());
+        this.cache = SingleVmPoolUtil.getCache(ResourceActionRepository.class.getName());
         this.resourceActionDao = resourceActionDao;
     }
 
     public long getResourceActionPermission(long resourceId, String action) throws ResourceActionNotFoundException {
-        List<ResourceActionPermission> list = getResourceActionPermissions(resourceId);
-        if (list != null) {
-            for (ResourceActionPermission item : list) {
-                if (item.getResourceId() == resourceId && item.getAction().equals(action)) {
-                    return item.getPermission();
+        List<ResourceActionPermission> resourceActionPermissions = getResourceActionPermissions(resourceId);
+        if (resourceActionPermissions != null) {
+            for (ResourceActionPermission resourceActionPermission : resourceActionPermissions) {
+                if (resourceActionPermission.getResourceId() == resourceId && resourceActionPermission.getAction().equals(action)) {
+                    return resourceActionPermission.getPermission();
                 }
             }
             throw new ResourceActionNotFoundException(resourceId, action);
@@ -39,11 +38,11 @@ public class ResourceActionRepository {
     }
 
     public List<String> getResourceActions(long resourceId) {
-        List<ResourceActionPermission> list = getResourceActionPermissions(resourceId);
-        if (list != null) {
-            List<String> actions = new ArrayList<>(list.size());
-            for (ResourceActionPermission ra : list) {
-                actions.add(ra.getAction());
+        List<ResourceActionPermission> resourceActionPermissions = getResourceActionPermissions(resourceId);
+        if (resourceActionPermissions != null) {
+            List<String> actions = new ArrayList<>(resourceActionPermissions.size());
+            for (ResourceActionPermission resourceActionPermission : resourceActionPermissions) {
+                actions.add(resourceActionPermission.getAction());
             }
             return actions;
         }

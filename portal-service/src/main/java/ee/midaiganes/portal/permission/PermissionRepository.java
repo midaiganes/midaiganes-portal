@@ -1,4 +1,4 @@
-package ee.midaiganes.services;
+package ee.midaiganes.portal.permission;
 
 import javax.annotation.Resource;
 
@@ -78,27 +78,27 @@ public class PermissionRepository {
 
     private long[] getUserGroups(long userId) {
         long[] groupIds = null;
-        if (User.DEFAULT_USER_ID == userId) {
+        if (User.isDefaultUserId(userId)) {
             if (!StringUtil.isEmpty(PropsValues.GUEST_GROUP_NAME)) {
-                Long gid = groupRepository.getGroupId(PropsValues.GUEST_GROUP_NAME);
-                if (gid != null) {
-                    groupIds = new long[] { gid.longValue() };
+                Long guestGroupId = groupRepository.getGroupId(PropsValues.GUEST_GROUP_NAME);
+                if (guestGroupId != null) {
+                    groupIds = new long[] { guestGroupId.longValue() };
                 }
             }
             if (!StringUtil.isEmpty(PropsValues.NOT_LOGGED_IN_GROUP_NAME)) {
-                Long gid = groupRepository.getGroupId(PropsValues.NOT_LOGGED_IN_GROUP_NAME);
-                if (gid != null) {
-                    groupIds = groupIds == null ? new long[] { gid.longValue() } : new long[] { gid.longValue(), groupIds[0] };
+                Long notLoggedInGroupId = groupRepository.getGroupId(PropsValues.NOT_LOGGED_IN_GROUP_NAME);
+                if (notLoggedInGroupId != null) {
+                    groupIds = groupIds == null ? new long[] { notLoggedInGroupId.longValue() } : new long[] { notLoggedInGroupId.longValue(), groupIds[0] };
                 }
             }
         } else {
             long[] list = groupRepository.getUserGroupIds(userId);
             if (!StringUtil.isEmpty(PropsValues.LOGGED_IN_GROUP_NAME)) {
-                Long gid = groupRepository.getGroupId(PropsValues.LOGGED_IN_GROUP_NAME);
-                if (gid != null) {
+                Long loggedInGroupId = groupRepository.getGroupId(PropsValues.LOGGED_IN_GROUP_NAME);
+                if (loggedInGroupId != null) {
                     long[] ll = new long[list.length + 1];
                     System.arraycopy(list, 0, ll, 0, list.length);
-                    ll[list.length - 1] = gid.longValue();
+                    ll[list.length - 1] = loggedInGroupId.longValue();
                     list = ll;
                 }
             }

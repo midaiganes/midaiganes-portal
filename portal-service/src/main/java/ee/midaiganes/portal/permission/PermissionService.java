@@ -1,4 +1,4 @@
-package ee.midaiganes.services;
+package ee.midaiganes.portal.permission;
 
 import javax.annotation.Resource;
 
@@ -9,7 +9,6 @@ import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
-import ee.midaiganes.services.dao.PermissionDao;
 import ee.midaiganes.services.exceptions.ResourceActionNotFoundException;
 
 @Resource(name = PortalConfig.PERMISSION_SERVICE)
@@ -26,14 +25,14 @@ public class PermissionService {
         this.cache = SingleVmPoolUtil.getCache(PermissionService.class.getName());
     }
 
-    @Transactional(propagation = Propagation.REQUIRED, readOnly = true, value = PortalConfig.TXMANAGER)
+    @Transactional(propagation = Propagation.REQUIRED, value = PortalConfig.TXMANAGER)
     public boolean hasPermission(long resource1, long resource1PrimKey, long resource2, long resource2PrimKey, String action) throws ResourceActionNotFoundException {
         long resourceActionPermission = resourceActionPermissionRepository.getResourceActionPermission(resource2, action);
         Long permissions = getPermissions(resource1, resource1PrimKey, resource2, resource2PrimKey);
         return permissions != null && (permissions.longValue() & resourceActionPermission) == resourceActionPermission;
     }
 
-    @Transactional(propagation = Propagation.REQUIRED, readOnly = false, value = PortalConfig.TXMANAGER)
+    @Transactional(propagation = Propagation.REQUIRED, value = PortalConfig.TXMANAGER)
     public void setPermissions(long resource1, long resource1PrimKey, long resource2, long resource2PrimKey, String[] actions, boolean[] permissions)
             throws ResourceActionNotFoundException {
         long actionPermissions = calculateActionPermission(getResourceActionPermissions(resource2, actions), permissions);

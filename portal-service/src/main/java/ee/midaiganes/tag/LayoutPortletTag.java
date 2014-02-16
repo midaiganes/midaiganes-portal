@@ -17,29 +17,30 @@ import ee.midaiganes.servlet.http.WrappedOutputHttpServletResponse;
 import ee.midaiganes.util.ContextUtil;
 
 public class LayoutPortletTag extends SimpleTag {
-	private static final Logger log = LoggerFactory.getLogger(LayoutPortletTag.class);
-	private long id;
+    private static final Logger log = LoggerFactory.getLogger(LayoutPortletTag.class);
+    private long id;
 
-	@Override
-	public int doEndTag() {
-		log.debug("id = {}", Long.valueOf(id));
-		try {
-			HttpServletRequest request = getHttpServletRequest();
-			ServletContext servletContext = ContextUtil.getPortalServletContext(request);
-			RequestDispatcher requestDispatcher = servletContext.getNamedDispatcher(LayoutPortletServlet.class.getName());
-			requestDispatcher.include(new LayoutPortletRequest(request, id), new WrappedOutputHttpServletResponse(getHttpServletResponse(), getPageContext()
-					.getOut()));
-		} catch (ServletException e) {
-			log.error(e.getMessage(), e);
-		} catch (IOException e) {
-			log.error(e.getMessage(), e);
-		} catch (RuntimeException e) {
-			log.error(e.getMessage(), e);
-		}
-		return Tag.EVAL_PAGE;
-	}
+    @Override
+    public int doEndTag() {
+        log.debug("id = {}", Long.valueOf(id));
+        try {
+            HttpServletRequest request = getHttpServletRequest();
+            ServletContext servletContext = ContextUtil.getPortalServletContext(request);
+            RequestDispatcher requestDispatcher = servletContext.getNamedDispatcher(LayoutPortletServlet.class.getName());
+            try (WrappedOutputHttpServletResponse resp = new WrappedOutputHttpServletResponse(getHttpServletResponse(), getPageContext().getOut())) {
+                requestDispatcher.include(new LayoutPortletRequest(request, id), resp);
+            }
+        } catch (ServletException e) {
+            log.error(e.getMessage(), e);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        } catch (RuntimeException e) {
+            log.error(e.getMessage(), e);
+        }
+        return Tag.EVAL_PAGE;
+    }
 
-	public void setId(long id) {
-		this.id = id;
-	}
+    public void setId(long id) {
+        this.id = id;
+    }
 }

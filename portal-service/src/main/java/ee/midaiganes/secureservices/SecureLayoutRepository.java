@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.portal.layout.Layout;
 import ee.midaiganes.portal.layout.LayoutRepository;
-import ee.midaiganes.services.PermissionRepository;
+import ee.midaiganes.portal.permission.PermissionRepository;
 import ee.midaiganes.services.exceptions.PrincipalException;
 import ee.midaiganes.services.exceptions.ResourceActionNotFoundException;
 import ee.midaiganes.services.exceptions.ResourceNotFoundException;

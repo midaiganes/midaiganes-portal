@@ -9,9 +9,9 @@ import org.springframework.stereotype.Component;
 
 import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.portal.layoutportlet.LayoutPortlet;
+import ee.midaiganes.portal.permission.PermissionRepository;
 import ee.midaiganes.portal.portletinstance.PortletInstance;
 import ee.midaiganes.portlet.app.PortletApp;
-import ee.midaiganes.services.PermissionRepository;
 import ee.midaiganes.services.PortletRepository;
 import ee.midaiganes.services.exceptions.PrincipalException;
 import ee.midaiganes.services.exceptions.ResourceActionNotFoundException;

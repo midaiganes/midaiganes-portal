@@ -33,6 +33,13 @@ import ee.midaiganes.portal.layoutportlet.LayoutPortletRepository;
 import ee.midaiganes.portal.layoutset.LayoutSetDao;
 import ee.midaiganes.portal.layoutset.LayoutSetRepository;
 import ee.midaiganes.portal.pagelayout.PageLayoutRepository;
+import ee.midaiganes.portal.permission.PermissionDao;
+import ee.midaiganes.portal.permission.PermissionRepository;
+import ee.midaiganes.portal.permission.PermissionService;
+import ee.midaiganes.portal.permission.ResourceActionDao;
+import ee.midaiganes.portal.permission.ResourceActionRepository;
+import ee.midaiganes.portal.permission.ResourceDao;
+import ee.midaiganes.portal.permission.ResourceRepository;
 import ee.midaiganes.portal.portletinstance.PortletInstanceDao;
 import ee.midaiganes.portal.portletinstance.PortletInstanceRepository;
 import ee.midaiganes.portal.theme.ThemeRepository;
@@ -42,17 +49,10 @@ import ee.midaiganes.secureservices.SecureLayoutRepository;
 import ee.midaiganes.secureservices.SecurePortletRepository;
 import ee.midaiganes.services.DbInstallService;
 import ee.midaiganes.services.LanguageRepository;
-import ee.midaiganes.services.PermissionRepository;
-import ee.midaiganes.services.PermissionService;
 import ee.midaiganes.services.PortletPreferencesRepository;
 import ee.midaiganes.services.PortletRepository;
 import ee.midaiganes.services.RequestParser;
-import ee.midaiganes.services.ResourceActionRepository;
-import ee.midaiganes.services.ResourceRepository;
 import ee.midaiganes.services.ThemeVariablesService;
-import ee.midaiganes.services.dao.PermissionDao;
-import ee.midaiganes.services.dao.ResourceActionDao;
-import ee.midaiganes.services.dao.ResourceDao;
 
 @Configuration(value = "portalConfig")
 @PropertySource(value = "classpath:portal.properties", name = "portalProperties")

@@ -65,8 +65,9 @@ public class PortalFilter extends HttpFilter {
             pageDisplay.setLayoutSet(layoutSet);
             User user = getUser(request);
             pageDisplay.setUser(user);
-            pageDisplay.setLayout(getLayout(user.getId(), layoutSet.getId(), RequestUtil.getFriendlyURL(request.getRequestURI())));
-            pageDisplay.setTheme(getTheme(pageDisplay));
+            Layout layout = getLayout(user.getId(), layoutSet.getId(), RequestUtil.getFriendlyURL(request.getRequestURI()));
+            pageDisplay.setLayout(layout);
+            pageDisplay.setTheme(getTheme(layout, layoutSet));
             RequestUtil.setPageDisplay(request, pageDisplay);
             if (pageDisplay.getLayout().isDefault()) {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -77,15 +78,15 @@ public class PortalFilter extends HttpFilter {
         }
     }
 
-    private Theme getTheme(PageDisplay pageDisplay) {
-        ThemeName themeName = pageDisplay.getLayout().getThemeName();
+    private Theme getTheme(Layout layout, LayoutSet layoutSet) {
+        ThemeName themeName = layout.getThemeName();
         if (themeName != null) {
             Theme theme = themeRepository.getTheme(themeName);
             if (theme != null) {
                 return theme;
             }
         }
-        themeName = pageDisplay.getLayoutSet().getThemeName();
+        themeName = layoutSet.getThemeName();
         if (themeName != null) {
             Theme theme = themeRepository.getTheme(themeName);
             if (theme != null) {
@@ -124,7 +125,7 @@ public class PortalFilter extends HttpFilter {
     private User getUser(HttpServletRequest request) {
         long userid = SessionUtil.getUserId(request);
         User user = null;
-        if (userid != User.DEFAULT_USER_ID) {
+        if (!User.isDefaultUserId(userid)) {
             user = userRepository.getUser(userid);
         }
         return user != null ? user : User.getDefault();

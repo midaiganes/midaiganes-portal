@@ -1,4 +1,4 @@
-package ee.midaiganes.services.dao;
+package ee.midaiganes.portal.permission;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -11,7 +11,7 @@ public class ResourceDao {
 
     public ResourceDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        resultSetExtractor = new LongResultSetExtractor();
+        this.resultSetExtractor = new LongResultSetExtractor();
     }
 
     public Long loadResourceId(String resource) {

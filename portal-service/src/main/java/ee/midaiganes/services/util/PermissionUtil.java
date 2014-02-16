@@ -2,7 +2,7 @@ package ee.midaiganes.services.util;
 
 import ee.midaiganes.beans.BeanRepositoryUtil;
 import ee.midaiganes.model.PortalResource;
-import ee.midaiganes.services.PermissionRepository;
+import ee.midaiganes.portal.permission.PermissionRepository;
 import ee.midaiganes.services.exceptions.ResourceActionNotFoundException;
 import ee.midaiganes.services.exceptions.ResourceNotFoundException;
 

@@ -7,7 +7,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.tagext.Tag;
 
 import org.slf4j.Logger;
@@ -47,8 +46,9 @@ public class RuntimePortletTag extends SimpleTag {
         HttpServletRequest request = getHttpServletRequest();
         ServletContext servletContext = ContextUtil.getPortalServletContext(request);
         RequestDispatcher requestDispatcher = servletContext.getNamedDispatcher(RuntimePortletServlet.class.getName());
-        HttpServletResponse response = new WrappedOutputHttpServletResponse(getHttpServletResponse(), getPageContext().getOut());
-        requestDispatcher.include(new RuntimePortletServletRequest(request, new PortletName(name)), response);
+        try (WrappedOutputHttpServletResponse response = new WrappedOutputHttpServletResponse(getHttpServletResponse(), getPageContext().getOut())) {
+            requestDispatcher.include(new RuntimePortletServletRequest(request, new PortletName(name)), response);
+        }
     }
 
     private static final class RuntimePortletServletRequest extends HttpServletRequestWrapper {

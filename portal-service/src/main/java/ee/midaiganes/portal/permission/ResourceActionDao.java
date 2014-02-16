@@ -1,11 +1,10 @@
-package ee.midaiganes.services.dao;
+package ee.midaiganes.portal.permission;
 
 import java.util.List;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import ee.midaiganes.model.ResourceActionPermission;
-import ee.midaiganes.services.rowmapper.ResourceActionPermissionRowMapper;
 
 public class ResourceActionDao {
     private static final String QRY_GET_RESOURCE_ACTION_PERMISSION = "SELECT resourceId, action, permission FROM ResourceAction WHERE resourceId = ?";

@@ -1,4 +1,4 @@
-package ee.midaiganes.services;
+package ee.midaiganes.portal.permission;
 
 import javax.annotation.Resource;
 
@@ -6,7 +6,6 @@ import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
-import ee.midaiganes.services.dao.ResourceDao;
 import ee.midaiganes.services.exceptions.ResourceNotFoundException;
 
 @Resource(name = PortalConfig.RESOURCE_REPOSITORY)

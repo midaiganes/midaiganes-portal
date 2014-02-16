@@ -1,4 +1,4 @@
-package ee.midaiganes.services.dao;
+package ee.midaiganes.portal.permission;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 

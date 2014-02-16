@@ -6,7 +6,7 @@ import ee.midaiganes.util.StringPool;
 
 public class ContextAndName implements Serializable {
     private static final long serialVersionUID = 1L;
-    protected static final String SEPARATOR = "_w_";
+    private static final String SEPARATOR = "_w_";
     private final String context;
     private final String contextWithSlash;
     private final String name;
@@ -33,7 +33,7 @@ public class ContextAndName implements Serializable {
         this(validateAndGet(split(fullName)));
     }
 
-    private static String[] split(String fullName) {
+    protected static String[] split(String fullName) {
         int length = fullName.length();
         StringBuilder ctx = new StringBuilder(length);
         StringBuilder name = new StringBuilder(length);
@@ -97,8 +97,8 @@ public class ContextAndName implements Serializable {
         return o instanceof ContextAndName && equals((ContextAndName) o, this);
     }
 
-    private static boolean equals(ContextAndName n, ContextAndName m) {
-        return n != null && m.context.equals(n.context) && m.name.equals(n.name);
+    private static boolean equals(ContextAndName n, ContextAndName _this) {
+        return n == _this || (n != null && _this.context.equals(n.context) && _this.name.equals(n.name));
     }
 
     @Override

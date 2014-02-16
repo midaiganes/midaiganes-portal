@@ -1,4 +1,4 @@
-package ee.midaiganes.services.rowmapper;
+package ee.midaiganes.portal.permission;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
