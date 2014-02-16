@@ -3,9 +3,9 @@ package ee.midaiganes.services.util;
 import javax.portlet.PortletResponse;
 
 import ee.midaiganes.beans.BeanRepositoryUtil;
-import ee.midaiganes.model.PortletNamespace;
 import ee.midaiganes.portal.portletinstance.PortletInstance;
 import ee.midaiganes.portal.portletinstance.PortletInstanceRepository;
+import ee.midaiganes.portal.portletinstance.PortletNamespace;
 
 public class PortletInstanceUtil {
 

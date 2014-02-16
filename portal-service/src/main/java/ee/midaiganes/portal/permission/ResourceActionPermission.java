@@ -1,4 +1,4 @@
-package ee.midaiganes.model;
+package ee.midaiganes.portal.permission;
 
 import java.io.Serializable;
 

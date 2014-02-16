@@ -1,7 +1,8 @@
-package ee.midaiganes.model;
+package ee.midaiganes.portal.portletinstance;
 
 import java.io.Serializable;
 
+import ee.midaiganes.model.PortletName;
 import ee.midaiganes.util.StringPool;
 
 public class PortletNamespace implements Serializable {

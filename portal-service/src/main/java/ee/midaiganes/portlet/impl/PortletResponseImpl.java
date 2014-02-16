@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Element;
 
-import ee.midaiganes.model.PortletNamespace;
+import ee.midaiganes.portal.portletinstance.PortletNamespace;
 
 public class PortletResponseImpl implements PortletResponse {
 	private final HttpServletResponse response;

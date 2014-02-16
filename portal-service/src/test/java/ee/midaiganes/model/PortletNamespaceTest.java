@@ -3,6 +3,8 @@ package ee.midaiganes.model;
 import org.junit.Test;
 import org.testng.Assert;
 
+import ee.midaiganes.portal.portletinstance.PortletNamespace;
+
 public class PortletNamespaceTest {
 
 	@Test

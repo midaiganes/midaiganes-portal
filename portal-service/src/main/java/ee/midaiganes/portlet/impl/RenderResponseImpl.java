@@ -6,7 +6,7 @@ import javax.portlet.PortletMode;
 import javax.portlet.RenderResponse;
 import javax.servlet.http.HttpServletResponse;
 
-import ee.midaiganes.model.PortletNamespace;
+import ee.midaiganes.portal.portletinstance.PortletNamespace;
 
 public class RenderResponseImpl extends MimeResponseImpl implements RenderResponse {
 

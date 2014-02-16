@@ -14,7 +14,6 @@ import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
 import ee.midaiganes.model.PortletName;
-import ee.midaiganes.model.PortletNamespace;
 import ee.midaiganes.util.CharsetPool;
 import ee.midaiganes.util.StringPool;
 

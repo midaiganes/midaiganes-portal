@@ -12,7 +12,7 @@ import javax.portlet.ResourceURL;
 import javax.servlet.http.HttpServletResponse;
 
 import ee.midaiganes.model.PortletLifecycle;
-import ee.midaiganes.model.PortletNamespace;
+import ee.midaiganes.portal.portletinstance.PortletNamespace;
 
 public class MimeResponseImpl extends PortletResponseImpl implements MimeResponse {
 	private final HttpServletResponse response;

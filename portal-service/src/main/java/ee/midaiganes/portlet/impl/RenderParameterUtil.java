@@ -3,7 +3,7 @@ package ee.midaiganes.portlet.impl;
 import javax.portlet.PortletRequest;
 import javax.servlet.http.HttpServletRequest;
 
-import ee.midaiganes.model.PortletNamespace;
+import ee.midaiganes.portal.portletinstance.PortletNamespace;
 
 public class RenderParameterUtil {
 

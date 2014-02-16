@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import ee.midaiganes.model.PortletLifecycle;
 import ee.midaiganes.model.PortletName;
-import ee.midaiganes.model.PortletNamespace;
+import ee.midaiganes.portal.portletinstance.PortletNamespace;
 import ee.midaiganes.util.PortletConstant;
 import ee.midaiganes.util.PortletModeUtil;
 import ee.midaiganes.util.StringPool;

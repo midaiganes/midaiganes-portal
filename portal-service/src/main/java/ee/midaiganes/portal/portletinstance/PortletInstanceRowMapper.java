@@ -6,7 +6,6 @@ import java.sql.SQLException;
 import org.springframework.jdbc.core.RowMapper;
 
 import ee.midaiganes.model.PortletName;
-import ee.midaiganes.model.PortletNamespace;
 
 public class PortletInstanceRowMapper implements RowMapper<PortletInstance> {
 	@Override

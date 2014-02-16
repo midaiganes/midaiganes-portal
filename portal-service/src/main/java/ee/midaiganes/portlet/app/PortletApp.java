@@ -19,8 +19,8 @@ import org.slf4j.LoggerFactory;
 
 import ee.midaiganes.model.MidaiganesWindowState;
 import ee.midaiganes.model.PortletAndConfiguration;
-import ee.midaiganes.model.PortletNamespace;
 import ee.midaiganes.portal.portletinstance.PortletInstance;
+import ee.midaiganes.portal.portletinstance.PortletNamespace;
 import ee.midaiganes.portlet.MidaiganesPortlet;
 import ee.midaiganes.portlet.impl.ActionRequestImpl;
 import ee.midaiganes.portlet.impl.ActionResponseImpl;

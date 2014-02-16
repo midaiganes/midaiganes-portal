@@ -5,8 +5,6 @@ import java.sql.SQLException;
 
 import org.springframework.jdbc.core.RowMapper;
 
-import ee.midaiganes.model.ResourceActionPermission;
-
 public final class ResourceActionPermissionRowMapper implements RowMapper<ResourceActionPermission> {
 	@Override
 	public final ResourceActionPermission mapRow(final ResultSet rs, final int rowNum) throws SQLException {

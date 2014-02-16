@@ -5,7 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import ee.midaiganes.model.PortletLifecycle;
 import ee.midaiganes.model.PortletName;
-import ee.midaiganes.model.PortletNamespace;
+import ee.midaiganes.portal.portletinstance.PortletNamespace;
 import ee.midaiganes.util.PortletConstant;
 import ee.midaiganes.util.StringPool;
 

@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import ee.midaiganes.model.PortletAndConfiguration;
-import ee.midaiganes.model.PortletNamespace;
+import ee.midaiganes.portal.portletinstance.PortletNamespace;
 
 public class RenderRequestImpl extends PortletRequestImpl implements RenderRequest {
 	private String ETag;

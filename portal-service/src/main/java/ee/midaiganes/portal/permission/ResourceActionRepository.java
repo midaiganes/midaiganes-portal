@@ -10,7 +10,6 @@ import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
-import ee.midaiganes.model.ResourceActionPermission;
 import ee.midaiganes.services.exceptions.ResourceActionNotFoundException;
 import ee.midaiganes.services.exceptions.ResourceHasNoActionsException;
 

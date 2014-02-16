@@ -4,8 +4,6 @@ import java.util.List;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import ee.midaiganes.model.ResourceActionPermission;
-
 public class ResourceActionDao {
     private static final String QRY_GET_RESOURCE_ACTION_PERMISSION = "SELECT resourceId, action, permission FROM ResourceAction WHERE resourceId = ?";
     private final ResourceActionPermissionRowMapper resourceActionPermissionRowMapper;

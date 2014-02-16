@@ -6,8 +6,8 @@ import java.sql.SQLException;
 import org.springframework.jdbc.core.RowMapper;
 
 import ee.midaiganes.model.PortletName;
-import ee.midaiganes.model.PortletNamespace;
 import ee.midaiganes.portal.portletinstance.PortletInstance;
+import ee.midaiganes.portal.portletinstance.PortletNamespace;
 
 public class LayoutPortletRowMapper implements RowMapper<LayoutPortlet> {
     @Override

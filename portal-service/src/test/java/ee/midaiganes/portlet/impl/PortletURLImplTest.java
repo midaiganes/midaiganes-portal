@@ -15,7 +15,7 @@ import org.testng.Assert;
 
 import ee.midaiganes.model.PortletLifecycle;
 import ee.midaiganes.model.PortletName;
-import ee.midaiganes.model.PortletNamespace;
+import ee.midaiganes.portal.portletinstance.PortletNamespace;
 
 public class PortletURLImplTest {
 	private static final String URL = "http://localhost";

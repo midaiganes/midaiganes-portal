@@ -5,7 +5,7 @@ import java.util.Locale;
 import javax.portlet.ResourceResponse;
 import javax.servlet.http.HttpServletResponse;
 
-import ee.midaiganes.model.PortletNamespace;
+import ee.midaiganes.portal.portletinstance.PortletNamespace;
 
 public class ResourceResponseImpl extends MimeResponseImpl implements ResourceResponse {
 	private final HttpServletResponse response;

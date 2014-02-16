@@ -12,7 +12,7 @@ import javax.portlet.WindowStateException;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.namespace.QName;
 
-import ee.midaiganes.model.PortletNamespace;
+import ee.midaiganes.portal.portletinstance.PortletNamespace;
 
 public class StateAwareResponseImpl extends PortletResponseImpl implements StateAwareResponse {
 

@@ -2,7 +2,7 @@ package ee.midaiganes.util;
 
 
 public interface StringPool {
-	/** {@link ee.midaiganes.model.PortletNamespace#isDefaultWindowID()} */
+	/** {@link ee.midaiganes.portal.portletinstance.PortletNamespace#isDefaultWindowID()} */
 	String DEFAULT_PORTLET_WINDOWID = "0000";
 	String SLASH = "/";
 	String MINUS = "-";

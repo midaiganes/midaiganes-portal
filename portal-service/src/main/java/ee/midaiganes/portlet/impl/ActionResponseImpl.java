@@ -6,7 +6,7 @@ import javax.portlet.ActionResponse;
 import javax.portlet.PortletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import ee.midaiganes.model.PortletNamespace;
+import ee.midaiganes.portal.portletinstance.PortletNamespace;
 
 public class ActionResponseImpl extends StateAwareResponseImpl implements ActionResponse {
 	private final HttpServletResponse response;

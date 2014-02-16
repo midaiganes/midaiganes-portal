@@ -3,7 +3,6 @@ package ee.midaiganes.portal.portletinstance;
 import java.io.Serializable;
 
 import ee.midaiganes.model.PortalResource;
-import ee.midaiganes.model.PortletNamespace;
 
 public class PortletInstance implements Serializable, PortalResource {
 	private static final long serialVersionUID = 1L;
