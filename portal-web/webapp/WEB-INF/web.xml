@@ -37,37 +37,13 @@
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
-
-	<listener>
-		<listener-class>ee.midaiganes.javax.servlet.PortalServletContextAttributeListener</listener-class>
-	</listener>
 	
 	<listener>
 		<listener-class>ee.midaiganes.javax.servlet.PortalServletContextListener</listener-class>
 	</listener>
 	
 	<listener>
-		<listener-class>ee.midaiganes.javax.servlet.PortalServletRequestAttributeListener</listener-class>
-	</listener>
-	
-	<listener>
 		<listener-class>ee.midaiganes.javax.servlet.PortalServletRequestListener</listener-class>
-	</listener>
-	
-	<listener>
-		<listener-class>ee.midaiganes.javax.servlet.http.PortalHttpSessionActivationListener</listener-class>
-	</listener>
-	
-	<listener>
-		<listener-class>ee.midaiganes.javax.servlet.http.PortalHttpSessionAttributeListener</listener-class>
-	</listener>
-	
-	<listener>
-		<listener-class>ee.midaiganes.javax.servlet.http.PortalHttpSessionBindingListener</listener-class>
-	</listener>
-	
-	<listener>
-		<listener-class>ee.midaiganes.javax.servlet.http.PortalHttpSessionListener</listener-class>
 	</listener>
 	
 	<listener>
