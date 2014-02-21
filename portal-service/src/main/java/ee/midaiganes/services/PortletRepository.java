@@ -35,8 +35,8 @@ import ee.midaiganes.portlet.MidaiganesPortlet;
 import ee.midaiganes.portlet.MidaiganesResourcePortlet;
 import ee.midaiganes.portlet.PortletAndConfiguration;
 import ee.midaiganes.portlet.PortletInitParameter;
-import ee.midaiganes.portlet.PortletName;
 import ee.midaiganes.portlet.PortletInitParameter.Description;
+import ee.midaiganes.portlet.PortletName;
 import ee.midaiganes.portlet.app.PortletApp;
 import ee.midaiganes.portlet.impl.PortletConfigImpl;
 import ee.midaiganes.util.StringPool;
@@ -120,7 +120,7 @@ public class PortletRepository {
         return getPortletApp(layoutPortlet.getPortletInstance(), portletMode, windowState);
     }
 
-    private PortletAndConfiguration getPortlet(PortletName portletName) {
+    public PortletAndConfiguration getPortlet(PortletName portletName) {
         lock.readLock().lock();
         try {
             PortletAndConfiguration portlet = portlets.get(portletName);

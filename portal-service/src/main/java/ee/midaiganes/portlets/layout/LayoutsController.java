@@ -112,7 +112,6 @@ public class LayoutsController extends BasePortlet {
             Long parentId = getParentId(layout.getParentId());
             long layoutSetId = RequestUtil.getPageDisplay(request).getLayoutSet().getId();
             PageLayoutName defaultPageLayoutName = pageLayoutRepository.getDefaultPageLayout().getPageLayoutName();
-            // TODO
             long languageId = languageRepository.getId(languageRepository.getSupportedLanguageIds().get(0)).longValue();
             layoutRepository.addLayout(layoutSetId, layout.getUrl(), null, defaultPageLayoutName, parentId, languageId);
         } else {

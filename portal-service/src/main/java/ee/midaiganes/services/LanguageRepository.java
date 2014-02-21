@@ -18,7 +18,6 @@ import ee.midaiganes.services.rowmapper.LongResultSetExtractor;
 import ee.midaiganes.services.rowmapper.StringRowMapper;
 import ee.midaiganes.util.StringUtil;
 
-// TODO caching
 @Resource(name = PortalConfig.LANGUAGE_REPOSITORY)
 public class LanguageRepository {
     private static final Logger log = LoggerFactory.getLogger(LanguageRepository.class);
@@ -96,11 +95,5 @@ public class LanguageRepository {
 
     public boolean isLanguageIdSupported(String languageId) {
         return getSupportedLanguageIds().contains(languageId);
-    }
-
-    public Locale getLocale(String languageId) {
-        // TODO
-        log.warn("todo");
-        return null;
     }
 }

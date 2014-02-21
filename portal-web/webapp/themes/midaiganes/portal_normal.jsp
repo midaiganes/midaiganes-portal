@@ -70,27 +70,6 @@
 				<h1>MIDAIGANES</h1>
 			</header>
 			
-			<%--
-			
-			<header id="header">
-				<c:choose>
-					<c:when test="${pageDisplay.user.defaultUser}">
-						<portal-taglib:portlet-render-url portletName="midaiganes_w_login" var="loginUrl" windowState="exclusive" />
-						<a href="${loginUrl}" class="open-dialog">Log in</a>
-						or
-						<portal-taglib:portlet-render-url portletName="midaiganes_w_registration" var="registrationUrl" windowState="exclusive"/>
-						<a href="${registrationUrl}" class="open-dialog">Create an account</a>
-					</c:when>
-					<c:otherwise>
-						<span>Username: ${pageDisplay.user.username}</span>
-						<portal-taglib:portlet-action-url portletName="midaiganes_w_login" var="logoutUrl">
-							<portlet:param name="action" value="logout"/>
-						</portal-taglib:portlet-action-url>
-						<a href="${logoutUrl}">log out</a>
-					</c:otherwise>
-				</c:choose>
-			</header>
-			--%>
 			<div class="navigation">
 				<ul>
 					<c:forEach items="${navItems}" var="navItem">

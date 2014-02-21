@@ -7,7 +7,6 @@ import java.util.List;
 import javax.portlet.WindowStateException;
 import javax.servlet.http.HttpServletRequest;
 
-import ee.midaiganes.factory.PortletURLFactory;
 import ee.midaiganes.model.NavItem;
 import ee.midaiganes.model.PageDisplay;
 import ee.midaiganes.portal.layout.Layout;

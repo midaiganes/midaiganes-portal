@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.TransactionManagementConfigurer;
 
 import ee.midaiganes.cache.SingleVmPoolUtil;
-import ee.midaiganes.factory.PortletURLFactory;
 import ee.midaiganes.portal.group.GroupDao;
 import ee.midaiganes.portal.group.GroupRepository;
 import ee.midaiganes.portal.layout.LayoutDao;
@@ -51,6 +50,7 @@ import ee.midaiganes.services.DbInstallService;
 import ee.midaiganes.services.LanguageRepository;
 import ee.midaiganes.services.PortletPreferencesRepository;
 import ee.midaiganes.services.PortletRepository;
+import ee.midaiganes.services.PortletURLFactory;
 import ee.midaiganes.services.RequestParser;
 import ee.midaiganes.services.ThemeVariablesService;
 
@@ -164,7 +164,7 @@ public class PortalConfig implements TransactionManagementConfigurer {
         BeanRepositoryUtil.register(LanguageRepository.class, languageRepository);
         BeanRepositoryUtil.register(PortletInstanceRepository.class, portletInstanceRepository);
         BeanRepositoryUtil.register(SecureLayoutRepository.class, secureLayoutRepository);
-        BeanRepositoryUtil.register(ThemeVariablesService.class, new ThemeVariablesService(PortletURLFactory.getInstance(), secureLayoutRepository));
+        BeanRepositoryUtil.register(ThemeVariablesService.class, new ThemeVariablesService(new PortletURLFactory(portletRepository), secureLayoutRepository));
         BeanRepositoryUtil.register(UserRepository.class, userRepository);
         BeanRepositoryUtil.register(RequestParser.class, new RequestParser());
         BeanRepositoryUtil.register(LayoutPortletRepository.class, layoutPortletRepository);
