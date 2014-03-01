@@ -56,6 +56,7 @@ public class LoginController extends BasePortlet {
                     response.sendRedirect(getAfterLoginUrl());
                 }
             } else {
+                request.setAttribute("loginfailed", Boolean.TRUE);
                 log.debug("User not found {}", loginData);
             }
         }

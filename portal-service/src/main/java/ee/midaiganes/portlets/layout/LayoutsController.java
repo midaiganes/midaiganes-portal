@@ -133,6 +133,8 @@ public class LayoutsController extends BasePortlet {
             } else {
                 log.warn("Invalid layout id '{}'", id);
             }
+        } else {
+            log.warn("Invalid layout id: '{}'", id);
         }
     }
 
@@ -210,9 +212,13 @@ public class LayoutsController extends BasePortlet {
         Map<String, String> layoutTitles = new HashMap<>();
         for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
             String key = entry.getKey();
-            if (key.length() > 14 && key.startsWith("layoutTitles[") && key.endsWith("]")) {
+            String layoutTitlesKey = "layoutTitles[";
+            if (key.length() > layoutTitlesKey.length() + 1 && key.startsWith(layoutTitlesKey) && key.endsWith("]")) {
                 String[] values = entry.getValue();
-                layoutTitles.put(key.substring(12, key.length() - 2), values != null && values.length > 0 ? values[1] : null);
+                String languageId = key.substring(layoutTitlesKey.length(), key.length() - 1);
+                String layoutTitle = values != null && values.length > 0 ? values[0] : null;
+                log.debug("Found layout title '{}' with language id '{}'", layoutTitle, languageId);
+                layoutTitles.put(languageId, layoutTitle);
             }
         }
         log.debug("Layout titles are: '{}'", layoutTitles);
