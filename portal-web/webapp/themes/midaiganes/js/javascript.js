@@ -18,7 +18,7 @@
 					if(existingModal.length == 0) {
 						var body = jQuery('body');
 						if(opts.hasLayer) {
-							body.append(jQuery('<div class="curtain"></div>'));							
+							body.append(jQuery('<div class="curtain"></div>'));
 						}
 						var modalHeader = '<div class="modal-header"><button type="button">&times;</button><h3></h3></div>';
 						var modalBody = '<div class="modal-body"></div>';
@@ -30,14 +30,15 @@
 						if(opts.footer) {
 							jQuery('.modal-footer', modal).html(opts.footer);
 						}
+						body.append(modal);
 						if(opts.body) {
-							var modalBodyContent = jQuery('.modal-body', modal);
+							// var modalBodyContent = jQuery('.modal-body', modal);
+							var modalBodyContent = jQuery('.modal .modal-body');
 							modalBodyContent.html(opts.body);
 							for(var i in Midaiganes.UI.Dialog.bodyFunctions) {
 								Midaiganes.UI.Dialog.bodyFunctions[i](modalBodyContent);
 							}
 						}
-						body.append(modal);
 					}
 				},
 				destroy : function() {
@@ -52,84 +53,6 @@
 	} else {
 		window.Midaiganes = Midaiganes;
 	}
-	
-	jQuery('.layout-hole').sortable({
-		placeholder: "ui-state-highlight",
-		revert: true,
-		update: function(event, ui) {
-			console.log('update..')
-			console.log(ui);
-			if(ui.item.hasClass('draggable-portlet-name')) {
-				// new portlet
-				var portletBoxId = jQuery(this).data('portlet-box');
-				jQuery.ajax({
-					url: jQuery(ui.item).data('add-portlet-url').replace('PORTLET_BOX_ID', portletBoxId),
-					success: function(data) {
-						// window.location.reload();
-						console.log('add portlet success');
-					},
-					error: function() {
-						// TODO
-						console.log('error add portlet');
-					}
-				});
-			} else if(ui.item.hasClass('portlet')) {
-				var prevIndex = ui.item.midaiganes.startIndex;
-				var currentIndex = jQuery(ui.item).index();
-				var portletBoxId = jQuery(this).data('portlet-box');
-				var windowId = jQuery(ui.item).data('window-id');
-				var movePortletUrl = window.Midaiganes.Admin.movePortletUrl;
-				movePortletUrl = movePortletUrl.replace('WINDOW_ID', windowId).replace('PORTLET_BOX_ID', portletBoxId).replace('BOX_INDEX', currentIndex);
-				jQuery.ajax({
-					url : movePortletUrl,
-					success: function(data) {
-						// window.location.reload()
-						console.log('move portlet success');
-					},
-					error: function() {
-						// TODO
-						console.log('error move portlet');
-					}
-				});
-			}
-		},
-		start: function(event, ui) {
-			console.log('start...');
-			console.log(ui);
-			var index = jQuery(ui.item).index();
-			ui.helper.midaiganes = {
-				'startIndex' : index
-			}
-		},
-		receive: function(event, ui) {
-			console.log('receive...');
-			console.log(ui);
-		},
-		over: function(event, ui) {
-			console.log('over...');
-			console.log(ui);
-		}
-	});
-	jQuery('.layout-hole').disableSelection();
-	Midaiganes.UI.Dialog.bodyFunctions.push(function(bodyContent) {
-		// TODO admin
-		jQuery('#add-portlet .draggable-portlet-name', bodyContent).draggable({
-			revert: "invalid",
-			//helper: 'clone',
-			helper: function() {
-				var t = jQuery(this);
-				var c = t.clone();
-				return c;
-			},
-			connectToSortable: '.layout-hole',
-			start: function(event, ui) {
-				ui.helper.midaiganes = 'new';
-			},
-			stop: function() {
-			}
-		});
-	});
-	// TODO end admin
 	
 	function openModal(el, hasModalLayer) {
 		var that = jQuery(el);

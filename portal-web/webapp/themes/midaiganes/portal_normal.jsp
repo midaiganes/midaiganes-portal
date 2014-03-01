@@ -14,7 +14,6 @@
 	<head>
 		<title>MIDAIGANES</title>
 		<meta charset="utf-8">
-		<link rel="stylesheet" href="${pageDisplay.theme.cssDir}/css.css" type="text/css" />
 		<c:if test="${addRemovePortletPermission}">
 			<portal-taglib:portlet-action-url var="movePortletUrl" portletName="${portalservice:midaiganesPortletName('add-remove-portlet')}" windowState="exclusive" portletMode="view">
 				<portlet:param name="action" value="move"/>
@@ -30,6 +29,7 @@
 				};
 			</script>
 		</c:if>
+		<link rel="stylesheet" href="${pageDisplay.theme.cssDir}/css.css" type="text/css" />
 	</head>
 	<body>
 		<c:if test="${addPagePermission or changePageLayoutPermission or addRemovePortletPermission or changePagePermissionsPermission}">
@@ -115,5 +115,8 @@
 		<script type="text/javascript" charset="UTF-8" src="${pageDisplay.theme.javascriptDir}/jquery-ui-1.10.3.custom.min.js"></script>
 		<script type="text/javascript" charset="UTF-8" src="${pageDisplay.theme.javascriptDir}/javascript.js"></script>
 		<script type="text/javascript" charset="UTF-8" src="${pageDisplay.theme.javascriptDir}/portlets.js"></script>
+		<c:if test="${addRemovePortletPermission or changePageLayoutPermission or changePagePermissionsPermission or addPagePermission}">
+			<script type="text/javascript" charset="UTF-8" src="${pageDisplay.theme.javascriptDir}/admin-javascript.js"></script>
+		</c:if>
 	</body>
 </html>
