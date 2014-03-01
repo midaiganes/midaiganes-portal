@@ -16,6 +16,7 @@
 		<conf name="dbupdate"/>
 		<conf name="server-jetty" extends="server"/>
 		<conf name="aspect" />
+		<conf name="seleniumtest" extends="test"/>
 	</configurations>
 	
 	<!-- http://ant.apache.org/ivy/history/2.1.0/ivyfile/dependency.html -->
@@ -107,6 +108,7 @@
         
         <dependency org="de.thetaphi" name="forbiddenapis" rev="1.4" conf="test->default" />
         
+        <dependency org="org.seleniumhq.selenium" name="selenium-java" rev="2.37.1" conf="seleniumtest->default" />
         <exclude org="org.eclipse.jetty.orbit" module="javax.servlet"/>
         <exclude org="javax.xml.bind" module="jsr173_api"/>
 	</dependencies>
