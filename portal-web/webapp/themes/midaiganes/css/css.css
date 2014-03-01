@@ -330,3 +330,12 @@ ul.chat li.selected{
 	line-height: 1.2em;
 	background: yellow;
 }
+/* messages */
+.message {
+	padding: 15px;
+	border-radius: 5px;
+	border: 1px solid #000;
+}
+.message.error {
+	border-color: #ff0000;
+}
