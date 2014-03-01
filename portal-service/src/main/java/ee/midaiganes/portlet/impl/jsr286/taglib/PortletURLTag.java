@@ -1,5 +1,6 @@
 package ee.midaiganes.portlet.impl.jsr286.taglib;
 
+import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +16,7 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 
 import ee.midaiganes.util.PortletModeUtil;
+import ee.midaiganes.util.StringUtil;
 import ee.midaiganes.util.WindowStateUtil;
 
 public abstract class PortletURLTag extends BasePortletTag implements PortletUrlParamTarget {
@@ -52,7 +54,9 @@ public abstract class PortletURLTag extends BasePortletTag implements PortletUrl
             if (var == null) {
                 portletUrl.write(getOut(), isEscapeXml());
             } else {
-                getPageContext().setAttribute(var, portletUrl.toString());
+                CharArrayWriter caw = new CharArrayWriter(128);
+                portletUrl.write(caw, isEscapeXml());
+                getPageContext().setAttribute(var, caw.toString());
             }
         } catch (PortletModeException e) {
             throw new JspException(e);
@@ -78,7 +82,7 @@ public abstract class PortletURLTag extends BasePortletTag implements PortletUrl
     }
 
     protected boolean isEscapeXml() {
-        return Boolean.parseBoolean(escapeXml);
+        return StringUtil.isEmpty(escapeXml) || Boolean.parseBoolean(escapeXml);
     }
 
     protected PortletMode getPortletMode() {
