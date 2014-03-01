@@ -16,10 +16,10 @@
 	</ul>
 </div>
 
-<portlet:actionURL var="addLayoutSetUrl">
+<portlet:actionURL var="addLayoutSetUrl" escapeXml="false">
 	<portlet:param name="action" value="add-layout-set"/>
 </portlet:actionURL>
-<form:form modelAttribute="addLayoutSetModel" acceptCharset="UTF-8" action="${addLayoutSetUrl}">
+<form:form modelAttribute="addLayoutSetModel" acceptCharset="UTF-8" action="${addLayoutSetUrl}" htmlEscape="true">
 	<portal-ui:form-content>
 		<portal-ui:form-title title="Add Layout Set" />
 		<portal-ui:form-input-row message="Virtual host" path="host" />

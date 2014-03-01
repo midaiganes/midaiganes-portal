@@ -1,12 +1,12 @@
 <%@ page pageEncoding="UTF-8" language="java" session="false" trimDirectiveWhitespaces="true" %>
 <%@ include file="../init.jsp" %>
 
-<portlet:actionURL var="changePermissionsUrl">
+<portlet:actionURL var="changePermissionsUrl" escapeXml="false">
 	<portlet:param name="id" value="${id}"/>
 	<portlet:param name="resource-id" value="${resourceId}"/>
 	<portlet:param name="resource-prim-key" value="${resourcePrimKey}"/>
 </portlet:actionURL>
-<form:form action="${changePermissionsUrl}" modelAttribute="permissionsData">
+<form:form action="${changePermissionsUrl}" modelAttribute="permissionsData" htmlEscape="true">
 	<table>
 		<tr>
 			<td></td>

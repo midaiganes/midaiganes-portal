@@ -2,9 +2,9 @@
 <%@ taglib prefix="lti" tagdir="/WEB-INF/tags/portlet-tags/layouts" %>
 <%@ include file="../init.jsp" %>
 
-<portlet:actionURL var="addLayoutUrl" />
+<portlet:actionURL var="addLayoutUrl" escapeXml="false" />
 
-<form:form modelAttribute="addLayoutModel" acceptCharset="UTF-8" action="${addLayoutUrl}" id="add-layout-form">
+<form:form modelAttribute="addLayoutModel" acceptCharset="UTF-8" action="${addLayoutUrl}" id="add-layout-form" htmlEscape="true">
 	<portal-ui:form-content>
 		<portal-ui:form-title title="Add layout" />
 		<portal-ui:form-input-row message="URL:" path="url" />

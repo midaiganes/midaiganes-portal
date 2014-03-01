@@ -1,12 +1,12 @@
 <%@ page pageEncoding="UTF-8" language="java" trimDirectiveWhitespaces="true" session="false" %>
 <%@ include file="../init.jsp" %>
 
-<portlet:actionURL var="editLayoutUrl">
+<portlet:actionURL var="editLayoutUrl" escapeXml="false">
 	<portlet:param name="action" value="edit-layout" />
 	<portlet:param name="id" value="${layout.id}"/>
 </portlet:actionURL>
 
-<form:form modelAttribute="editLayoutModel" acceptCharset="UTF-8" action="${editLayoutUrl}">
+<form:form modelAttribute="editLayoutModel" acceptCharset="UTF-8" action="${editLayoutUrl}" htmlEscape="true">
 	<portal-ui:form-content>
 		<portal-ui:form-title title="Edit layout" />
 		<portal-ui:form-input-row-spring message="URL:" path="url" />

@@ -3,6 +3,11 @@
 
 <portlet:actionURL var="loginUrl" windowState="normal" />
 
+<c:if test="${not empty loginfailed and loginfailed}">
+	<p class="message error">
+		Invalid username or password.
+	</p>
+</c:if>
 <form method="post" action="${loginUrl}">
 	<portal-ui:form-content>
 		<portal-ui:form-input-row message="Username:" path="username"/>

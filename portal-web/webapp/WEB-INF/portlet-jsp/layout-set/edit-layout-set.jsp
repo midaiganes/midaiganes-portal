@@ -1,7 +1,7 @@
 <%@ page pageEncoding="UTF-8" language="java" trimDirectiveWhitespaces="true" session="false" %>
 <%@ include file="../init.jsp" %>
 
-<portlet:actionURL var="editLayoutSetUrl">
+<portlet:actionURL var="editLayoutSetUrl" escapeXml="false">
 	<portlet:param name="action" value="edit-layout-set"/>
 </portlet:actionURL>
 
@@ -10,7 +10,7 @@
 	<a href="${backUrl}">Back</a>
 </div>
 
-<form:form modelAttribute="editLayoutSetModel" acceptCharset="UTF-8" action="${editLayoutSetUrl}">
+<form:form modelAttribute="editLayoutSetModel" acceptCharset="UTF-8" action="${editLayoutSetUrl}" htmlEscape="true">
 	<portal-ui:form-content>
 		<portal-ui:form-title title="Edit Layout Set" />
 		<portal-ui:form-input-row-spring message="Virtual host" path="host" />
