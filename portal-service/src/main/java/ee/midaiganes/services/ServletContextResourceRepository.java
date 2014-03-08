@@ -18,58 +18,58 @@ import javax.servlet.ServletContext;
 @Deprecated
 public class ServletContextResourceRepository {
 
-	private final ConcurrentHashMap<String, ConcurrentHashMap<String, CopyOnWriteArrayList<String>>> resourcePaths;
-	private final ReentrantReadWriteLock lock;
-	private final ReadLock readLock;
-	private final WriteLock writeLock;
+    private final ConcurrentHashMap<String, ConcurrentHashMap<String, CopyOnWriteArrayList<String>>> resourcePaths;
+    private final ReentrantReadWriteLock lock;
+    private final ReadLock readLock;
+    private final WriteLock writeLock;
 
-	public ServletContextResourceRepository() {
-		resourcePaths = new ConcurrentHashMap<String, ConcurrentHashMap<String, CopyOnWriteArrayList<String>>>();
-		lock = new ReentrantReadWriteLock();
-		readLock = lock.readLock();
-		writeLock = lock.writeLock();
-	}
+    public ServletContextResourceRepository() {
+        resourcePaths = new ConcurrentHashMap<>();
+        lock = new ReentrantReadWriteLock();
+        readLock = lock.readLock();
+        writeLock = lock.writeLock();
+    }
 
-	public void contextDestroyed(ServletContext ctx) {
-		writeLock.lock();
-		try {
-			resourcePaths.remove(ctx.getContextPath());
-		} finally {
-			writeLock.unlock();
-		}
-	}
+    public void contextDestroyed(ServletContext ctx) {
+        writeLock.lock();
+        try {
+            resourcePaths.remove(ctx.getContextPath());
+        } finally {
+            writeLock.unlock();
+        }
+    }
 
-	public List<String> getContextResourcePaths(ServletContext ctx, String path) {
-		readLock.lock();
-		try {
-			resourcePaths.putIfAbsent(ctx.getContextPath(), new ConcurrentHashMap<String, CopyOnWriteArrayList<String>>());
-			ConcurrentHashMap<String, CopyOnWriteArrayList<String>> resources = resourcePaths.get(ctx.getContextPath());
-			CopyOnWriteArrayList<String> list = resources.get(path);
-			if (list != null) {
-				return list;
-			}
-		} finally {
-			readLock.unlock();
-		}
-		return getOrCreateContextResourcePaths(ctx, path);
-	}
+    public List<String> getContextResourcePaths(ServletContext ctx, String path) {
+        readLock.lock();
+        try {
+            resourcePaths.putIfAbsent(ctx.getContextPath(), new ConcurrentHashMap<String, CopyOnWriteArrayList<String>>());
+            ConcurrentHashMap<String, CopyOnWriteArrayList<String>> resources = resourcePaths.get(ctx.getContextPath());
+            CopyOnWriteArrayList<String> list = resources.get(path);
+            if (list != null) {
+                return list;
+            }
+        } finally {
+            readLock.unlock();
+        }
+        return getOrCreateContextResourcePaths(ctx, path);
+    }
 
-	private List<String> getOrCreateContextResourcePaths(ServletContext ctx, String path) {
-		writeLock.lock();
-		try {
-			resourcePaths.putIfAbsent(ctx.getContextPath(), new ConcurrentHashMap<String, CopyOnWriteArrayList<String>>());
-			ConcurrentHashMap<String, CopyOnWriteArrayList<String>> resources = resourcePaths.get(ctx.getContextPath());
-			CopyOnWriteArrayList<String> list = resources.get(path);
-			if (list == null) {
-				list = new CopyOnWriteArrayList<String>(ctx.getResourcePaths(path));
-				CopyOnWriteArrayList<String> previous = resources.putIfAbsent(path, list);
-				if (previous != null) {
-					previous.addAll(list);
-				}
-			}
-			return list;
-		} finally {
-			writeLock.unlock();
-		}
-	}
+    private List<String> getOrCreateContextResourcePaths(ServletContext ctx, String path) {
+        writeLock.lock();
+        try {
+            resourcePaths.putIfAbsent(ctx.getContextPath(), new ConcurrentHashMap<String, CopyOnWriteArrayList<String>>());
+            ConcurrentHashMap<String, CopyOnWriteArrayList<String>> resources = resourcePaths.get(ctx.getContextPath());
+            CopyOnWriteArrayList<String> list = resources.get(path);
+            if (list == null) {
+                list = new CopyOnWriteArrayList<>(ctx.getResourcePaths(path));
+                CopyOnWriteArrayList<String> previous = resources.putIfAbsent(path, list);
+                if (previous != null) {
+                    previous.addAll(list);
+                }
+            }
+            return list;
+        } finally {
+            writeLock.unlock();
+        }
+    }
 }
