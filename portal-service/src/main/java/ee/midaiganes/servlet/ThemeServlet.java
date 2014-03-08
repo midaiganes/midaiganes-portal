@@ -15,32 +15,31 @@ import ee.midaiganes.portal.theme.Theme;
 import ee.midaiganes.services.ThemeVariablesService;
 
 public class ThemeServlet extends HttpServlet {
-	public static final String THEME = ThemeServlet.class.getName() + ".THEME";
-	private static final Logger log = LoggerFactory.getLogger(ThemeServlet.class);
+    public static final String THEME = ThemeServlet.class.getName() + ".THEME";
+    private static final Logger log = LoggerFactory.getLogger(ThemeServlet.class);
 
-	private ThemeVariablesService themeVariablesService;
+    private ThemeVariablesService themeVariablesService;
 
-	@Override
-	public void init(ServletConfig config) throws ServletException {
-		super.init(config);
-		this.themeVariablesService = BeanRepositoryUtil.getBean(ThemeVariablesService.class);
-	}
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        this.themeVariablesService = BeanRepositoryUtil.getBean(ThemeVariablesService.class);
+    }
 
-	@Override
-	protected void service(HttpServletRequest request, HttpServletResponse response) {
-		try {
-			Theme theme = (Theme) request.getAttribute(THEME);
-			request = setThemeVariables(request, themeVariablesService.getThemeVariables(request));
-			request.getRequestDispatcher(theme.getPortalNormalPath()).include(request, response);
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
-	}
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            Theme theme = (Theme) request.getAttribute(THEME);
+            setThemeVariables(request, themeVariablesService.getThemeVariables(request));
+            request.getRequestDispatcher(theme.getPortalNormalPath()).include(request, response);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
 
-	private HttpServletRequest setThemeVariables(HttpServletRequest request, List<ThemeVariablesService.ThemeVariable> variables) {
-		for (ThemeVariablesService.ThemeVariable tv : variables) {
-			request.setAttribute(tv.getName(), tv.getValue());
-		}
-		return request;
-	}
+    private void setThemeVariables(HttpServletRequest request, List<ThemeVariablesService.ThemeVariable> variables) {
+        for (ThemeVariablesService.ThemeVariable tv : variables) {
+            request.setAttribute(tv.getName(), tv.getValue());
+        }
+    }
 }
