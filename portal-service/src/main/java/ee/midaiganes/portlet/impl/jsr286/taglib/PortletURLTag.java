@@ -2,7 +2,9 @@ package ee.midaiganes.portlet.impl.jsr286.taglib;
 
 import java.io.CharArrayWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.portlet.MimeResponse;
@@ -19,13 +21,14 @@ import ee.midaiganes.util.PortletModeUtil;
 import ee.midaiganes.util.StringUtil;
 import ee.midaiganes.util.WindowStateUtil;
 
-public abstract class PortletURLTag extends BasePortletTag implements PortletUrlParamTarget {
+public abstract class PortletURLTag extends BasePortletTag implements PortletUrlParamTarget, PortletUrlPropertyTarget {
     private String portletMode;
     private String secure;
     private String windowState;
     private String escapeXml;
     private String var;
     private Map<String, String> parameters;
+    private Map<String, List<String>> properties;
 
     @Override
     public void release() {
@@ -35,6 +38,7 @@ public abstract class PortletURLTag extends BasePortletTag implements PortletUrl
         this.escapeXml = null;
         this.var = null;
         this.parameters = null;
+        this.properties = null;
         super.release();
     }
 
@@ -51,6 +55,7 @@ public abstract class PortletURLTag extends BasePortletTag implements PortletUrl
             portletUrl.setSecure(isSecure());
             portletUrl.setWindowState(getWindowState());
             setParameters(portletUrl);
+            addProperties(portletUrl);
             if (var == null) {
                 portletUrl.write(getOut(), isEscapeXml());
             } else {
@@ -77,6 +82,17 @@ public abstract class PortletURLTag extends BasePortletTag implements PortletUrl
         if (this.parameters != null) {
             for (Map.Entry<String, String> param : this.parameters.entrySet()) {
                 portletUrl.setParameter(param.getKey(), param.getValue());
+            }
+        }
+    }
+
+    private void addProperties(PortletURL portletUrl) {
+        if (this.properties != null) {
+            for (Map.Entry<String, List<String>> property : this.properties.entrySet()) {
+                String key = property.getKey();
+                for (String value : property.getValue()) {
+                    portletUrl.addProperty(key, value);
+                }
             }
         }
     }
@@ -111,6 +127,19 @@ public abstract class PortletURLTag extends BasePortletTag implements PortletUrl
         this.parameters.put(name, value);
     }
 
+    @Override
+    public void addProperty(String name, String value) {
+        if (this.properties == null) {
+            this.properties = new HashMap<>();
+        }
+        List<String> values = this.properties.get(name);
+        if (values == null) {
+            values = new ArrayList<>();
+            this.properties.put(name, values);
+        }
+        values.add(value);
+    }
+
     public void setPortletMode(String portletMode) {
         this.portletMode = portletMode;
     }
@@ -132,7 +161,9 @@ public abstract class PortletURLTag extends BasePortletTag implements PortletUrl
     }
 
     public void setCopyCurrentRenderParameters(String copyCurrentRenderParameters) {
-        // TODO
+        if (Boolean.parseBoolean(copyCurrentRenderParameters)) {
+            // TODO
+        }
         throw new RuntimeException("not implemented");
     }
 
