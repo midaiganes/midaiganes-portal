@@ -41,8 +41,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.google.common.base.Charsets;
+
 import ee.midaiganes.javax.servlet.PortalPluginListener;
-import ee.midaiganes.util.CharsetPool;
 import ee.midaiganes.util.IOUtil;
 import ee.midaiganes.util.StringPool;
 
@@ -118,7 +119,7 @@ public class AutoDeployer implements Runnable {
     private void doWithWarFile(Path warFilePath) throws ZipException, IOException {
         File childFile = warFilePath.toFile();
         TempZipFile tempZipFile = getTempZipFile(childFile.getName());
-        try (ZipFile warFile = new ZipFile(childFile, ZipFile.OPEN_READ, CharsetPool.UTF_8); ZipOutputStream tempZipFileStream = tempZipFile.getZipOutputStream()) {
+        try (ZipFile warFile = new ZipFile(childFile, ZipFile.OPEN_READ, Charsets.UTF_8); ZipOutputStream tempZipFileStream = tempZipFile.getZipOutputStream()) {
             Enumeration<? extends ZipEntry> e = warFile.entries();
             while (e.hasMoreElements()) {
                 doWithZipEntry(warFile, tempZipFileStream, e.nextElement());
@@ -214,7 +215,7 @@ public class AutoDeployer implements Runnable {
         }
 
         public ZipOutputStream getZipOutputStream() throws FileNotFoundException {
-            return new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(file), 1024), CharsetPool.UTF_8);
+            return new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(file), 1024), Charsets.UTF_8);
         }
     }
 }

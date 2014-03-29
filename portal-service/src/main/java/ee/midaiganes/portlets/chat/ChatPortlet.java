@@ -19,6 +19,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Charsets;
+
 import ee.midaiganes.beans.BeanRepositoryUtil;
 import ee.midaiganes.portal.user.User;
 import ee.midaiganes.portal.user.UserRepository;
@@ -32,7 +34,6 @@ import ee.midaiganes.portlets.chat.Chat.SendAndRemoveUserChatMessagesRequest.Asy
 import ee.midaiganes.portlets.chat.Chat.SendAndRemoveUserChatMessagesRequest.GetAsyncCallback;
 import ee.midaiganes.portlets.chat.Chat.SendMessageToChat;
 import ee.midaiganes.portlets.chat.Chat.SendPrivateMessageToUserResponse;
-import ee.midaiganes.util.CharsetPool;
 import ee.midaiganes.util.LongUtil;
 import ee.midaiganes.util.RequestUtil;
 import ee.midaiganes.util.SessionUtil;
@@ -67,7 +68,7 @@ public class ChatPortlet extends BasePortlet implements ResourceServingPortlet {
                     String responseMsg = (String) request.getAttribute(RESPONSE_MSG);
                     if (responseMsg != null) {
                         try (OutputStream os = response.getPortletOutputStream()) {
-                            os.write(responseMsg.getBytes(CharsetPool.UTF_8));
+                            os.write(responseMsg.getBytes(Charsets.UTF_8));
                         }
                     } else {
                         List<ChatModel> chats = chatService.getChats();
@@ -155,7 +156,7 @@ public class ChatPortlet extends BasePortlet implements ResourceServingPortlet {
                 if (SendAndRemoveUserChatMessagesStatus.SUCCESS.equals(resp.getStatus())) {
                     String json = JsonUtil.toJson(resp.getCommands());
                     log.debug("Messages json is: '{}'", json);
-                    byte[] bytes = json.getBytes(CharsetPool.UTF_8);
+                    byte[] bytes = json.getBytes(Charsets.UTF_8);
                     try (OutputStream os = response.getPortletOutputStream()) {
                         os.write(bytes);
                         os.flush();
@@ -190,7 +191,7 @@ public class ChatPortlet extends BasePortlet implements ResourceServingPortlet {
         public void call(ChatCmds messages) {
             log.debug("Sending messages: '{}'", messages);
             try (ServletOutputStream outputStream = asyncContext.getResponse().getOutputStream()) {
-                outputStream.write(JsonUtil.toJson(messages).getBytes(CharsetPool.UTF_8));
+                outputStream.write(JsonUtil.toJson(messages).getBytes(Charsets.UTF_8));
                 outputStream.flush();
             } catch (IOException e) {
                 log.error(e.getMessage(), e);

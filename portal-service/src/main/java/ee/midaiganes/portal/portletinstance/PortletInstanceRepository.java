@@ -9,18 +9,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
 
+import com.google.common.base.Charsets;
+
 import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
 import ee.midaiganes.portlet.PortletName;
-import ee.midaiganes.util.CharsetPool;
 import ee.midaiganes.util.StringPool;
 
 @Resource(name = PortalConfig.PORTLET_INSTANCE_REPOSITORY)
 public class PortletInstanceRepository {
     private static final Logger log = LoggerFactory.getLogger(PortletInstanceRepository.class);
-    private static final SecureRandom random = new SecureRandom(new Object().toString().getBytes(CharsetPool.UTF_8));
+    private static final SecureRandom random = new SecureRandom(new Object().toString().getBytes(Charsets.UTF_8));
     private final SingleVmCache cache = SingleVmPoolUtil.getCache(PortletInstanceRepository.class.getName());
 
     private final PortletInstanceDao portletInstanceDao;

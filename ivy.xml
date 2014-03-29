@@ -88,6 +88,7 @@
 			<exclude module="slf4j-log4j12"/>
 		</dependency>
         <dependency org="com.google.code.gson" name="gson" rev="2.2.4" conf="global->default"/>
+        <dependency org="com.google.guava" name="guava" rev="16.0.1" conf="global->default"/>
 		<dependency org="org.liquibase" name="liquibase-core" rev="3.0.4" conf="dbupdate->default"/>
 		
 		<!-- jetty -->

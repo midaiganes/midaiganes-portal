@@ -12,6 +12,8 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Charsets;
+
 public interface PropsValues {
     String PORTAL_PROPERTIES = "/portal.properties";
     String PORTAL_CONTEXT = PropsUtil.getString(PropsKeys.PORTAL_CONTEXT);
@@ -53,7 +55,7 @@ public interface PropsValues {
 
         private static ConcurrentHashMap<String, String> loadProperties() {
             Properties properties = new Properties();
-            try (InputStreamReader reader = new InputStreamReader(PropsUtil.class.getResourceAsStream(PropsValues.PORTAL_PROPERTIES), CharsetPool.UTF_8)) {
+            try (InputStreamReader reader = new InputStreamReader(PropsUtil.class.getResourceAsStream(PropsValues.PORTAL_PROPERTIES), Charsets.UTF_8)) {
                 properties.load(reader);
                 return replaceProperties(properties);
             } catch (IOException e) {
