@@ -42,9 +42,9 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.ByteStreams;
 
 import ee.midaiganes.javax.servlet.PortalPluginListener;
-import ee.midaiganes.util.IOUtil;
 import ee.midaiganes.util.StringPool;
 
 public class AutoDeployer implements Runnable {
@@ -140,7 +140,7 @@ public class AutoDeployer implements Runnable {
                 tempZipFile.putNextEntry(entry);
                 if (!entry.isDirectory()) {
                     try (InputStream in = warFile.getInputStream(entry)) {
-                        IOUtil.copy(in, tempZipFile);
+                        ByteStreams.copy(in, tempZipFile);
                     }
                 }
             }

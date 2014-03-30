@@ -17,11 +17,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.io.ByteStreams;
+
 import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.portal.theme.Theme;
 import ee.midaiganes.portal.theme.ThemeRepository;
 import ee.midaiganes.services.ServletContextResourceRepository;
-import ee.midaiganes.util.IOUtil;
 import ee.midaiganes.util.StringPool;
 
 public class StaticContentServlet extends HttpServlet {
@@ -64,7 +65,7 @@ public class StaticContentServlet extends HttpServlet {
 
     private void copyToOutputStream(HttpServletResponse response, InputStream is) throws IOException {
         try (ServletOutputStream os = response.getOutputStream()) {
-            IOUtil.copy(is, os);
+            ByteStreams.copy(is, os);
             os.flush();
         }
     }

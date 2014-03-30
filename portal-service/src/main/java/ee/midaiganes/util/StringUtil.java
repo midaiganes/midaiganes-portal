@@ -2,18 +2,23 @@ package ee.midaiganes.util;
 
 import java.util.regex.Pattern;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import com.google.common.base.Strings;
+
 public class StringUtil {
     private static final Pattern NUMBER_PATTERN = Pattern.compile("^[1-9][0-9]*$");
 
-    public static boolean isEmpty(String str) {
+    public static boolean isEmpty(@Nullable String str) {
         return str == null || StringPool.EMPTY.equals(str.trim());
     }
 
-    public static boolean isNumber(String str) {
+    public static boolean isNumber(@Nullable String str) {
         return !isEmpty(str) && NUMBER_PATTERN.matcher(str).matches();
     }
 
-    public static String repeat(String str, String separator, int count) {
+    public static String repeat(@Nonnull String str, @Nullable String separator, int count) {
         int separatorLength = length(separator);
         if (separatorLength != 0) {
             StringBuilder sb = new StringBuilder(((str.length() + separatorLength) * count) - separatorLength);
@@ -25,18 +30,10 @@ public class StringUtil {
             }
             return sb.toString();
         }
-        return repeat(str, count);
+        return Strings.repeat(str, count);
     }
 
-    public static String repeat(String str, int count) {
-        StringBuilder sb = new StringBuilder(str.length() * count);
-        for (int i = 0; i < count; i++) {
-            sb.append(str);
-        }
-        return sb.toString();
-    }
-
-    public static int length(String str) {
+    public static int length(@Nullable String str) {
         return str == null ? 0 : str.length();
     }
 

@@ -7,6 +7,8 @@ import java.util.List;
 import javax.portlet.WindowStateException;
 import javax.servlet.http.HttpServletRequest;
 
+import com.google.common.base.Preconditions;
+
 import ee.midaiganes.model.NavItem;
 import ee.midaiganes.model.PageDisplay;
 import ee.midaiganes.portal.layout.Layout;
@@ -15,7 +17,6 @@ import ee.midaiganes.secureservices.SecureLayoutRepository;
 import ee.midaiganes.util.MidaiganesPortlets;
 import ee.midaiganes.util.PropsValues;
 import ee.midaiganes.util.RequestUtil;
-import ee.midaiganes.util.Validate;
 
 public class ThemeVariablesService {
     private static final String LOG_IN_URL = "logInUrl";
@@ -29,8 +30,8 @@ public class ThemeVariablesService {
     private final SecureLayoutRepository secureLayoutRepository;
 
     public ThemeVariablesService(PortletURLFactory portletUrlFactor, SecureLayoutRepository secureLayoutRepository) {
-        Validate.notNull(portletUrlFactor, "Portlet url factory is null");
-        Validate.notNull(secureLayoutRepository, "Secure layout repository is null");
+        Preconditions.checkNotNull(portletUrlFactor, "Portlet url factory is null");
+        Preconditions.checkNotNull(secureLayoutRepository, "Secure layout repository is null");
 
         this.portletUrlFactor = portletUrlFactor;
         this.secureLayoutRepository = secureLayoutRepository;

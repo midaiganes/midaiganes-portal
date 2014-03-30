@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.Resource;
 import javax.xml.bind.JAXBException;
 
@@ -15,9 +17,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import com.google.common.collect.Iterables;
+
 import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.generated.xml.theme.MidaiganesTheme;
-import ee.midaiganes.util.CollectionUtil;
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.XmlUtil;
 
@@ -51,15 +54,17 @@ public class ThemeRepository {
         }
     }
 
+    @Nullable
     public Theme getDefaultTheme() {
         lock.readLock().lock();
         try {
-            return CollectionUtil.getFirstElement(themes.values());
+            return Iterables.getFirst(themes.values(), null);
         } finally {
             lock.readLock().unlock();
         }
     }
 
+    @Nonnull
     private final Theme getThemeFromMidaiganesTheme(String contextPath, MidaiganesTheme.Theme theme) {
         return new Theme(new ThemeName(contextPath, theme.getId()), theme.getPath(), theme.getJavascriptPath(), theme.getCssPath());
     }
@@ -94,7 +99,7 @@ public class ThemeRepository {
         }
     }
 
-    private void registerTheme(Theme theme) {
+    private void registerTheme(@Nonnull Theme theme) {
         lock.writeLock().lock();
         try {
             themes.put(theme.getThemeName(), theme);
