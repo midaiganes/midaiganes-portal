@@ -65,7 +65,7 @@
 					<portal-taglib:portlet-action-url portletName="${portalservice:midaiganesPortletName('login')}" var="logoutUrl">
 						<portlet:param name="action" value="logout"/>
 					</portal-taglib:portlet-action-url>
-					<a href="${logoutUrl}" style="float:right;color: white;margin: 13px; text-decoration: none;">log out</a>
+					<a href="${logoutUrl}" id="logout">log out <strong>${pageDisplay.user.username}</strong></a>
 				</c:if>
 				<h1>MIDAIGANES</h1>
 			</header>

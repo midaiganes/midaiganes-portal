@@ -2,13 +2,19 @@ package ee.midaiganes.model;
 
 import java.io.Serializable;
 
+import javax.annotation.Nonnull;
+
+import com.google.common.base.Preconditions;
+
 import ee.midaiganes.util.StringPool;
 
 public class ContextAndName implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final String SEPARATOR = "_w_";
+    @Nonnull
     private final String context;
     private final String contextWithSlash;
+    @Nonnull
     private final String name;
     private final String fullName;
 
@@ -17,12 +23,9 @@ public class ContextAndName implements Serializable {
     }
 
     public ContextAndName(String context, String name) {
-        if (context == null || name == null) {
-            throw new IllegalArgumentException("contex='" + context + "'; name='" + name + "'");
-        }
-        if (context.length() > 0 && context.charAt(0) == '/') {
-            throw new IllegalArgumentException("context must not start with '/'; context = '" + context + "'");
-        }
+        Preconditions.checkNotNull(context, "Context is null");
+        Preconditions.checkNotNull(name, "Name is null");
+        Preconditions.checkArgument(context.length() == 0 || context.charAt(0) != '/', "context must not start with '/'; context = '%s'", context);
         this.context = context;
         this.name = name;
         this.contextWithSlash = StringPool.SLASH + context;
@@ -62,9 +65,8 @@ public class ContextAndName implements Serializable {
     }
 
     private static String[] validateAndGet(String[] fullName) {
-        if (fullName == null) {
-            throw new IllegalArgumentException("Full name is null");
-        } else if (fullName.length == 0) {
+        Preconditions.checkNotNull(fullName, "Full name is null");
+        if (fullName.length == 0) {
             throw new IllegalArgumentException("Full name lenght is 0");
         } else if (fullName.length == 1) {
             throw new IllegalArgumentException("Full name lenght is 1. Full name is '" + fullName[0] + "'");
@@ -72,6 +74,7 @@ public class ContextAndName implements Serializable {
         return fullName;
     }
 
+    @Nonnull
     public String getContext() {
         return context;
     }
@@ -80,6 +83,7 @@ public class ContextAndName implements Serializable {
         return contextWithSlash;
     }
 
+    @Nonnull
     public String getName() {
         return name;
     }
@@ -94,7 +98,7 @@ public class ContextAndName implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof ContextAndName && equals((ContextAndName) o, this);
+        return o instanceof ContextAndName && ContextAndName.equals((ContextAndName) o, this);
     }
 
     private static boolean equals(ContextAndName n, ContextAndName _this) {

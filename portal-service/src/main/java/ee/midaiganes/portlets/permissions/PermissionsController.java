@@ -113,6 +113,7 @@ public class PermissionsController extends BasePortlet {
         renderParams.put("resource-id", new String[] { resourceId });
         renderParams.put("resource-prim-key", new String[] { resourcePrimKey });
         response.setRenderParameters(renderParams);
+        request.setAttribute("success", Boolean.TRUE);
     }
 
     private PermissionsData getPermissionsData(ActionRequest request, int nrOfActions) {

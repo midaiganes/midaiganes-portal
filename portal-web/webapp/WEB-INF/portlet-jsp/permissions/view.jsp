@@ -7,6 +7,11 @@
 	<portlet:param name="resource-prim-key" value="${resourcePrimKey}"/>
 </portlet:actionURL>
 <form:form action="${changePermissionsUrl}" modelAttribute="permissionsData" htmlEscape="true">
+	<c:if test="${not empty success and success}">
+		<p class="message">
+			Permissions updated.
+		</p>
+	</c:if>
 	<table>
 		<tr>
 			<td></td>

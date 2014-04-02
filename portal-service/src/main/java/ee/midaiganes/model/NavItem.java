@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.common.base.Preconditions;
+
 import ee.midaiganes.portal.layout.Layout;
 import ee.midaiganes.util.PortalURLUtil;
 
@@ -14,7 +16,8 @@ public class NavItem implements Serializable, Comparable<NavItem> {
     private final List<NavItem> childs = new ArrayList<>();
 
     public NavItem(Layout layout, List<Layout> layouts) {
-        this.layout = layout;
+        Preconditions.checkNotNull(layouts, "Layouts is null");
+        this.layout = Preconditions.checkNotNull(layout, "Layout is null");
         for (Layout l : layouts) {
             Long parentId = l.getParentId();
             if (parentId != null && parentId.longValue() == this.layout.getId()) {
