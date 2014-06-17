@@ -9,40 +9,30 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nonnull;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Charsets;
 
-public interface PropsValues {
-    String PORTAL_PROPERTIES = "/portal.properties";
-    String PORTAL_CONTEXT = PropsUtil.getString(PropsKeys.PORTAL_CONTEXT);
-    String AUTODEPLOY_DIR = PropsUtil.getString(PropsKeys.AUTODEPLOY_DIR);
-    String WEBAPPS_DIR = PropsUtil.getString(PropsKeys.WEBAPPS_DIR);
-    long[] SUPERADMIN_USER_IDS = ArrayUtil.toPrimitiveLongArray(PropsUtil.getString(PropsKeys.SUPERADMIN_USER_IDS));
-    boolean AUTODEPLOY_ENABLED = Boolean.parseBoolean(PropsUtil.getString(PropsKeys.AUTODEPLOY_ENABLED));
-    boolean CACHE_DISABLED = Boolean.parseBoolean(PropsUtil.getString(PropsKeys.CACHE_DISABLED));
-    String GUEST_GROUP_NAME = PropsUtil.getString(PropsKeys.GUEST_GROUP_NAME);
-    String LOGGED_IN_GROUP_NAME = PropsUtil.getString(PropsKeys.LOGGED_IN_GROUP_NAME);
-    String NOT_LOGGED_IN_GROUP_NAME = PropsUtil.getString(PropsKeys.NOT_LOGGED_IN_GROUP_NAME);
-    String PERMISSIONS_RESOURCE_NAME = PropsUtil.getString(PropsKeys.PERMISSIONS_RESOURCE_NAME);
-    String LOGIN_URL = PropsUtil.getString(PropsKeys.LOGIN_URL);
+public final class PropsValues {
+    public static final String PORTAL_PROPERTIES = "/portal.properties";
+    public static final String PORTAL_CONTEXT = PropsUtil.getString(PropsKeys.PORTAL_CONTEXT);
+    public static final String AUTODEPLOY_DIR = PropsUtil.getString(PropsKeys.AUTODEPLOY_DIR);
+    public static final String WEBAPPS_DIR = PropsUtil.getString(PropsKeys.WEBAPPS_DIR);
+    @Nonnull
+    public static final long[] SUPERADMIN_USER_IDS = ArrayUtil.toPrimitiveLongArray(PropsUtil.getString(PropsKeys.SUPERADMIN_USER_IDS));
+    public static final boolean AUTODEPLOY_ENABLED = Boolean.parseBoolean(PropsUtil.getString(PropsKeys.AUTODEPLOY_ENABLED));
+    public static final boolean CACHE_DISABLED = Boolean.parseBoolean(PropsUtil.getString(PropsKeys.CACHE_DISABLED));
+    public static final String GUEST_GROUP_NAME = PropsUtil.getString(PropsKeys.GUEST_GROUP_NAME);
+    public static final String LOGGED_IN_GROUP_NAME = PropsUtil.getString(PropsKeys.LOGGED_IN_GROUP_NAME);
+    public static final String NOT_LOGGED_IN_GROUP_NAME = PropsUtil.getString(PropsKeys.NOT_LOGGED_IN_GROUP_NAME);
+    @Nonnull
+    public static final String PERMISSIONS_RESOURCE_NAME = PropsUtil.getNonnullString(PropsKeys.PERMISSIONS_RESOURCE_NAME);
+    public static final String LOGIN_URL = PropsUtil.getString(PropsKeys.LOGIN_URL);
 
-    interface PropsKeys {
-        String PORTAL_CONTEXT = "portal.context";
-        String AUTODEPLOY_DIR = "autodeploy.dir";
-        String WEBAPPS_DIR = "webapps.dir";
-        String AUTODEPLOY_ENABLED = "autodeploy.enabled";
-        String SUPERADMIN_USER_IDS = "superadmin.user.ids";
-        String CACHE_DISABLED = "cache.disabled";
-        String GUEST_GROUP_NAME = "guest.group.name";
-        String LOGGED_IN_GROUP_NAME = "logged.in.group.name";
-        String NOT_LOGGED_IN_GROUP_NAME = "not.logged.in.group.name";
-        String PERMISSIONS_RESOURCE_NAME = "permissions.resource.name";
-        String LOGIN_URL = "login.url";
-    }
-
-    static class PropsUtil {
+    public static class PropsUtil {
         private static final Logger log = LoggerFactory.getLogger(PropsUtil.class);
         private static final Pattern pattern = Pattern.compile("^.*?\\$\\{([a-zA-Z\\.]*)\\}.*?$", Pattern.MULTILINE | Pattern.DOTALL);
         private static final String PREFIX = "${";
@@ -99,6 +89,15 @@ public interface PropsValues {
 
         private static String getString(String key) {
             return properties.get(key);
+        }
+
+        @Nonnull
+        private static String getNonnullString(String key) {
+            String value = getString(key);
+            if (value == null) {
+                throw new IllegalStateException("Property '" + key + "' value is null.");
+            }
+            return value;
         }
     }
 }

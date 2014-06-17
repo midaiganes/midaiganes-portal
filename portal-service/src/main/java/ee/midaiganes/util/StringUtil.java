@@ -37,4 +37,12 @@ public class StringUtil {
         return str == null ? 0 : str.length();
     }
 
+    @Nonnull
+    public static String getName(Class<?> clazz) {
+        String name = clazz.getName();
+        if (name == null) {
+            throw new Error("Classname is null!");
+        }
+        return name;
+    }
 }
