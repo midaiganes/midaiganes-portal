@@ -1,7 +1,10 @@
 package ee.midaiganes.model;
 
-public interface PortalResource {
-	long getId();
+import javax.annotation.Nonnull;
 
-	String getResource();
+public interface PortalResource {
+    long getId();
+
+    @Nonnull
+    String getResource();
 }

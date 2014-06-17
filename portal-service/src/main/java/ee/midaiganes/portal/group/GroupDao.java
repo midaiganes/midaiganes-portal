@@ -2,6 +2,8 @@ package ee.midaiganes.portal.group;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import ee.midaiganes.services.rowmapper.TLongArrayListResultSetExtractor;
@@ -22,7 +24,7 @@ public class GroupDao {
         return jdbcTemplate.query("SELECT id, name, userGroup FROM Group_", groupRowMapper);
     }
 
-    public void addGroup(String name, boolean userGroup) {
+    public void addGroup(@Nonnull String name, boolean userGroup) {
         jdbcTemplate.update("INSERT INTO Group_ (name, userGroup) VALUES(?, ?)", name, Boolean.valueOf(userGroup));
     }
 

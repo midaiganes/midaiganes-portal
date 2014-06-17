@@ -140,6 +140,9 @@ public class AutoDeployer implements Runnable {
                 tempZipFile.putNextEntry(entry);
                 if (!entry.isDirectory()) {
                     try (InputStream in = warFile.getInputStream(entry)) {
+                        if (in == null) {
+                            throw new IllegalStateException("war entry inputstream is null");
+                        }
                         ByteStreams.copy(in, tempZipFile);
                     }
                 }

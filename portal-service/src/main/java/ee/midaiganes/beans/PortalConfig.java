@@ -71,7 +71,6 @@ public class PortalConfig implements TransactionManagementConfigurer {
     public static final String PAGE_LAYOUT_REPOSITORY = "pageLayoutRepository";
     public static final String LAYOUT_REPOSITORY = "layoutRepository";
     public static final String LAYOUT_PORTLET_REPOSITORY = "layoutPortletRepository";
-    @Deprecated
     public static final String SERVLET_CONTEXT_RESOURCE_REPOSITORY = "servletContextResourceRepository";
     public static final String THEME_REPOSITORY = "themeRepository";
     public static final String RESOURCE_REPOSITORY = "resourceRepository";
@@ -105,6 +104,9 @@ public class PortalConfig implements TransactionManagementConfigurer {
 
     @Autowired
     private PermissionRepository permissionRepository;
+
+    @Autowired
+    private PermissionService permissionService;
 
     @Autowired
     private LanguageRepository languageRepository;
@@ -178,6 +180,7 @@ public class PortalConfig implements TransactionManagementConfigurer {
         BeanRepositoryUtil.register(GroupRepository.class, groupRepository);
         BeanRepositoryUtil.register(ResourceActionRepository.class, resourceActionRepository);
         BeanRepositoryUtil.register(ResourceRepository.class, resourceRepository);
+        BeanRepositoryUtil.register(PermissionService.class, permissionService);
     }
 
     @PreDestroy
@@ -332,12 +335,12 @@ public class PortalConfig implements TransactionManagementConfigurer {
 
     @Bean(name = PERMISSION_REPOSITORY, autowire = Autowire.NO)
     public PermissionRepository permissionRepository() {
-        return new PermissionRepository(permissionService(), resourceRepository(), groupRepository());
+        return new PermissionRepository(resourceRepository(), groupRepository(), new PermissionDao(portalJdbcTemplate()), resourceActionRepository());
     }
 
     @Bean(name = PERMISSION_SERVICE, autowire = Autowire.NO)
     public PermissionService permissionService() {
-        return new PermissionService(new PermissionDao(portalJdbcTemplate()), resourceActionRepository());
+        return new PermissionService(resourceActionRepository(), resourceRepository(), permissionRepository());
     }
 
     @Bean(name = RESOURCE_ACTION_REPOSITORY, autowire = Autowire.NO)
