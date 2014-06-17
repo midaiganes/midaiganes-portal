@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Resource;
 
 import ee.midaiganes.beans.PortalConfig;
@@ -70,7 +71,7 @@ public class UserRepository {
         return users;
     }
 
-    public long addUser(final String username, final String password) throws DuplicateUsernameException {
+    public long addUser(@Nonnull final String username, @Nonnull final String password) throws DuplicateUsernameException {
         // TODO plain text password
         return userDao.addUser(username, password);
     }

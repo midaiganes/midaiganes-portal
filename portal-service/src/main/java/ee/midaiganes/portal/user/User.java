@@ -2,6 +2,10 @@ package ee.midaiganes.portal.user;
 
 import java.io.Serializable;
 
+import javax.annotation.Nonnull;
+
+import com.google.common.base.Preconditions;
+
 import ee.midaiganes.model.PortalResource;
 import ee.midaiganes.util.StringPool;
 
@@ -19,12 +23,9 @@ public class User implements Serializable, PortalResource {
     }
 
     public User(long id, String username) {
-        if (id == DEFAULT_USER_ID) {
-            throw new IllegalArgumentException("Default user id not allowed");
-        }
-        if (username == null) {
-            throw new IllegalArgumentException("Username is null");
-        }
+        Preconditions.checkArgument(id != DEFAULT_USER_ID, "Default user id not allowed.");
+        Preconditions.checkNotNull(username, "Username is null.");
+
         this.id = id;
         this.username = username;
     }
@@ -51,8 +52,10 @@ public class User implements Serializable, PortalResource {
     }
 
     @Override
+    @Nonnull
     public String getResource() {
-        return User.class.getName();
+        String resource = User.class.getName();
+        return Preconditions.checkNotNull(resource);
     }
 
     @Override

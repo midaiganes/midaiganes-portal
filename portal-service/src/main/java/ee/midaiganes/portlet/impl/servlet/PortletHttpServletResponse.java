@@ -50,6 +50,7 @@ public class PortletHttpServletResponse extends HttpServletResponseWrapper {
     }
 
     @Override
+    @Deprecated
     public String encodeRedirectUrl(String url) {
         return null;
     }
@@ -60,6 +61,7 @@ public class PortletHttpServletResponse extends HttpServletResponseWrapper {
     }
 
     @Override
+    @Deprecated
     public String encodeUrl(String url) {
         return portletResponse.encodeURL(url);
     }
@@ -105,6 +107,7 @@ public class PortletHttpServletResponse extends HttpServletResponseWrapper {
     }
 
     @Override
+    @Deprecated
     public void setStatus(int sc, String msg) {
         log.debug("Ignore set status: '{}' with message '{}'", Integer.valueOf(sc), msg);
     }
