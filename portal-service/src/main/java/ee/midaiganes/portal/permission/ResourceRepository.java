@@ -1,6 +1,9 @@
 package ee.midaiganes.portal.permission;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Resource;
+
+import com.google.common.base.Preconditions;
 
 import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.cache.Element;
@@ -18,8 +21,8 @@ public class ResourceRepository {
         cache = SingleVmPoolUtil.getCache(ResourceRepository.class.getName());
     }
 
-    public long getResourceId(String resource) throws ResourceNotFoundException {
-        final String cacheKey = resource;
+    public long getResourceId(@Nonnull String resource) throws ResourceNotFoundException {
+        final String cacheKey = Preconditions.checkNotNull(resource);
         final Element el = cache.getElement(cacheKey);
         if (el != null) {
             Long val = el.get();

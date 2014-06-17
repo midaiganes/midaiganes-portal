@@ -10,9 +10,9 @@ import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.collect.ImmutableList;
 
 import ee.midaiganes.beans.PortalConfig;
 import ee.midaiganes.cache.Element;
@@ -68,7 +68,7 @@ public class LayoutRepository {
     private List<LayoutTitle> loadAndCacheLayoutTitles(long layoutId) {
         List<LayoutTitle> list = null;
         try {
-            list = Collections.unmodifiableList(layoutDao.loadLayoutTitles(layoutId));
+            list = ImmutableList.copyOf(layoutDao.loadLayoutTitles(layoutId));
         } finally {
             list = list == null ? Collections.<LayoutTitle> emptyList() : list;
             layoutTitleCache.put(Long.toString(layoutId), list);
@@ -227,7 +227,7 @@ public class LayoutRepository {
         }
     }
 
-    @Transactional(isolation = Isolation.DEFAULT, propagation = Propagation.REQUIRED, readOnly = false, value = PortalConfig.TXMANAGER)
+    @Transactional
     public void deleteLayout(long layoutId) {
         try {
             Layout layout = getLayout(layoutId);
@@ -263,6 +263,9 @@ public class LayoutRepository {
     public Layout get404Layout(long layoutSetId, String friendlyUrl) {
         log.info("get 404 layout; layoutsetid = {}; friendlyUrl = {}", Long.valueOf(layoutSetId), friendlyUrl);
         Theme defaultTheme = themeRepository.getDefaultTheme();
+        if (defaultTheme == null) {
+            throw new IllegalStateException("Default theme not found. No themes deployed?");
+        }
         String pageLayoutId = pageLayoutRepository.getDefaultPageLayout().getPageLayoutName().getFullName();
         return Layout.getDefault(layoutSetId, friendlyUrl, defaultTheme.getThemeName(), pageLayoutId);
     }

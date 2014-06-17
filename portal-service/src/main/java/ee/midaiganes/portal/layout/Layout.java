@@ -3,6 +3,10 @@ package ee.midaiganes.portal.layout;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
+import com.google.common.base.Preconditions;
+
 import ee.midaiganes.model.PortalResource;
 import ee.midaiganes.portal.theme.ThemeName;
 
@@ -113,8 +117,10 @@ public class Layout implements Serializable, PortalResource {
     }
 
     @Override
+    @Nonnull
     public String getResource() {
-        return Layout.class.getName();
+        String resource = Layout.class.getName();
+        return Preconditions.checkNotNull(resource);
     }
 
     @Override

@@ -2,6 +2,8 @@ package ee.midaiganes.portal.layoutset;
 
 import java.io.Serializable;
 
+import javax.annotation.Nonnull;
+
 import com.google.common.base.Preconditions;
 
 import ee.midaiganes.model.PortalResource;
@@ -52,7 +54,9 @@ public final class LayoutSet implements Serializable, PortalResource {
     }
 
     @Override
+    @Nonnull
     public String getResource() {
-        return LayoutSet.class.getName();
+        String resource = LayoutSet.class.getName();
+        return Preconditions.checkNotNull(resource);
     }
 }

@@ -2,6 +2,7 @@ package ee.midaiganes.portal.theme;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 
 import ee.midaiganes.beans.PortalConfig;
@@ -58,7 +60,9 @@ public class ThemeRepository {
     public Theme getDefaultTheme() {
         lock.readLock().lock();
         try {
-            return Iterables.getFirst(themes.values(), null);
+            Collection<Theme> values = themes.values();
+            Preconditions.checkNotNull(values);
+            return Iterables.getFirst(values, null);
         } finally {
             lock.readLock().unlock();
         }

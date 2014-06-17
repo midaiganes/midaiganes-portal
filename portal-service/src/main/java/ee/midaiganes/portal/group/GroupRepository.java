@@ -3,6 +3,7 @@ package ee.midaiganes.portal.group;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Resource;
 
 import ee.midaiganes.beans.PortalConfig;
@@ -34,7 +35,7 @@ public class GroupRepository {
         return groups;
     }
 
-    public void addGroup(String name, boolean userGroup) {
+    public void addGroup(@Nonnull String name, boolean userGroup) {
         try {
             groupDao.addGroup(name, userGroup);
         } finally {

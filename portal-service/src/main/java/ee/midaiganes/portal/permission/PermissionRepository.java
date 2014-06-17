@@ -1,11 +1,14 @@
 package ee.midaiganes.portal.permission;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Resource;
 
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import ee.midaiganes.beans.PortalConfig;
+import ee.midaiganes.cache.Element;
+import ee.midaiganes.cache.SingleVmCache;
+import ee.midaiganes.cache.SingleVmPoolUtil;
 import ee.midaiganes.model.PortalResource;
 import ee.midaiganes.portal.group.Group;
 import ee.midaiganes.portal.group.GroupRepository;
@@ -19,52 +22,32 @@ import ee.midaiganes.util.StringUtil;
 @Resource(name = PortalConfig.PERMISSION_REPOSITORY)
 public class PermissionRepository {
     private static final long[] EMPTY_ARRAY = new long[0];
-
-    private final PermissionService permissionService;
-
+    @Nonnull
+    private static final String GROUP_CLASS_NAME = StringUtil.getName(Group.class);
     private final ResourceRepository resourceRepository;
-
     private final GroupRepository groupRepository;
+    private final PermissionDao permissionDao;
+    private final ResourceActionRepository resourceActionPermissionRepository;
 
-    public PermissionRepository(PermissionService permissionService, ResourceRepository resourceRepository, GroupRepository groupRepository) {
-        this.permissionService = permissionService;
+    private final SingleVmCache cache;
+
+    public PermissionRepository(ResourceRepository resourceRepository, GroupRepository groupRepository, PermissionDao permissionDao,
+            ResourceActionRepository resourceActionPermissionRepository) {
         this.resourceRepository = resourceRepository;
         this.groupRepository = groupRepository;
+        this.permissionDao = permissionDao;
+        this.resourceActionPermissionRepository = resourceActionPermissionRepository;
+        this.cache = SingleVmPoolUtil.getCache(PermissionRepository.class.getName());
     }
 
-    @Transactional(propagation = Propagation.REQUIRED, value = PortalConfig.TXMANAGER)
+    @Transactional
     public boolean hasUserPermission(long userId, PortalResource resource, String action) throws ResourceNotFoundException, ResourceActionNotFoundException {
-        return hasUserPermission(userId, resource.getResource(), resource.getId(), action);
+        return hasUserPermission(userId, resourceRepository.getResourceId(resource.getResource()), resource.getId(), action);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED, value = PortalConfig.TXMANAGER)
-    public boolean hasUserPermission(long userId, String resource, long resourcePrimKey, String action) throws ResourceNotFoundException, ResourceActionNotFoundException {
-        return hasUserPermission(userId, resourceRepository.getResourceId(resource), resourcePrimKey, action);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED, value = PortalConfig.TXMANAGER)
-    public void setUserPermissions(long userId, long resourceId, long resourcePrimKey, String[] actions, boolean[] permissions) throws ResourceNotFoundException,
-            ResourceActionNotFoundException {
-        setPermissions(getUserResourceId(), userId, resourceId, resourcePrimKey, actions, permissions);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED, value = PortalConfig.TXMANAGER)
-    public void setPermissions(long resourceId, long resourcePrimKey, long resource2Id, long resource2PrimKey, String[] actions, boolean[] permissions)
-            throws ResourceActionNotFoundException {
-        permissionService.setPermissions(resourceId, resourcePrimKey, resource2Id, resource2PrimKey, actions, permissions);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED, value = PortalConfig.TXMANAGER)
-    public boolean hasPermission(PortalResource resource, long resourceId, long resourcePrimKey, String action) throws ResourceNotFoundException, ResourceActionNotFoundException {
-        return permissionService.hasPermission(resourceRepository.getResourceId(resource.getResource()), resource.getId(), resourceId, resourcePrimKey, action);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED, value = PortalConfig.TXMANAGER)
-    public boolean hasUserPermission(long userId, long resourceId, long resourcePrimKey, String action) throws ResourceNotFoundException, ResourceActionNotFoundException {
-        return PortalUtil.isSuperAdminUser(userId) ||
-        // permissionService.hasPermission(getUserResourceId(), userId,
-        // resourceId, resourcePrimKey, action);
-                hasUserGroupsPermission(userId, resourceId, resourcePrimKey, action);
+    @Transactional
+    protected boolean hasUserPermission(long userId, long resourceId, long resourcePrimKey, String action) throws ResourceNotFoundException, ResourceActionNotFoundException {
+        return PortalUtil.isSuperAdminUser(userId) || hasUserGroupsPermission(userId, resourceId, resourcePrimKey, action);
     }
 
     private boolean hasUserGroupsPermission(long userId, long resourceId, long resourcePrimKey, String action) throws ResourceNotFoundException, ResourceActionNotFoundException {
@@ -107,21 +90,47 @@ public class PermissionRepository {
         return groupIds == null ? EMPTY_ARRAY : groupIds;
     }
 
-    @Transactional(propagation = Propagation.REQUIRED, value = PortalConfig.TXMANAGER)
-    public boolean hasGroupPermission(long groupId, String resource, long resourcePrimKey, String action) throws ResourceNotFoundException, ResourceActionNotFoundException {
-        return hasGroupPermission(groupId, resourceRepository.getResourceId(resource), resourcePrimKey, action);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED, value = PortalConfig.TXMANAGER)
-    public boolean hasGroupPermission(long groupId, long resourceId, long resourcePrimKey, String action) throws ResourceNotFoundException, ResourceActionNotFoundException {
-        return permissionService.hasPermission(getGroupResourceId(), groupId, resourceId, resourcePrimKey, action);
-    }
-
-    private long getUserResourceId() throws ResourceNotFoundException {
-        return resourceRepository.getResourceId(User.class.getName());
+    private boolean hasGroupPermission(long groupId, long resourceId, long resourcePrimKey, String action) throws ResourceNotFoundException, ResourceActionNotFoundException {
+        return hasPermission(getGroupResourceId(), groupId, resourceId, resourcePrimKey, action);
     }
 
     private long getGroupResourceId() throws ResourceNotFoundException {
-        return resourceRepository.getResourceId(Group.class.getName());
+        return resourceRepository.getResourceId(GROUP_CLASS_NAME);
+    }
+
+    protected boolean hasPermission(long resource1, long resource1PrimKey, long resource2, long resource2PrimKey, String action) throws ResourceActionNotFoundException {
+        long resourceActionPermission = resourceActionPermissionRepository.getResourceActionPermission(resource2, action);
+        Long permissions = getPermissions(resource1, resource1PrimKey, resource2, resource2PrimKey);
+        return permissions != null && (permissions.longValue() & resourceActionPermission) == resourceActionPermission;
+    }
+
+    private Long getPermissions(long resource1, long resource1PrimKey, long resource2, long resource2PrimKey) {
+        String cacheKey = resource1 + "#" + resource1PrimKey + "#" + resource2 + "#" + resource2PrimKey;
+        Element el = cache.getElement(cacheKey);
+        if (el == null) {
+            Long permissions = null;
+            try {
+                permissions = permissionDao.loadPermissions(resource1, resource1PrimKey, resource2, resource2PrimKey);
+            } finally {
+                cache.put(cacheKey, permissions);
+            }
+            return permissions;
+        }
+        return el.get();
+    }
+
+    protected void setPermissions(long resource1, long resource1PrimKey, long resource2, long resource2PrimKey, long actionPermissions) {
+        Long id = permissionDao.loadPermissionsId(resource1, resource1PrimKey, resource2, resource2PrimKey);
+        try {
+            if (id == null) {
+                permissionDao.addPermissions(resource1, resource1PrimKey, resource2, resource2PrimKey, actionPermissions);
+            } else {
+                permissionDao.updatePermissions(id.longValue(), actionPermissions);
+            }
+            cache.put(resource1 + "#" + resource1PrimKey + "#" + resource2 + "#" + resource2PrimKey, Long.valueOf(actionPermissions));
+        } catch (RuntimeException e) {
+            cache.clear();
+            throw e;
+        }
     }
 }
