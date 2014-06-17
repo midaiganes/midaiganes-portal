@@ -15,7 +15,6 @@ import javax.servlet.ServletContext;
  * @see javax.servlet.ServletContext.getResourcePaths(String)
  * 
  */
-@Deprecated
 public class ServletContextResourceRepository {
 
     private final ConcurrentHashMap<String, ConcurrentHashMap<String, CopyOnWriteArrayList<String>>> resourcePaths;

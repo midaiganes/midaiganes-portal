@@ -11,6 +11,8 @@ import javax.portlet.RenderResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 import ee.midaiganes.beans.BeanRepositoryUtil;
 import ee.midaiganes.portal.user.UserRepository;
 import ee.midaiganes.portlets.BasePortlet;
@@ -34,10 +36,14 @@ public class RegistrationController extends BasePortlet {
     }
 
     private void registerUser(RegistrationData registrationData, ActionRequest request) {
-        if (!StringUtil.isEmpty(registrationData.getUsername()) && !StringUtil.isEmpty(registrationData.getPassword())) {
+        String username = registrationData.getUsername();
+        String password = registrationData.getPassword();
+        if (!StringUtil.isEmpty(username) && !StringUtil.isEmpty(password)) {
+            Preconditions.checkNotNull(username);
+            Preconditions.checkNotNull(password);
             try {
-                long userid = BeanRepositoryUtil.getBean(UserRepository.class).addUser(registrationData.getUsername(), registrationData.getPassword());
-                log.debug("user added: id = {}; name = {}", Long.valueOf(userid), registrationData.getUsername());
+                long userid = BeanRepositoryUtil.getBean(UserRepository.class).addUser(username, password);
+                log.debug("user added: id = {}; name = {}", Long.valueOf(userid), username);
                 request.setAttribute("success", Boolean.TRUE);
             } catch (DuplicateUsernameException e) {
                 log.debug("duplicate username", e);

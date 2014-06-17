@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.Resource;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -52,7 +54,9 @@ public class StaticContentServlet extends HttpServlet {
             log.debug("requestURI = {}; staticFiles = {}", requestURI, staticFiles);
             if (staticFiles.containsKey(requestURI)) {
                 try (InputStream is = getResourceAsStream(staticFiles.get(requestURI), requestURI)) {
-                    copyToOutputStream(response, is);
+                    if (is != null) {
+                        copyToOutputStream(response, is);
+                    }
                 }
             } else {
                 log.error("file not found: {}", requestURI);
@@ -63,13 +67,16 @@ public class StaticContentServlet extends HttpServlet {
         }
     }
 
-    private void copyToOutputStream(HttpServletResponse response, InputStream is) throws IOException {
+    private void copyToOutputStream(HttpServletResponse response, @Nonnull InputStream is) throws IOException {
         try (ServletOutputStream os = response.getOutputStream()) {
-            ByteStreams.copy(is, os);
-            os.flush();
+            if (os != null) {
+                ByteStreams.copy(is, os);
+                os.flush();
+            }
         }
     }
 
+    @Nullable
     private InputStream getResourceAsStream(Theme theme, String requestURI) {
         return getContext(theme.getThemeName().getContextWithSlash()).getResourceAsStream(requestURI.substring(theme.getThemeName().getContextWithSlash().length()));
     }

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletException;
@@ -21,7 +22,7 @@ import ee.midaiganes.beans.BeanRepositoryUtil;
 import ee.midaiganes.model.PortalResource;
 import ee.midaiganes.portal.group.Group;
 import ee.midaiganes.portal.group.GroupRepository;
-import ee.midaiganes.portal.permission.PermissionRepository;
+import ee.midaiganes.portal.permission.PermissionService;
 import ee.midaiganes.portal.permission.ResourceActionRepository;
 import ee.midaiganes.portal.permission.ResourceRepository;
 import ee.midaiganes.portal.portletinstance.PortletInstance;
@@ -37,7 +38,7 @@ public class PermissionsController extends BasePortlet {
     private static final Logger log = LoggerFactory.getLogger(PermissionsController.class);
 
     private final ResourceRepository resourceRepository;
-    private final PermissionRepository permissionRepository;
+    private final PermissionService permissionService;
     private final ResourceActionRepository resourceActionRepository;
     private final GroupRepository groupRepository;
     private final UserRepository userRepository;
@@ -48,7 +49,7 @@ public class PermissionsController extends BasePortlet {
         this.userRepository = BeanRepositoryUtil.getBean(UserRepository.class);
         this.groupRepository = BeanRepositoryUtil.getBean(GroupRepository.class);
         this.resourceActionRepository = BeanRepositoryUtil.getBean(ResourceActionRepository.class);
-        this.permissionRepository = BeanRepositoryUtil.getBean(PermissionRepository.class);
+        this.permissionService = BeanRepositoryUtil.getBean(PermissionService.class);
         this.resourceRepository = BeanRepositoryUtil.getBean(ResourceRepository.class);
     }
 
@@ -84,8 +85,7 @@ public class PermissionsController extends BasePortlet {
         return getView(request, Long.parseLong(resourceId), Long.parseLong(resourcePrimKey));
     }
 
-    private String resourceView(@RequestParam("resource") String resource, @RequestParam("resource-prim-key") String resourcePrimKey, RenderRequest request)
-            throws ResourceNotFoundException {
+    private String resourceView(@Nonnull String resource, @RequestParam("resource-prim-key") String resourcePrimKey, RenderRequest request) throws ResourceNotFoundException {
         return getView(request, resourceRepository.getResourceId(resource), Long.parseLong(resourcePrimKey));
     }
 
@@ -142,7 +142,7 @@ public class PermissionsController extends BasePortlet {
             for (int i = 0; i < actions.size(); i++) {
                 permissions[i] = row.getPermissions().get(i).booleanValue();
             }
-            permissionRepository.setPermissions(resourceId, row.getResourcePrimKey(), resource2Id, resourcePrimKey, allActions, permissions);
+            permissionService.setPermissions(resourceId, row.getResourcePrimKey(), resource2Id, resourcePrimKey, allActions, permissions);
         }
     }
 
@@ -160,7 +160,7 @@ public class PermissionsController extends BasePortlet {
 
             for (String action : actions) {
                 try {
-                    permissions.add(Boolean.valueOf(permissionRepository.hasPermission(resource, resourceId, resourcePrimKey, action)));
+                    permissions.add(Boolean.valueOf(permissionService.hasPermission(resource, resourceId, resourcePrimKey, action)));
                 } catch (ResourceNotFoundException | ResourceActionNotFoundException e) {
                     log.error(e.getMessage(), e);
                 }

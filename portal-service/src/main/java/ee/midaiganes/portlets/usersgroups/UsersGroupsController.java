@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nonnull;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletException;
@@ -111,7 +112,7 @@ public class UsersGroupsController extends BasePortlet {
         sendRedirect(request, response);
     }
 
-    private void addGroup(String groupName, String userGroup, ActionRequest request, ActionResponse response) throws IOException {
+    private void addGroup(@Nonnull String groupName, String userGroup, ActionRequest request, ActionResponse response) throws IOException {
         groupRepository.addGroup(groupName, Boolean.parseBoolean(userGroup));
         sendRedirect(request, response);
     }
