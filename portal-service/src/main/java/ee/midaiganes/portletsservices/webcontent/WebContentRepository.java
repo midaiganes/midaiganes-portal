@@ -17,7 +17,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import ee.midaiganes.beans.PortalConfig;
+import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
@@ -25,7 +25,7 @@ import ee.midaiganes.cache.SingleVmPoolUtil;
 @Repository(value = "webContentRepository")
 public class WebContentRepository {
 
-    @Resource(name = PortalConfig.PORTAL_JDBC_TEMPLATE)
+    @Resource(name = PortalBeans.PORTAL_JDBC_TEMPLATE)
     private JdbcTemplate jdbcTemplate;
 
     private final SingleVmCache cache;
