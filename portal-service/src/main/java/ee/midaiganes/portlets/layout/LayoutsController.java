@@ -61,22 +61,26 @@ public class LayoutsController extends BasePortlet {
     private void editLayoutView(String id, RenderRequest request, RenderResponse response) throws PortletException, IOException {
         if (StringUtil.isNumber(id)) {
             Layout layout = layoutRepository.getLayout(Long.parseLong(id));
-            LayoutModel layoutModel = new LayoutModel();
-            layoutModel.setDefaultLayoutTitleLanguageId(languageRepository.getLanguageId(layout.getDefaultLayoutTitleLanguageId()));
-            Long parentId = layout.getParentId();
-            layoutModel.setParentId(Long.toString(parentId == null ? 0 : parentId.longValue()));
-            layoutModel.setUrl(layout.getFriendlyUrl());
-            for (String languageId : languageRepository.getSupportedLanguageIds()) {
-                layoutModel.getLayoutTitles().put(languageId, StringPool.EMPTY);
-            }
-            for (LayoutTitle lt : layout.getLayoutTitles()) {
-                layoutModel.getLayoutTitles().put(languageRepository.getLanguageId(lt.getLanguageId()), lt.getTitle());
-            }
-            request.setAttribute("editLayoutModel", layoutModel);
-            request.setAttribute("layout", layout);
-            request.setAttribute("layouts", layoutRepository.getLayouts(RequestUtil.getPageDisplay(request).getLayoutSet().getId()));
+            if (layout != null) {
+                LayoutModel layoutModel = new LayoutModel();
+                layoutModel.setDefaultLayoutTitleLanguageId(languageRepository.getLanguageId(layout.getDefaultLayoutTitleLanguageId()));
+                Long parentId = layout.getParentId();
+                layoutModel.setParentId(Long.toString(parentId == null ? 0 : parentId.longValue()));
+                layoutModel.setUrl(layout.getFriendlyUrl());
+                for (String languageId : languageRepository.getSupportedLanguageIds()) {
+                    layoutModel.getLayoutTitles().put(languageId, StringPool.EMPTY);
+                }
+                for (LayoutTitle lt : layout.getLayoutTitles()) {
+                    layoutModel.getLayoutTitles().put(languageRepository.getLanguageId(lt.getLanguageId()), lt.getTitle());
+                }
+                request.setAttribute("editLayoutModel", layoutModel);
+                request.setAttribute("layout", layout);
+                request.setAttribute("layouts", layoutRepository.getLayouts(RequestUtil.getPageDisplay(request).getLayoutSet().getId()));
 
-            super.include("layouts/edit-layout", request, response);
+                super.include("layouts/edit-layout", request, response);
+            } else {
+                log.warn("Layout with id '" + id + "' not found.");
+            }
         } else {
             addLayoutView(request, response);
         }
