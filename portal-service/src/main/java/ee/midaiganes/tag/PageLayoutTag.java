@@ -27,9 +27,7 @@ public class PageLayoutTag extends SimpleTag {
             try (WrappedOutputHttpServletResponse resp = new WrappedOutputHttpServletResponse(getHttpServletResponse(), getPageContext().getOut())) {
                 requestDispatcher.include(getHttpServletRequest(), resp);
             }
-        } catch (ServletException e) {
-            log.error(e.getMessage(), e);
-        } catch (IOException e) {
+        } catch (ServletException | IOException e) {
             log.error(e.getMessage(), e);
         }
         return Tag.EVAL_PAGE;

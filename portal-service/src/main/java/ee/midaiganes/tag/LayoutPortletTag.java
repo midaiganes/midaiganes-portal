@@ -30,11 +30,7 @@ public class LayoutPortletTag extends SimpleTag {
             try (WrappedOutputHttpServletResponse resp = new WrappedOutputHttpServletResponse(getHttpServletResponse(), getPageContext().getOut())) {
                 requestDispatcher.include(new LayoutPortletRequest(request, id), resp);
             }
-        } catch (ServletException e) {
-            log.error(e.getMessage(), e);
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        } catch (RuntimeException e) {
+        } catch (ServletException | IOException | RuntimeException e) {
             log.error(e.getMessage(), e);
         }
         return Tag.EVAL_PAGE;
