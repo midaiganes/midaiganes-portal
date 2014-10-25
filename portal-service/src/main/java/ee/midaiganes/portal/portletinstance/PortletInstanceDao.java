@@ -4,6 +4,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -23,6 +25,7 @@ public class PortletInstanceDao {
     private static final LongResultSetExtractor longResultSetExtractor = new LongResultSetExtractor();
     private final JdbcTemplate jdbcTemplate;
 
+    @Inject
     public PortletInstanceDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }

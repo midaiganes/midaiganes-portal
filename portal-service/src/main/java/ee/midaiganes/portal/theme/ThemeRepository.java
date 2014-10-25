@@ -12,6 +12,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.Resource;
+import javax.inject.Inject;
 import javax.xml.bind.JAXBException;
 
 import org.slf4j.Logger;
@@ -21,12 +22,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 
-import ee.midaiganes.beans.PortalConfig;
+import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.generated.xml.theme.MidaiganesTheme;
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.XmlUtil;
 
-@Resource(name = PortalConfig.THEME_REPOSITORY)
+@Resource(name = PortalBeans.THEME_REPOSITORY)
 public class ThemeRepository {
     private static final Logger log = LoggerFactory.getLogger(ThemeRepository.class);
     private final Map<ThemeName, Theme> themes = new ConcurrentHashMap<>();
@@ -34,6 +35,7 @@ public class ThemeRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
+    @Inject
     public ThemeRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
