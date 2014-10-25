@@ -8,18 +8,21 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import javax.annotation.Nullable;
 import javax.annotation.Resource;
 import javax.xml.bind.JAXBException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.beans.PortalConfig;
+import com.google.common.base.Preconditions;
+
+import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.generated.xml.pagelayout.MidaiganesLayout;
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.XmlUtil;
 
-@Resource(name = PortalConfig.PAGE_LAYOUT_REPOSITORY)
+@Resource(name = PortalBeans.PAGE_LAYOUT_REPOSITORY)
 public class PageLayoutRepository {
     private static final Logger log = LoggerFactory.getLogger(PageLayoutRepository.class);
     private final ConcurrentHashMap<PageLayoutName, PageLayout> pageLayouts = new ConcurrentHashMap<>();
@@ -34,10 +37,12 @@ public class PageLayoutRepository {
         }
     }
 
+    @Nullable
     public PageLayout getPageLayout(String pageLayoutId) {
         return getPageLayout(new PageLayoutName(pageLayoutId));
     }
 
+    @Nullable
     public PageLayout getPageLayout(PageLayoutName pageLayoutName) {
         lock.readLock().lock();
         try {
@@ -77,7 +82,9 @@ public class PageLayoutRepository {
     }
 
     private PageLayout getPageLayoutFromMidaiganesLayout(String context, MidaiganesLayout.Layout l) {
-        return new PageLayout(new PageLayoutName(context, l.getId()), l.getPath());
+        String path = l.getPath();
+        Preconditions.checkNotNull(path);
+        return new PageLayout(new PageLayoutName(context, l.getId()), path);
     }
 
     public void registerPageLayouts(String contextPath, InputStream pageLayoutXmlStream) {

@@ -2,6 +2,7 @@ package ee.midaiganes.portal.permission;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -14,6 +15,7 @@ public class ResourceDao {
     private final LongResultSetExtractor resultSetExtractor;
     private final JdbcTemplate jdbcTemplate;
 
+    @Inject
     public ResourceDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = Preconditions.checkNotNull(jdbcTemplate);
         this.resultSetExtractor = new LongResultSetExtractor();

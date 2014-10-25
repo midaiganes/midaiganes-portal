@@ -1,5 +1,7 @@
 package ee.midaiganes.portal.permission;
 
+import javax.inject.Inject;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import ee.midaiganes.services.rowmapper.LongResultSetExtractor;
@@ -13,6 +15,7 @@ public class PermissionDao {
 
     private final JdbcTemplate jdbcTemplate;
 
+    @Inject
     public PermissionDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }

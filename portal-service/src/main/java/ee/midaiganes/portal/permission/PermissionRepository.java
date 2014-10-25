@@ -2,10 +2,11 @@ package ee.midaiganes.portal.permission;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.springframework.transaction.annotation.Transactional;
 
-import ee.midaiganes.beans.PortalConfig;
+import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
@@ -19,7 +20,7 @@ import ee.midaiganes.util.PortalUtil;
 import ee.midaiganes.util.PropsValues;
 import ee.midaiganes.util.StringUtil;
 
-@Resource(name = PortalConfig.PERMISSION_REPOSITORY)
+@Resource(name = PortalBeans.PERMISSION_REPOSITORY)
 public class PermissionRepository {
     private static final long[] EMPTY_ARRAY = new long[0];
     @Nonnull
@@ -31,6 +32,7 @@ public class PermissionRepository {
 
     private final SingleVmCache cache;
 
+    @Inject
     public PermissionRepository(ResourceRepository resourceRepository, GroupRepository groupRepository, PermissionDao permissionDao,
             ResourceActionRepository resourceActionPermissionRepository) {
         this.resourceRepository = resourceRepository;

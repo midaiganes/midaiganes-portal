@@ -2,21 +2,23 @@ package ee.midaiganes.portal.permission;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.springframework.transaction.annotation.Transactional;
 
-import ee.midaiganes.beans.PortalConfig;
+import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.model.PortalResource;
 import ee.midaiganes.services.exceptions.ResourceActionNotFoundException;
 import ee.midaiganes.services.exceptions.ResourceNotFoundException;
 
-@Resource(name = PortalConfig.PERMISSION_SERVICE)
+@Resource(name = PortalBeans.PERMISSION_SERVICE)
 public class PermissionService {
 
     private final ResourceActionRepository resourceActionPermissionRepository;
     private final ResourceRepository resourceRepository;
     private final PermissionRepository permissionRepository;
 
+    @Inject
     public PermissionService(ResourceActionRepository resourceActionPermissionRepository, ResourceRepository resourceRepository, PermissionRepository permissionRepository) {
         this.resourceActionPermissionRepository = resourceActionPermissionRepository;
         this.resourceRepository = resourceRepository;
