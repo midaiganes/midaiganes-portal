@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.Resource;
+import javax.inject.Inject;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -21,7 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.io.ByteStreams;
 
-import ee.midaiganes.beans.PortalConfig;
+import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.portal.theme.Theme;
 import ee.midaiganes.portal.theme.ThemeRepository;
 import ee.midaiganes.services.ServletContextResourceRepository;
@@ -30,10 +31,12 @@ import ee.midaiganes.util.StringPool;
 public class StaticContentServlet extends HttpServlet {
     private static final Logger log = LoggerFactory.getLogger(StaticContentServlet.class);
 
-    @Resource(name = PortalConfig.THEME_REPOSITORY)
+    @Inject
+    @Resource(name = PortalBeans.THEME_REPOSITORY)
     private ThemeRepository themeRepository;
 
-    @Resource(name = PortalConfig.SERVLET_CONTEXT_RESOURCE_REPOSITORY)
+    @Inject
+    @Resource(name = PortalBeans.SERVLET_CONTEXT_RESOURCE_REPOSITORY)
     private ServletContextResourceRepository servletContextResourceRepository;
 
     @Override
