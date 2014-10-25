@@ -6,18 +6,20 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
-import ee.midaiganes.beans.PortalConfig;
+import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
 import ee.midaiganes.services.exceptions.DuplicateUsernameException;
 
-@Resource(name = PortalConfig.USER_REPOSITORY)
+@Resource(name = PortalBeans.USER_REPOSITORY)
 public class UserRepository {
     private final SingleVmCache cache;
     private final UserDao userDao;
 
+    @Inject
     public UserRepository(UserDao userDao) {
         this.userDao = userDao;
         this.cache = SingleVmPoolUtil.getCache(UserRepository.class.getName());
