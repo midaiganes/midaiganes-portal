@@ -7,7 +7,6 @@
 	<property name="ivy.local.default.ivy.pattern"      value="[organisation]/[module]/[revision]/[type]s/[artifact].[ext]" override="false"/>
 	<property name="ivy.local.default.artifact.pattern" value="[organisation]/[module]/[revision]/[type]s/[artifact].[ext]" override="false"/>
 
-	<!-- property name="jetty.version" value="9.0.5.v20130815" override="true"/ -->
 	<property name="jetty.version" value="9.1.0.v20131115" override="true"/>
 	<property name="spring.version" value="${ivy.spring.version}" override="true"/>
 	<property name="jsp-api.version" value="2.2" />
@@ -43,7 +42,7 @@
 	</resolvers>
 	
 	<resolvers>
-		<chain name="default" returnFirst="true" checkmodified="true">
+		<chain name="default" returnFirst="true" checkmodified="false">
 			<resolver ref="local"/>
 			<resolver ref="main"/>
 		</chain>
