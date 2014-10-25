@@ -5,19 +5,21 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
-import ee.midaiganes.beans.PortalConfig;
+import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
 
-@Resource(name = PortalConfig.GROUP_REPOSITORY)
+@Resource(name = PortalBeans.GROUP_REPOSITORY)
 public class GroupRepository {
     private static final String GET_GROUPS_CACHE_KEY = "getGroups";
     private final SingleVmCache cache;
     private final GroupDao groupDao;
     private static final long[] EMPTY_ARRAY = new long[0];
 
+    @Inject
     public GroupRepository(GroupDao groupDao) {
         cache = SingleVmPoolUtil.getCache(GroupRepository.class.getName());
         this.groupDao = groupDao;

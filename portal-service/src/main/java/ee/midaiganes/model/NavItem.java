@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import com.google.common.base.Preconditions;
 
 import ee.midaiganes.portal.layout.Layout;
@@ -15,7 +17,7 @@ public class NavItem implements Serializable, Comparable<NavItem> {
     private final Layout layout;
     private final List<NavItem> childs = new ArrayList<>();
 
-    public NavItem(Layout layout, List<Layout> layouts) {
+    public NavItem(Layout layout, @Nonnull List<Layout> layouts) {
         Preconditions.checkNotNull(layouts, "Layouts is null");
         this.layout = Preconditions.checkNotNull(layout, "Layout is null");
         for (Layout l : layouts) {

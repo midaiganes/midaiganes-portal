@@ -3,6 +3,7 @@ package ee.midaiganes.portal.group;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -14,6 +15,7 @@ public class GroupDao {
     private final GroupRowMapper groupRowMapper;
     private final TLongArrayListResultSetExtractor longResultSetExtractor;
 
+    @Inject
     public GroupDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.groupRowMapper = new GroupRowMapper();

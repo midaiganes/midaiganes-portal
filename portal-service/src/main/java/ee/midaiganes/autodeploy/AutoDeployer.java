@@ -1,5 +1,6 @@
 package ee.midaiganes.autodeploy;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -139,10 +140,7 @@ public class AutoDeployer implements Runnable {
             } else {
                 tempZipFile.putNextEntry(entry);
                 if (!entry.isDirectory()) {
-                    try (InputStream in = warFile.getInputStream(entry)) {
-                        if (in == null) {
-                            throw new IllegalStateException("war entry inputstream is null");
-                        }
+                    try (InputStream in = new BufferedInputStream(warFile.getInputStream(entry))) {
                         ByteStreams.copy(in, tempZipFile);
                     }
                 }
@@ -153,7 +151,7 @@ public class AutoDeployer implements Runnable {
     }
 
     private void doWithWebXmlZipEntry(ZipFile warFile, ZipOutputStream tempZipFile, ZipEntry entry) {
-        try (InputStream is = warFile.getInputStream(entry)) {
+        try (InputStream is = new BufferedInputStream(warFile.getInputStream(entry))) {
             try {
                 Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(is);
                 Node webapp = doc.getFirstChild();
