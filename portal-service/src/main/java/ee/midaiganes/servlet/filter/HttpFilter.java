@@ -11,30 +11,30 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.web.context.support.WebApplicationContextUtils;
+import ee.midaiganes.util.GuiceUtil;
 
 public abstract class HttpFilter implements Filter {
-	private FilterConfig filterConfig;
+    private FilterConfig filterConfig;
 
-	@Override
-	public void init(FilterConfig filterConfig) throws ServletException {
-		this.filterConfig = filterConfig;
-		WebApplicationContextUtils.getRequiredWebApplicationContext(filterConfig.getServletContext()).getAutowireCapableBeanFactory().autowireBean(this);
-	}
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+        this.filterConfig = filterConfig;
+        GuiceUtil.getInjector(filterConfig.getServletContext()).injectMembers(this);
+    }
 
-	@Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-		doFilter((HttpServletRequest) request, (HttpServletResponse) response, chain);
-	}
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        doFilter((HttpServletRequest) request, (HttpServletResponse) response, chain);
+    }
 
-	@Override
-	public void destroy() {
-		this.filterConfig = null;
-	}
+    @Override
+    public void destroy() {
+        this.filterConfig = null;
+    }
 
-	protected FilterConfig getFilterConfig() {
-		return filterConfig;
-	}
+    protected FilterConfig getFilterConfig() {
+        return filterConfig;
+    }
 
-	protected abstract void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException;
+    protected abstract void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException;
 }
