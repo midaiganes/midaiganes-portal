@@ -10,27 +10,27 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 public class XmlUtil {
-	public static <A> A unmarshal(Class<A> clazz, InputStream in) throws JAXBException {
-		return clazz.cast(JAXBElement.class.cast(getUnmarshaller(clazz).unmarshal(in)).getValue());
-	}
+    public static <A> A unmarshal(Class<A> clazz, InputStream in) throws JAXBException {
+        return clazz.cast(JAXBElement.class.cast(getUnmarshaller(clazz).unmarshal(in)).getValue());
+    }
 
-	public static <A> A unmarshalWithoutJAXBElement(Class<A> clazz, InputStream in) throws JAXBException {
-		return clazz.cast(getUnmarshaller(clazz).unmarshal(in));
-	}
+    public static <A> A unmarshalWithoutJAXBElement(Class<A> clazz, InputStream in) throws JAXBException {
+        return clazz.cast(getUnmarshaller(clazz).unmarshal(in));
+    }
 
-	public static void marshal(Object o, OutputStream os) throws JAXBException {
-		getMarshaller(o.getClass()).marshal(o, os);
-	}
+    public static void marshal(Object o, OutputStream os) throws JAXBException {
+        getMarshaller(o.getClass()).marshal(o, os);
+    }
 
-	private static JAXBContext getContext(Class<?> clazz) throws JAXBException {
-		return JAXBContext.newInstance(clazz.getPackage().getName());
-	}
+    private static JAXBContext getContext(Class<?> clazz) throws JAXBException {
+        return JAXBContext.newInstance(clazz.getPackage().getName());
+    }
 
-	private static Unmarshaller getUnmarshaller(Class<?> clazz) throws JAXBException {
-		return getContext(clazz).createUnmarshaller();
-	}
+    private static Unmarshaller getUnmarshaller(Class<?> clazz) throws JAXBException {
+        return getContext(clazz).createUnmarshaller();
+    }
 
-	private static Marshaller getMarshaller(Class<?> clazz) throws JAXBException {
-		return getContext(clazz).createMarshaller();
-	}
+    private static Marshaller getMarshaller(Class<?> clazz) throws JAXBException {
+        return getContext(clazz).createMarshaller();
+    }
 }

@@ -1,18 +1,16 @@
 package ee.midaiganes.util;
 
-public class GetterUtil {
-	public static long get(String str, long defaultValue) {
-		if (!StringUtil.isEmpty(str)) {
-			try {
-				return Long.parseLong(str);
-			} catch (NumberFormatException e) {
-				return defaultValue;
-			}
-		}
-		return defaultValue;
-	}
+import javax.annotation.Nullable;
 
-	public static <A> A get(A a, A def) {
-		return a != null ? a : def;
-	}
+import com.google.common.primitives.Longs;
+
+public class GetterUtil {
+    public static long get(@Nullable String str, long defaultValue) {
+        Long val = str == null ? null : Longs.tryParse(str);
+        return val == null ? defaultValue : val.longValue();
+    }
+
+    public static <A> A get(A a, A def) {
+        return a != null ? a : def;
+    }
 }
