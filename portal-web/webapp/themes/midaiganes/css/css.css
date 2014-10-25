@@ -37,6 +37,9 @@ footer {
 	text-align: center;
 	font-size: 9px;
 }
+table {
+	width: 100%;
+}
 footer .content {
 	margin-top: 20px;
 }
@@ -139,6 +142,9 @@ button:HOVER {
 	transition: background-position 0.1s linear;
 	background-color: #e6e6e6;
 }
+.buttons {
+	margin-top: 12px;
+}
 .input-append input {
 	border-top-right-radius:0;
 	border-bottom-right-radius:0;
@@ -235,6 +241,9 @@ ul.chat li.selected{
 }
 .navigation li:FIRST-CHILD {
 	border-left: 0 none;
+}
+.navigation .active {
+	text-decoration: underline;
 }
 #dockbar {
 	position: fixed;
@@ -347,4 +356,36 @@ ul.chat li.selected{
 }
 .message.error {
 	border-color: #ff0000;
+}
+table.table-1 {
+	border-left: 1px solid #c6c6c6;
+	border-top: 1px solid #c6c6c6;
+	border-collapse: collapse;
+}
+table.table-1 td, table.table-1 th {
+	border-right: 1px solid #c6c6c6;
+	border-bottom: 1px solid #c6c6c6;
+	padding: 5px;
+}
+table.table-1 tr:nth-child(2n) {
+	background: #e6e6e6;
+}
+table.table-1 td {
+	text-align: center;
+}
+div.list-group > div, ul.list-group > li {
+	padding: 10px;
+	border: 1px solid #e6e6e6;
+	margin-bottom: -1px;
+}
+div.list-group > div:first-child, ul.list-group > li:first-child {
+	border-top-right-radius: 5px;
+	border-top-left-radius: 5px;
+}
+div.list-group > div:last-child, ul.list-group > li:last-child{
+	border-bottom-right-radius: 5px;
+	border-bottom-left-radius: 5px;
+}
+div.list-group > div.ui-draggable {
+	cursor: move;
 }

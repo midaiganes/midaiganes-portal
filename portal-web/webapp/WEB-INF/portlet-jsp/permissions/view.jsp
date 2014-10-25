@@ -12,7 +12,7 @@
 			Permissions updated.
 		</p>
 	</c:if>
-	<table>
+	<table class="table-1">
 		<tr>
 			<td></td>
 			<c:forEach items="${actionsList}" var="actionItem">
@@ -31,7 +31,7 @@
 			</tr>
 		</c:forEach>
 	</table>
-	<div>
+	<div class="buttons">
 		<button type="button" class="ajax-submit">Save</button>
 	</div>
 </form:form>

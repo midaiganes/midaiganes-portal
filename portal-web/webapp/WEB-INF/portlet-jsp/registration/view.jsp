@@ -1,7 +1,7 @@
 <%@ page pageEncoding="UTF-8" language="java" trimDirectiveWhitespaces="true" session="false" %>
 <%@ include file="../init.jsp" %>
 
-<portlet:actionURL var="formAction" />
+<portlet:actionURL var="formAction" windowState="exclusive" />
 
 <form action="${formAction}" method="post">
 	<portal-ui:form-content>
@@ -13,7 +13,7 @@
 		</c:if>
 		<portal-ui:form-input-row message="Username" path="username"/>
 		<portal-ui:form-input-row message="Password" path="password" isPassword="true"/>
-		<div>
+		<div class="buttons">
 			<button type="button" class="ajax-submit">Register</button>
 		</div>
 	</portal-ui:form-content>
