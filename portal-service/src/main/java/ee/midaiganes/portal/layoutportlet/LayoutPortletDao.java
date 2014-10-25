@@ -2,6 +2,8 @@ package ee.midaiganes.portal.layoutportlet;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -13,6 +15,7 @@ public class LayoutPortletDao {
 
     private final JdbcTemplate jdbcTemplate;
 
+    @Inject
     public LayoutPortletDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }

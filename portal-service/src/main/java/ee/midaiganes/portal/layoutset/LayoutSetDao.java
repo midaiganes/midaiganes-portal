@@ -5,6 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -25,6 +27,7 @@ public class LayoutSetDao {
 
     private final JdbcTemplate jdbcTemplate;
 
+    @Inject
     public LayoutSetDao(JdbcTemplate jdbcTemplate) {
         Preconditions.checkNotNull(jdbcTemplate);
         this.jdbcTemplate = jdbcTemplate;

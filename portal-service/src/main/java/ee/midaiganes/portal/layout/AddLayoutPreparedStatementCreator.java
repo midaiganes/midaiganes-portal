@@ -5,6 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.SqlProvider;
 
@@ -13,6 +15,7 @@ import ee.midaiganes.portal.theme.ThemeName;
 import ee.midaiganes.util.StringPool;
 
 public class AddLayoutPreparedStatementCreator implements PreparedStatementCreator, SqlProvider {
+    private static final Logger log = LoggerFactory.getLogger(AddLayoutPreparedStatementCreator.class);
     private static final String[] ID_ARRAY = { StringPool.ID };
 
     private final long layoutSetId;
@@ -43,6 +46,16 @@ public class AddLayoutPreparedStatementCreator implements PreparedStatementCreat
     @Override
     public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
         PreparedStatement ps = con.prepareStatement(qry_add_layout, ID_ARRAY);
+        try {
+            setParameters(ps);
+            return ps;
+        } catch (SQLException | RuntimeException e) {
+            closePrepareStatement(ps);
+            throw e;
+        }
+    }
+
+    private void setParameters(PreparedStatement ps) throws SQLException {
         int i = 1;
         ps.setLong(i++, layoutSetId);
         ps.setString(i++, friendlyUrl);
@@ -65,6 +78,15 @@ public class AddLayoutPreparedStatementCreator implements PreparedStatementCreat
         }
 
         ps.setLong(i++, defaultLayoutTitleLanguageId);
-        return ps;
+    }
+
+    private void closePrepareStatement(PreparedStatement ps) {
+        if (ps != null) {
+            try {
+                ps.close();
+            } catch (SQLException e) {
+                log.warn(e.getMessage(), e);
+            }
+        }
     }
 }

@@ -4,11 +4,11 @@ import java.io.Serializable;
 import java.util.List;
 
 import javax.annotation.Nonnull;
-
-import com.google.common.base.Preconditions;
+import javax.annotation.Nullable;
 
 import ee.midaiganes.model.PortalResource;
 import ee.midaiganes.portal.theme.ThemeName;
+import ee.midaiganes.util.StringUtil;
 
 public class Layout implements Serializable, PortalResource {
     private static final long serialVersionUID = 1L;
@@ -97,9 +97,7 @@ public class Layout implements Serializable, PortalResource {
         return layoutTitle != null ? layoutTitle : LayoutTitle.getDefault(id, defaultLayoutTitleLanguageId, friendlyUrl);
     }
 
-    /**
-     * @return LayoutTitle or null
-     */
+    @Nullable
     public LayoutTitle getLayoutTitle(long languageId) {
         if (layoutTitles != null) {
             for (LayoutTitle layoutTitle : layoutTitles) {
@@ -119,8 +117,7 @@ public class Layout implements Serializable, PortalResource {
     @Override
     @Nonnull
     public String getResource() {
-        String resource = Layout.class.getName();
-        return Preconditions.checkNotNull(resource);
+        return StringUtil.getName(Layout.class);
     }
 
     @Override

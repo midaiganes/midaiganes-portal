@@ -2,18 +2,20 @@ package ee.midaiganes.portal.layoutset;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.beans.PortalConfig;
+import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
 import ee.midaiganes.portal.theme.ThemeName;
 
-@Resource(name = PortalConfig.LAYOUT_SET_REPOSITORY)
+@Resource(name = PortalBeans.LAYOUT_SET_REPOSITORY)
 public class LayoutSetRepository {
     private static final Logger log = LoggerFactory.getLogger(LayoutSetRepository.class);
 
@@ -23,6 +25,7 @@ public class LayoutSetRepository {
     private final SingleVmCache cache;
     private final LayoutSetDao layoutSetDao;
 
+    @Inject
     public LayoutSetRepository(LayoutSetDao layoutSetDao) {
         this.layoutSetDao = layoutSetDao;
         this.cache = SingleVmPoolUtil.getCache(LayoutSetRepository.class.getName());
@@ -38,6 +41,7 @@ public class LayoutSetRepository {
         return layoutSets;
     }
 
+    @Nullable
     public LayoutSet getLayoutSet(String virtualHost) {
         String cacheKey = GET_LAYOUT_SET_BY_VIRTUAL_HOST_CACHE_KEY_PREFIX + virtualHost;
         Element el = cache.getElement(cacheKey);

@@ -6,7 +6,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nullable;
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.ImmutableList;
 
-import ee.midaiganes.beans.PortalConfig;
+import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
@@ -28,7 +30,7 @@ import ee.midaiganes.services.exceptions.IllegalPageLayoutException;
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.StringUtil;
 
-@Resource(name = PortalConfig.LAYOUT_REPOSITORY)
+@Resource(name = PortalBeans.LAYOUT_REPOSITORY)
 public class LayoutRepository {
     private static final Logger log = LoggerFactory.getLogger(LayoutRepository.class);
     private static final Pattern FRIENDLY_URL_PATTERN;
@@ -43,6 +45,7 @@ public class LayoutRepository {
     private final SingleVmCache layoutTitleCache;
     private final SingleVmCache layoutCache;
 
+    @Inject
     public LayoutRepository(LayoutDao layoutDao, ThemeRepository themeRepository, PageLayoutRepository pageLayoutRepository) {
         this.layoutDao = layoutDao;
         this.themeRepository = themeRepository;
@@ -60,6 +63,7 @@ public class LayoutRepository {
         return list;
     }
 
+    @Nullable
     private List<LayoutTitle> getLayoutTitlesFromCache(long layoutId) {
         Element el = layoutTitleCache.getElement(Long.toString(layoutId));
         return el != null ? el.<List<LayoutTitle>> get() : null;
@@ -76,6 +80,7 @@ public class LayoutRepository {
         return list;
     }
 
+    @Nullable
     public Layout getLayout(long layoutId) {
         Element el = layoutCache.getElement(Long.toString(layoutId));
         if (el != null) {
@@ -153,6 +158,7 @@ public class LayoutRepository {
         return layouts;
     }
 
+    @Nullable
     public Layout getLayout(long layoutSetId, String friendlyUrl) {
         for (Layout layout : getLayouts(layoutSetId)) {
             if (layout.getFriendlyUrl().equals(friendlyUrl)) {
@@ -229,18 +235,23 @@ public class LayoutRepository {
 
     @Transactional
     public void deleteLayout(long layoutId) {
-        try {
-            Layout layout = getLayout(layoutId);
-            int deleted = layoutDao.deleteLayout(layoutId);
-            int updated = layoutDao.moveLayoutsUp(layout.getLayoutSetId(), layout.getParentId(), layout.getNr());
-            log.debug("Deleted {} and updated {} layout(s)", Integer.valueOf(deleted), Integer.valueOf(updated));
-        } finally {
-            cache.clear();
-            layoutTitleCache.remove(Long.toString(layoutId));
-            layoutCache.remove(Long.toString(layoutId));
+        Layout layout = getLayout(layoutId);
+        if (layout != null) {
+            try {
+                int deleted = layoutDao.deleteLayout(layoutId);
+                int updated = layoutDao.moveLayoutsUp(layout.getLayoutSetId(), layout.getParentId(), layout.getNr());
+                log.debug("Deleted {} and updated {} layout(s)", Integer.valueOf(deleted), Integer.valueOf(updated));
+            } finally {
+                cache.clear();
+                layoutTitleCache.remove(Long.toString(layoutId));
+                layoutCache.remove(Long.toString(layoutId));
+            }
+        } else {
+            throw new IllegalArgumentException("Layout not found with id " + layoutId);
         }
     }
 
+    @Transactional
     public boolean moveLayoutUp(long layoutId) {
         try {
             return layoutDao.moveLayoutUp(layoutId) == 2;

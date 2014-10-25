@@ -5,30 +5,33 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import ee.midaiganes.beans.PortalConfig;
+import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
 import ee.midaiganes.portal.portletinstance.PortletInstanceRepository;
 import ee.midaiganes.portlet.PortletName;
 
-@Resource(name = PortalConfig.LAYOUT_PORTLET_REPOSITORY)
+@Resource(name = PortalBeans.LAYOUT_PORTLET_REPOSITORY)
 public class LayoutPortletRepository {
     private final PortletInstanceRepository portletInstanceRepository;
     private final LayoutPortletDao layoutPortletDao;
     private final SingleVmCache cache;
 
+    @Inject
     public LayoutPortletRepository(LayoutPortletDao layoutPortletDao, PortletInstanceRepository portletInstanceRepository) {
         this.layoutPortletDao = layoutPortletDao;
         this.portletInstanceRepository = portletInstanceRepository;
         this.cache = SingleVmPoolUtil.getCache(LayoutPortletRepository.class.getName());
     }
 
-    @Transactional(readOnly = false, value = PortalConfig.TXMANAGER, propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = false, value = PortalBeans.TXMANAGER, propagation = Propagation.REQUIRED)
     public void addLayoutPortlet(long layoutId, long rowId, PortletName portletName, int boxIndex) {
         try {
             long portletInstanceId = portletInstanceRepository.addPortletInstance(portletName);
@@ -63,6 +66,7 @@ public class LayoutPortletRepository {
     }
 
     // TODO layout/portletWindowId is not unique
+    @Nullable
     public LayoutPortlet getLayoutPortlet(long layoutId, String portletWindowID) {
         LayoutPortlet lp = null;
         for (LayoutPortlet layoutPortlet : getLayoutPortlets(layoutId)) {
@@ -77,13 +81,17 @@ public class LayoutPortletRepository {
         return lp;
     }
 
-    @Transactional(readOnly = false, value = PortalConfig.TXMANAGER)
+    @Transactional
     public void moveLayoutPortlet(String portletWindowID, long layoutId, long portletBoxId, long boxIndex) {
-        try {
-            LayoutPortlet layoutPortlet = getLayoutPortlet(layoutId, portletWindowID);
-            layoutPortletDao.moveLayoutPortlet(layoutPortlet.getId(), portletBoxId, boxIndex);
-        } finally {
-            cache.clear();
+        LayoutPortlet layoutPortlet = getLayoutPortlet(layoutId, portletWindowID);
+        if (layoutPortlet != null) {
+            try {
+                layoutPortletDao.moveLayoutPortlet(layoutPortlet.getId(), portletBoxId, boxIndex);
+            } finally {
+                cache.clear();
+            }
+        } else {
+            throw new IllegalArgumentException("Layout portlet not found: layoutId=" + layoutId + ", portletWindowId='" + portletWindowID + "'.");
         }
     }
 
