@@ -8,8 +8,11 @@ import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 import javax.portlet.Portlet;
 import javax.portlet.PortletConfig;
 import javax.portlet.PortletException;
@@ -22,7 +25,7 @@ import javax.xml.bind.JAXBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.beans.PortalConfig;
+import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.generated.xml.portlet.DescriptionType;
 import ee.midaiganes.generated.xml.portlet.InitParamType;
 import ee.midaiganes.generated.xml.portlet.PortletAppType;
@@ -43,27 +46,30 @@ import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.TimeProviderUtil;
 import ee.midaiganes.util.XmlUtil;
 
-@Resource(name = PortalConfig.PORTLET_REPOSITORY)
+@Resource(name = PortalBeans.PORTLET_REPOSITORY)
 public class PortletRepository {
     private static final Logger log = LoggerFactory.getLogger(PortletRepository.class);
     private final ConcurrentHashMap<PortletName, PortletAndConfiguration> portlets = new ConcurrentHashMap<>();
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    private final ReadLock readLock = lock.readLock();
+    private final WriteLock writeLock = lock.writeLock();
 
     private final PortletPreferencesRepository portletPreferencesRepository;
 
     private final PortletInstanceRepository portletInstanceRepository;
 
+    @Inject
     public PortletRepository(PortletPreferencesRepository portletPreferencesRepository, PortletInstanceRepository portletInstanceRepository) {
         this.portletPreferencesRepository = portletPreferencesRepository;
         this.portletInstanceRepository = portletInstanceRepository;
     }
 
     public List<PortletName> getPortletNames() {
-        lock.readLock().lock();
+        readLock.lock();
         try {
             return new ArrayList<>(portlets.keySet());
         } finally {
-            lock.readLock().unlock();
+            readLock.unlock();
         }
     }
 
@@ -88,12 +94,12 @@ public class PortletRepository {
         for (PortletName entry : getPortletNames()) {
             if (entry.getContextWithSlash().equals(contextPath)) {
                 try {
-                    lock.writeLock().lock();
+                    writeLock.lock();
                     PortletAndConfiguration conf = null;
                     try {
                         conf = portlets.remove(entry);
                     } finally {
-                        lock.writeLock().unlock();
+                        writeLock.unlock();
                     }
                     if (conf != null) {
                         conf.getMidaiganesPortlet().destroy();
@@ -121,14 +127,14 @@ public class PortletRepository {
     }
 
     public PortletAndConfiguration getPortlet(PortletName portletName) {
-        lock.readLock().lock();
+        readLock.lock();
         try {
             PortletAndConfiguration portlet = portlets.get(portletName);
             if (portlet != null) {
                 return portlet;
             }
         } finally {
-            lock.readLock().unlock();
+            readLock.unlock();
         }
         log.warn("no portlet with name = {};", portletName);
         return null;
@@ -184,11 +190,11 @@ public class PortletRepository {
                 midaiganesPortlet.init(portletConfig);
                 log.info("Portlet '{}' init took: {}ms", portletName, Long.valueOf(System.currentTimeMillis() - start));
                 PortletAndConfiguration portletAndConfiguration = new PortletAndConfiguration(midaiganesPortlet, portletConfig, portletType);
-                lock.writeLock().lock();
+                writeLock.lock();
                 try {
                     portlets.put(portletName, portletAndConfiguration);
                 } finally {
-                    lock.writeLock().unlock();
+                    writeLock.unlock();
                 }
                 return portletName;
             } catch (PortletException e) {

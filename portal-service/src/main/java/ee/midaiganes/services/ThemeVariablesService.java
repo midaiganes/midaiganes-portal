@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.portlet.WindowStateException;
 import javax.servlet.http.HttpServletRequest;
 
@@ -29,6 +30,7 @@ public class ThemeVariablesService {
     private final PortletURLFactory portletUrlFactor;
     private final SecureLayoutRepository secureLayoutRepository;
 
+    @Inject
     public ThemeVariablesService(PortletURLFactory portletUrlFactor, SecureLayoutRepository secureLayoutRepository) {
         Preconditions.checkNotNull(portletUrlFactor, "Portlet url factory is null");
         Preconditions.checkNotNull(secureLayoutRepository, "Secure layout repository is null");

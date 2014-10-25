@@ -1,5 +1,6 @@
 package ee.midaiganes.services;
 
+import javax.inject.Inject;
 import javax.portlet.PortletURL;
 import javax.portlet.WindowState;
 import javax.portlet.WindowStateException;
@@ -14,6 +15,7 @@ import ee.midaiganes.util.StringPool;
 public class PortletURLFactory {
     private final PortletRepository portletRepository;
 
+    @Inject
     public PortletURLFactory(PortletRepository portletRepository) {
         this.portletRepository = portletRepository;
     }

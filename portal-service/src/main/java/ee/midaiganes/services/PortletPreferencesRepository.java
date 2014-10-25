@@ -7,14 +7,13 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import ee.midaiganes.beans.PortalConfig;
+import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
@@ -22,7 +21,7 @@ import ee.midaiganes.services.rowmapper.PortletPreferencesResultSetExtractor;
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.StringUtil;
 
-@Resource(name = PortalConfig.PORTLET_PREFERENCES_REPOSITORY)
+@Resource(name = PortalBeans.PORTLET_PREFERENCES_REPOSITORY)
 public class PortletPreferencesRepository {
 
     private final JdbcTemplate jdbcTemplate;
@@ -34,11 +33,12 @@ public class PortletPreferencesRepository {
     private final SingleVmCache cache = SingleVmPoolUtil.getCache(PortletPreferencesRepository.class.getName());
     private static final PortletPreferencesResultSetExtractor getPortletPreferencesExtractor = new PortletPreferencesResultSetExtractor();
 
+    @Inject
     public PortletPreferencesRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    @Transactional(propagation = Propagation.REQUIRED, readOnly = true, isolation = Isolation.DEFAULT)
+    @Transactional
     public Map<String, String[]> getPortletPreferences(long portletInstanceId) {
         String key = Long.toString(portletInstanceId);
         Element element = cache.getElement(key);
@@ -55,7 +55,7 @@ public class PortletPreferencesRepository {
         return preferences;
     }
 
-    @Transactional(propagation = Propagation.REQUIRED, readOnly = false, isolation = Isolation.DEFAULT)
+    @Transactional
     public void savePortletPreferences(long portletInstanceId, Map<String, String[]> preferences) {
         List<String> keys = new ArrayList<>(preferences.keySet());
         List<String[]> values = new ArrayList<>();
