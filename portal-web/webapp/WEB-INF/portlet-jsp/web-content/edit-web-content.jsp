@@ -7,14 +7,14 @@
 	
 </portlet:actionURL>
 
-<form:form action="${editWebContentUrl}" modelAttribute="webContent" htmlEscape="true">
+<form action="${editWebContentUrl}" method="POST" accept-charset="UTF-8">
 	<div>
-		<form:input path="title"/>
+		<portal-ui:form-input name="title" value="${webContent.title}"/>
 	</div>
 	<div>
-		<form:textarea path="content" rows="10" cols="80"/>
+		<textarea rows="10" cols="80" name="content">${webContent.content}<%-- TODO --%></textarea>
 	</div>
 	<div>
 		<input type="submit" value="Save" />
 	</div>
-</form:form>
+</form>

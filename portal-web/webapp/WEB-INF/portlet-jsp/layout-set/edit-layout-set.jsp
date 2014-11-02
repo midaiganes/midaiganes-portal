@@ -10,20 +10,20 @@
 	<a href="${backUrl}">Back</a>
 </div>
 
-<form:form modelAttribute="editLayoutSetModel" acceptCharset="UTF-8" action="${editLayoutSetUrl}" htmlEscape="true">
+<form accept-charset="UTF-8" action="${editLayoutSetUrl}" method="POST">
 	<portal-ui:form-content>
 		<portal-ui:form-title title="Edit Layout Set" />
-		<portal-ui:form-input-row-spring message="Virtual host" path="host" />
+		<portal-ui:form-input-row message="Virtual host" path="host" value="${editLayoutSetUrl.host}"/>
 		<portal-ui:form-select-row-wrapper message="Theme" path="fullThemeName">
-			<form:select path="fullThemeName">
+			<select name="fullThemeName">
 				<c:forEach items="${themes}" var="theme">
-					<form:option value="${theme.themeName.fullName}">${theme.themeName}</form:option>
+					<option value="${theme.themeName.fullName}"${editLayoutSetModel.fullThemeName eq theme.themeName.fullName ? ' selected="selected"' : ''}><c:out value="${theme.themeName}" escapeXml="true" /></option>
 				</c:forEach>
-			</form:select>
+			</select>
 		</portal-ui:form-select-row-wrapper>
 		<div>
-			<form:hidden path="id"/>
+			<portal-ui:form-hidden name="id" value="${editLayoutSetModel.id}" />
 			<input type="submit" value="Edit layout Set"/>
 		</div>
 	</portal-ui:form-content>
-</form:form>
+</form>

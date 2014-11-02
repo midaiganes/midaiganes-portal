@@ -6,27 +6,27 @@
 	<portlet:param name="id" value="${layout.id}"/>
 </portlet:actionURL>
 
-<form:form modelAttribute="editLayoutModel" acceptCharset="UTF-8" action="${editLayoutUrl}" htmlEscape="true">
+<form accept-charset="UTF-8" method="POST" action="${editLayoutUrl}">
 	<portal-ui:form-content>
 		<portal-ui:form-title title="Edit layout" />
-		<portal-ui:form-input-row-spring message="URL:" path="url" />
+		<portal-ui:form-input-row message="URL:" path="url" value="${editLayoutModel.url}" />
 		<div>
 			<label for="parentId">Parent:</label>
-			<form:select path="parentId">
-				<form:option value=""></form:option>
+			<select name="parentId">
+				<option value=""></option>
 				<c:forEach items="${layouts}" var="l">
 					<c:if test="${l.id ne layout.id}">
-						<form:option value="${l.id}">${l.friendlyUrl}</form:option>
+						<option value="${l.id}"${editLayoutModel.parentId eq l.id ? ' selected="selected"' : ''}>${l.friendlyUrl}</option>
 					</c:if>
 				</c:forEach>
-			</form:select>
+			</select>
 		</div>
-		<portal-ui:form-input-row-spring message="Default layout title language" path="defaultLayoutTitleLanguageId" />
+		<portal-ui:form-input-row message="Default layout title language" path="defaultLayoutTitleLanguageId" value="${editLayoutModel.defaultLayoutTitleLanguageId}" />
 		<c:forEach items="${editLayoutModel.layoutTitles}" var="layoutTitle">
-			<portal-ui:form-input-row-spring message="${layoutTitle.key}" path="layoutTitles[${layoutTitle.key}]"/>
+			<portal-ui:form-input-row message="${layoutTitle.key}" path="layoutTitles[${layoutTitle.key}]" value="${editLayoutModel.layoutTitles[layoutTitle.key]}"/>
 		</c:forEach>
 		<div>
 			<button type="button" class="ajax-submit">Edit layout</button>
 		</div>
 	</portal-ui:form-content>
-</form:form>
+</form>

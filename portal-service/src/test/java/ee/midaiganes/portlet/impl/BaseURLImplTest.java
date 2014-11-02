@@ -5,15 +5,15 @@ import java.io.StringWriter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 public class BaseURLImplTest {
     private BaseURLImpl baseURL;
     private static final String URL = "http://localhost/";
 
-    @Before
+    @BeforeMethod
     public void beforeMethod() {
         baseURL = new BaseURLImpl("localhost", 80, "/", false);
     }

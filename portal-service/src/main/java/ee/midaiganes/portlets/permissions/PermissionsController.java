@@ -16,7 +16,6 @@ import javax.portlet.RenderResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import ee.midaiganes.beans.BeanRepositoryUtil;
 import ee.midaiganes.model.PortalResource;
@@ -80,12 +79,11 @@ public class PermissionsController extends BasePortlet {
         return "permissions/portlet-instances";
     }
 
-    private String view(@RequestParam("resource-id") String resourceId, @RequestParam("resource-prim-key") String resourcePrimKey, RenderRequest request)
-            throws ResourceNotFoundException {
+    private String view(String resourceId, String resourcePrimKey, RenderRequest request) throws ResourceNotFoundException {
         return getView(request, Long.parseLong(resourceId), Long.parseLong(resourcePrimKey));
     }
 
-    private String resourceView(@Nonnull String resource, @RequestParam("resource-prim-key") String resourcePrimKey, RenderRequest request) throws ResourceNotFoundException {
+    private String resourceView(@Nonnull String resource, String resourcePrimKey, RenderRequest request) throws ResourceNotFoundException {
         return getView(request, resourceRepository.getResourceId(resource), Long.parseLong(resourcePrimKey));
     }
 

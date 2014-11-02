@@ -19,19 +19,19 @@
 <portlet:actionURL var="addLayoutSetUrl" escapeXml="false">
 	<portlet:param name="action" value="add-layout-set"/>
 </portlet:actionURL>
-<form:form modelAttribute="addLayoutSetModel" acceptCharset="UTF-8" action="${addLayoutSetUrl}" htmlEscape="true">
+<form accept-charset="UTF-8" action="${addLayoutSetUrl}">
 	<portal-ui:form-content>
 		<portal-ui:form-title title="Add Layout Set" />
-		<portal-ui:form-input-row message="Virtual host" path="host" />
+		<portal-ui:form-input-row message="Virtual host" path="host" value="${addLayoutSetModel.host}"/>
 		<portal-ui:form-select-row-wrapper message="Theme" path="fullThemeName">
-			<form:select path="fullThemeName">
+			<select name="fullThemeName">
 				<c:forEach items="${themes}" var="theme">
-					<form:option value="${theme.themeName.fullName}">${theme.themeName}</form:option>
+					<option value="${theme.themeName.fullName}"${addLayoutSetModel.fullThemeName eq theme.themeName.fullName ? ' selected="selected"' : '' }>${theme.themeName}</option>
 				</c:forEach>
-			</form:select>
+			</select>
 		</portal-ui:form-select-row-wrapper>
 		<div>
 			<input type="submit" value="Add layout Set"/>
 		</div>
 	</portal-ui:form-content>
-</form:form>
+</form>

@@ -7,7 +7,8 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.Resource;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.joda.time.DateTime;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,24 +16,22 @@ import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Repository;
 
-import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
 
-@Repository(value = "webContentRepository")
+@Singleton
 public class WebContentRepository {
-
-    @Resource(name = PortalBeans.PORTAL_JDBC_TEMPLATE)
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
     private final SingleVmCache cache;
     private final SingleVmCache webContentCache;
     private static final WebContentRowMapper webContentRowMapper = new WebContentRowMapper();
 
-    public WebContentRepository() {
+    @Inject
+    public WebContentRepository(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
         cache = SingleVmPoolUtil.getCache(WebContentRepository.class.getName());
         webContentCache = SingleVmPoolUtil.getCache(WebContentRepository.class.getName() + "." + WebContent.class.getName());
     }

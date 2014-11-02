@@ -89,7 +89,7 @@ public class LanguageRepository {
             return country;
         }
         if (StringUtil.isEmpty(country)) {
-            log.warn("locale.getCountry is empty");
+            log.debug("locale.getCountry is empty");
             return language;
         }
         return language + "_" + country;

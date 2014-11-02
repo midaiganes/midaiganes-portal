@@ -13,6 +13,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.portlet.Portlet;
 import javax.portlet.PortletConfig;
 import javax.portlet.PortletException;
@@ -24,6 +25,9 @@ import javax.xml.bind.JAXBException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
 
 import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.generated.xml.portlet.DescriptionType;
@@ -42,6 +46,7 @@ import ee.midaiganes.portlet.PortletInitParameter.Description;
 import ee.midaiganes.portlet.PortletName;
 import ee.midaiganes.portlet.app.PortletApp;
 import ee.midaiganes.portlet.impl.PortletConfigImpl;
+import ee.midaiganes.util.GuiceUtil;
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.TimeProviderUtil;
 import ee.midaiganes.util.XmlUtil;
@@ -77,7 +82,7 @@ public class PortletRepository {
         try {
             PortletAppType portletAppType = XmlUtil.unmarshal(PortletAppType.class, portletXmlInputStream);
             if (portletAppType != null) {
-                initializePortletApp(servletContext, portletAppType);
+                initializePortletApp(servletContext, portletAppType, GuiceUtil.getInjector(servletContext));
             }
         } catch (JAXBException e) {
             log.error(e.getMessage(), e);
@@ -140,25 +145,21 @@ public class PortletRepository {
         return null;
     }
 
-    private void initializePortletApp(ServletContext servletContext, PortletAppType portletAppType) {
+    private void initializePortletApp(ServletContext servletContext, PortletAppType portletAppType, Injector injector) {
         for (PortletType portletType : portletAppType.getPortlet()) {
-            initializePortletType(servletContext, portletType);
+            initializePortletType(servletContext, portletType, injector);
         }
     }
 
-    private void initializePortletType(ServletContext servletContext, PortletType portletType) {
+    private void initializePortletType(ServletContext servletContext, PortletType portletType, Injector injector) {
         log.debug("portlet = {}", portletType);
         try {
-            PortletName portletName = initializePortlet(servletContext, portletType);
+            PortletName portletName = initializePortlet(servletContext, portletType, injector);
             log.debug("full portlet name = {}", portletName);
             if (portletName != null) {
                 portletInstanceRepository.addDefaultPortletInstance(portletName);
             }
         } catch (ClassNotFoundException e) {
-            log.error(e.getMessage(), e);
-        } catch (IllegalAccessException e) {
-            log.error(e.getMessage(), e);
-        } catch (InstantiationException e) {
             log.error(e.getMessage(), e);
         } catch (RuntimeException e) {
             log.error(e.getMessage(), e);
@@ -178,10 +179,26 @@ public class PortletRepository {
         return new MidaiganesPortlet(portlet, portletName);
     }
 
-    private PortletName initializePortlet(ServletContext servletContext, PortletType portletType) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+    private static class PortletModule extends AbstractModule {
+        private final Class<? extends Portlet> portletClass;
+
+        private PortletModule(Class<? extends Portlet> portletClass) {
+            this.portletClass = portletClass;
+        }
+
+        @Override
+        protected void configure() {
+            bind(Portlet.class).to(portletClass).in(Singleton.class);
+        }
+    }
+
+    private PortletName initializePortlet(ServletContext servletContext, PortletType portletType, Injector injector) throws ClassNotFoundException {
         Class<?> obj = Class.forName(portletType.getPortletClass());
         if (Portlet.class.isAssignableFrom(obj)) {
-            Portlet portlet = (Portlet) obj.newInstance();
+            @SuppressWarnings("unchecked")
+            final Class<? extends Portlet> portletClass = (Class<? extends Portlet>) obj;
+            Injector portletInjector = injector.createChildInjector(new PortletModule(portletClass));
+            Portlet portlet = portletInjector.getInstance(Portlet.class);
             try {
                 PortletConfig portletConfig = getPortletConfig(servletContext, portletType);
                 PortletName portletName = new PortletName(getContextPathName(servletContext), portletType.getPortletName().getValue());

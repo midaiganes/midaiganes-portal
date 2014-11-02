@@ -4,18 +4,18 @@
 
 <portlet:actionURL var="addLayoutUrl" escapeXml="false" />
 
-<form:form modelAttribute="addLayoutModel" acceptCharset="UTF-8" action="${addLayoutUrl}" id="add-layout-form" htmlEscape="true">
+<form accept-charset="UTF-8" action="${addLayoutUrl}" id="add-layout-form">
 	<portal-ui:form-content>
 		<portal-ui:form-title title="Add layout" />
-		<portal-ui:form-input-row message="URL:" path="url" />
+		<portal-ui:form-input-row message="URL:" path="url" value="${addLayoutModel.url}" />
 		<div>
 			<label for="parentId">Parent:</label>
-			<form:select path="parentId">
-				<form:option value=""></form:option>
+			<select name="parentId">
+				<option value=""></option>
 				<c:forEach items="${layouts}" var="layout">
-					<form:option value="${layout.layout.id}">${layout.layout.friendlyUrl}</form:option>
+					<option value="${layout.layout.id}"${addLayoutModel.parentId eq layout.layout.id ? ' selected="selected"' : '' }>${layout.layout.friendlyUrl}</option>
 				</c:forEach>
-			</form:select>
+			</select>
 		</div>
 		<div>
 			<button type="button" class="ajax-submit">Add layout</button>
@@ -24,4 +24,4 @@
 	
 	<h3>Layouts:</h3>
 	<lti:layout-tree-item layouts="${layouts}"/>
-</form:form>
+</form>

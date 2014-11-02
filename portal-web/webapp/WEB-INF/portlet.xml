@@ -86,15 +86,11 @@
 			<keywords>registration</keywords>
 		</portlet-info>
 	</portlet>
-	<!-- 
+	
 	<portlet>
 		<portlet-name>web-content</portlet-name>
 		<display-name>web-content</display-name>
-		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
-		<init-param>
-			<name>contextConfigLocation</name>
-			<value>/WEB-INF/portlet-context/web-content-portlet.xml</value>
-		</init-param>
+		<portlet-class>ee.midaiganes.portlets.webcontent.WebContentPortlet</portlet-class>
 		<supports>
 			<mime-type>text/html</mime-type>
 			<portlet-mode>view</portlet-mode>
@@ -107,7 +103,7 @@
 			<keywords>web-content</keywords>
 		</portlet-info>
 	</portlet>
-	-->
+	
 	<portlet>
 		<portlet-name>login</portlet-name>
 		<display-name>login</display-name>

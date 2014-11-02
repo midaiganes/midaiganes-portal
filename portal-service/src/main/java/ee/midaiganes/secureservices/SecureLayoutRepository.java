@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.portal.layout.Layout;
@@ -18,7 +18,7 @@ import ee.midaiganes.services.exceptions.PrincipalException;
 import ee.midaiganes.services.exceptions.ResourceActionNotFoundException;
 import ee.midaiganes.services.exceptions.ResourceNotFoundException;
 
-@Component(value = PortalBeans.SECURE_LAYOUT_REPOSITORY)
+@Resource(name = PortalBeans.SECURE_LAYOUT_REPOSITORY)
 public class SecureLayoutRepository {
     private static final Logger log = LoggerFactory.getLogger(SecureLayoutRepository.class);
     private static final String VIEW = "VIEW";

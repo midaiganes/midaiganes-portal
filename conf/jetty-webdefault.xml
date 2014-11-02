@@ -44,7 +44,6 @@
   <listener>
    <listener-class>org.eclipse.jetty.servlet.listener.IntrospectorCleaner</listener-class>
   </listener>
-  
 
   <!-- ==================================================================== -->
   <!-- Context params to control Session Cookies                            -->
@@ -317,6 +316,19 @@
     	<param-name>keepgenerated</param-name>
     	<param-value>true</param-value>
     </init-param>
+    <init-param>
+      <param-name>compilerTargetVM</param-name>
+      <param-value>1.7</param-value>
+    </init-param>
+    <init-param>
+      <param-name>compilerSourceVM</param-name>
+      <param-value>1.7</param-value>
+    </init-param>
+    <!--
+    <init-param>
+    	<param-name>compilerClassName</param-name>
+    	<param-value>org.apache.jasper.compiler.JDTCompiler</param-value>
+    </init-param> -->
     <!--  
     <init-param>
         <param-name>classpath</param-name>

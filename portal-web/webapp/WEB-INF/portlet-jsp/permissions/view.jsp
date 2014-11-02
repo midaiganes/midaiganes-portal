@@ -6,7 +6,7 @@
 	<portlet:param name="resource-id" value="${resourceId}"/>
 	<portlet:param name="resource-prim-key" value="${resourcePrimKey}"/>
 </portlet:actionURL>
-<form:form action="${changePermissionsUrl}" modelAttribute="permissionsData" htmlEscape="true">
+<form action="${changePermissionsUrl}" accept-charset="UTF-8" method="POST">
 	<c:if test="${not empty success and success}">
 		<p class="message">
 			Permissions updated.
@@ -23,10 +23,12 @@
 			<tr>
 				<th>
 					<span>${permissionsRow.resourceText}</span>
-					<form:hidden path="rows[${permissionsRowStatus.index}].resourcePrimKey"/>
+					<portal-ui:form-hidden name="rows[${permissionsRowStatus.index}].resourcePrimKey" value="${permissionsData.rows[permissionsRowStatus.index].resourcePrimKey }" />
 				</th>
 				<c:forEach items="${permissionsRow.permissions}" var="permissionValue" varStatus="permissionsValueStatus">
-					<td><form:checkbox path="rows[${permissionsRowStatus.index}].permissions[${permissionsValueStatus.index}]" value="true"/></td>
+					<td>
+						<input type="checkbox" name="rows[${permissionsRowStatus.index}].permissions[${permissionsValueStatus.index}]" value="true"${permissionsData.rows[permissionsRowStatus.index].permissions[permissionsValueStatus.index] eq 'true' ? ' checked="checked"' : ''} />
+					</td>
 				</c:forEach>
 			</tr>
 		</c:forEach>
@@ -34,4 +36,4 @@
 	<div class="buttons">
 		<button type="button" class="ajax-submit">Save</button>
 	</div>
-</form:form>
+</form>

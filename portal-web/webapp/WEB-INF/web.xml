@@ -127,16 +127,6 @@
 	</servlet>
 	
 	<servlet>
-		<description>org.springframework.web.servlet.ViewRendererServlet</description>
-		<display-name>org.springframework.web.servlet.ViewRendererServlet</display-name>
-		<servlet-name>org.springframework.web.servlet.ViewRendererServlet</servlet-name>
-		<servlet-class>org.springframework.web.servlet.ViewRendererServlet</servlet-class>
-		<!-- before PortletServlet -->
-		<load-on-startup>29</load-on-startup>
-		<async-supported>true</async-supported>
-	</servlet>
-	
-	<servlet>
 		<description>ee.midaiganes.servlet.RuntimePortletServlet</description>
 		<display-name>ee.midaiganes.servlet.RuntimePortletServlet</display-name>
 		<servlet-name>ee.midaiganes.servlet.RuntimePortletServlet</servlet-name>
@@ -175,11 +165,6 @@
 	<servlet-mapping>
 		<servlet-name>ee.midaiganes.servlet.RuntimePortletServlet</servlet-name>
 		<url-pattern>/WEB-INF/runtime-portlet</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>org.springframework.web.servlet.ViewRendererServlet</servlet-name>
-		<url-pattern>/WEB-INF/servlet/view</url-pattern>
 	</servlet-mapping>
 	
 	<servlet-mapping>
