@@ -97,17 +97,25 @@
 	<target name="ivy-retrieve" depends="init">
 		<ivy:retrieve />
 	</target>
-
-	<target name="ivy-path" depends="init">
-		<ivy:cachepath pathid="ivy.runtime.path" conf="runtime"/>
-		<ivy:cachepath pathid="ivy.gen.path" conf="gen"/>
-		<ivy:cachepath pathid="ivy.compile.path" conf="compile"/>
+	
+	<target name="ivy-path-dbupdate" depends="init">
 		<ivy:cachepath pathid="ivy.dbupdate.path" conf="dbupdate"/>
-		<ivy:cachepath pathid="ivy.test.path" conf="test" />
 	</target>
 	
 	
-	<target name="init-jaxb-xjc" depends="ivy-path">
+	<target name="ivy-path-gen" depends="init">
+		<ivy:cachepath pathid="ivy.gen.path" conf="gen"/>
+	</target>
+	
+	<target name="ivy-path-compile" depends="init">
+		<ivy:cachepath pathid="ivy.compile.path" conf="compile"/>
+	</target>
+	
+	<target name="ivy-path-test" depends="init">
+		<ivy:cachepath pathid="ivy.test.path" conf="test" />
+	</target>
+	
+	<target name="init-jaxb-xjc" depends="ivy-path-gen">
 		<taskdef name="xjc" classname="com.sun.tools.xjc.XJCTask" classpathref="ivy.gen.path" />
 	</target>
 	
@@ -144,7 +152,7 @@
 		<jar basedir="portal-gen/build/classes" destfile="portal-gen/build/portal-gen.jar" encoding="UTF-8" />
 	</target>
 	
-	<target name="compile-service-classpath" depends="jar-gen">
+	<target name="compile-service-classpath" depends="jar-gen, ivy-path-compile">
 		<path id="compile.classpath">
 			<fileset file="portal-gen/build/portal-gen.jar" />
 			<path refid="ivy.compile.path" />
@@ -193,7 +201,7 @@
 		<ivy:retrieve pattern="${tomcat.lib.dir}/[artifact]-[revision].[ext]" sync="false" type="jar" conf="runtime" transitive="false" />
 	</target -->
 	
-	<target name="set-liquibase-path" depends="ivy-path">
+	<target name="set-liquibase-path" depends="ivy-path-dbupdate">
 		<path id="liquibase.path">
 			<path refid="ivy.dbupdate.path" />
 			<dirset dir="portal-db/liquibase" />
@@ -228,14 +236,14 @@
 	</target>
 	
 	<target name="prepare-start-jetty" depends="retrieve-aspectjweaver">
-		<ivy:cachepath pathid="server-jetty.ivy.path" conf="server-jetty" />
+		<ivy:cachepath pathid="server.ivy.path" conf="server" />
 		<ivy:cachepath pathid="portal.global.ivy.path" conf="global"/>
 		<delete dir="portal-server-jetty/build/classes" />
-		<compile-basedir basedir="portal-server-jetty" classpathref="server-jetty.ivy.path" />
-		<path id="server-jetty.run.classpath">
+		<compile-basedir basedir="portal-server-jetty" classpathref="server.ivy.path" />
+		<path id="server.run.classpath">
 			<pathelement location="${project.basedir}/conf"/>
 			<pathelement location="portal-server-jetty/build/classes"/>
-			<path refid="server-jetty.ivy.path" />
+			<path refid="server.ivy.path" />
 			<path refid="portal.global.ivy.path" />
 		</path>
 		<!-- property name="javaweaver.path" location="${jetty.run.dir}/spring-instrument.jar" / -->
@@ -243,7 +251,7 @@
 	</target>
 	
 	<target name="start-jetty" depends="prepare-start-jetty" description="start jetty server">
-		<java classname="ee.midaiganes.launcher.JettyLauncher" fork="true" classpathref="server-jetty.run.classpath">
+		<java classname="ee.midaiganes.launcher.JettyLauncher" fork="true" classpathref="server.run.classpath">
 			<sysproperty key="project.basedir" value="${project.basedir}"/>
 			<sysproperty key="deploy.dir" value="${deploy.dir}"/>
 			<sysproperty key="java.security.policy" value="${project.basedir}/conf/catalina.policy"/>
@@ -261,7 +269,7 @@
 	
 	
 	
-	<target name="forbidden-checks" depends="compile-service">
+	<target name="forbidden-checks" depends="compile-service, ivy-path-test">
 		<taskdef uri="antlib:de.thetaphi.forbiddenapis" classpathref="ivy.test.path"/>
 		<fa:forbiddenapis internalRuntimeForbidden="true" classpathref="compile.classpath" dir="portal-service/build/classes">
 			<bundledsignatures name="jdk-unsafe-${jdk.version}"/>
@@ -272,6 +280,23 @@
 		</fa:forbiddenapis>
 	</target>
 	
-	<target name="test" depends="forbidden-checks">
+	<target name="compile-test" depends="compile-service, ivy-path-test">
+		<path id="compile.test.classpath">
+			<path refid="ivy.test.path" />
+			<pathelement location="portal-service/build/classes"/>
+		</path>
+		<compile srcdir="portal-service/src/test/java" destdir="portal-service/build/test/classes" classpathref="compile.test.classpath"/>
+	</target>
+	
+	<target name="test" depends="forbidden-checks, compile-test" description="test">
+		<taskdef resource="testngtasks" classpathref="ivy.test.path" />
+		<path id="test.run.classpath">
+			<path refid="ivy.test.path" />
+			<pathelement location="portal-service/build/classes"/>
+			<pathelement location="portal-service/build/test/classes"/>
+		</path>
+		<testng classpathref="test.run.classpath">
+			<classfileset dir="portal-service/build/test/classes" includes="**/*.class" />
+		</testng>
 	</target>
 </project>

@@ -7,3 +7,4 @@ portal-gen*
 portal-web/webapp/META-INF/tmpxsd
 portal-web/webapp/WEB-INF/lib
 portal-server-jetty/run
+/.apt_generated
