@@ -1,18 +1,15 @@
 package ee.midaiganes.portal.permission;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import com.google.common.base.Preconditions;
 
-import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
 import ee.midaiganes.services.exceptions.ResourceNotFoundException;
 
-@Resource(name = PortalBeans.RESOURCE_REPOSITORY)
 public class ResourceRepository {
     private final SingleVmCache cache;
     private final ResourceDao resourceDao;

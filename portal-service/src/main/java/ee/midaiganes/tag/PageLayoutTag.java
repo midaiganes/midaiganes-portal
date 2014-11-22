@@ -5,7 +5,6 @@ import java.io.IOException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 
 import org.slf4j.Logger;
@@ -20,7 +19,7 @@ public class PageLayoutTag extends SimpleTag {
     private static final Logger log = LoggerFactory.getLogger(PageLayoutTag.class);
 
     @Override
-    public int doEndTag() throws JspException {
+    public int doEndTag() {
         try {
             ServletContext servletContext = ContextUtil.getServletContext(getHttpServletRequest(), PropsValues.PORTAL_CONTEXT);
             RequestDispatcher requestDispatcher = servletContext.getNamedDispatcher(PageLayoutServlet.class.getName());

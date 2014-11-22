@@ -30,8 +30,8 @@
 				</c:forEach>
 			</select>
 		</portal-ui:form-select-row-wrapper>
-		<div>
-			<input type="submit" value="Add layout Set"/>
-		</div>
+		<portal-ui:form-buttons>
+			<button type="submit">Add layout Set</button>
+		</portal-ui:form-buttons>
 	</portal-ui:form-content>
 </form>

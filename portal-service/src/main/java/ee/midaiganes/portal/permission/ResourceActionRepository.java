@@ -4,17 +4,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
 import ee.midaiganes.services.exceptions.ResourceActionNotFoundException;
 import ee.midaiganes.services.exceptions.ResourceHasNoActionsException;
 
-@Resource(name = PortalBeans.RESOURCE_ACTION_REPOSITORY)
 public class ResourceActionRepository {
     private final SingleVmCache cache;
     private final ResourceActionDao resourceActionDao;

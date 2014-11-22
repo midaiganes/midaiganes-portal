@@ -3,19 +3,16 @@ package ee.midaiganes.portal.layoutset;
 import java.util.List;
 
 import javax.annotation.Nullable;
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
 import ee.midaiganes.portal.theme.ThemeName;
 
-@Resource(name = PortalBeans.LAYOUT_SET_REPOSITORY)
 public class LayoutSetRepository {
     private static final Logger log = LoggerFactory.getLogger(LayoutSetRepository.class);
 

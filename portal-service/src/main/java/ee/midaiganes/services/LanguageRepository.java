@@ -4,14 +4,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
@@ -19,7 +17,6 @@ import ee.midaiganes.services.rowmapper.LongResultSetExtractor;
 import ee.midaiganes.services.rowmapper.StringRowMapper;
 import ee.midaiganes.util.StringUtil;
 
-@Resource(name = PortalBeans.LANGUAGE_REPOSITORY)
 public class LanguageRepository {
     private static final Logger log = LoggerFactory.getLogger(LanguageRepository.class);
 

@@ -12,8 +12,9 @@
 
 <form accept-charset="UTF-8" action="${editLayoutSetUrl}" method="POST">
 	<portal-ui:form-content>
+		<portal-ui:form-hidden name="id" value="${editLayoutSetModel.id}" />
 		<portal-ui:form-title title="Edit Layout Set" />
-		<portal-ui:form-input-row message="Virtual host" path="host" value="${editLayoutSetUrl.host}"/>
+		<portal-ui:form-input-row message="Virtual host" path="host" value="${editLayoutSetModel.host}"/>
 		<portal-ui:form-select-row-wrapper message="Theme" path="fullThemeName">
 			<select name="fullThemeName">
 				<c:forEach items="${themes}" var="theme">
@@ -21,9 +22,8 @@
 				</c:forEach>
 			</select>
 		</portal-ui:form-select-row-wrapper>
-		<div>
-			<portal-ui:form-hidden name="id" value="${editLayoutSetModel.id}" />
-			<input type="submit" value="Edit layout Set"/>
-		</div>
+		<portal-ui:form-buttons>
+			<button type="submit">Edit layout Set</button>
+		</portal-ui:form-buttons>
 	</portal-ui:form-content>
 </form>

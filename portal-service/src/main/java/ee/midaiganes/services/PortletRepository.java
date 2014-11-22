@@ -11,7 +11,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.portlet.Portlet;
@@ -29,7 +28,6 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 
-import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.generated.xml.portlet.DescriptionType;
 import ee.midaiganes.generated.xml.portlet.InitParamType;
 import ee.midaiganes.generated.xml.portlet.PortletAppType;
@@ -51,7 +49,6 @@ import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.TimeProviderUtil;
 import ee.midaiganes.util.XmlUtil;
 
-@Resource(name = PortalBeans.PORTLET_REPOSITORY)
 public class PortletRepository {
     private static final Logger log = LoggerFactory.getLogger(PortletRepository.class);
     private final ConcurrentHashMap<PortletName, PortletAndConfiguration> portlets = new ConcurrentHashMap<>();

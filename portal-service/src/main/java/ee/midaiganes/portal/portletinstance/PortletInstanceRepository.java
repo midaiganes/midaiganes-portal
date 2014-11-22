@@ -3,7 +3,6 @@ package ee.midaiganes.portal.portletinstance;
 import java.security.SecureRandom;
 import java.util.List;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -12,14 +11,12 @@ import org.springframework.dao.DuplicateKeyException;
 
 import com.google.common.base.Charsets;
 
-import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
 import ee.midaiganes.portlet.PortletName;
 import ee.midaiganes.util.StringPool;
 
-@Resource(name = PortalBeans.PORTLET_INSTANCE_REPOSITORY)
 public class PortletInstanceRepository {
     private static final Logger log = LoggerFactory.getLogger(PortletInstanceRepository.class);
     private static final SecureRandom random = new SecureRandom(new Object().toString().getBytes(Charsets.UTF_8));

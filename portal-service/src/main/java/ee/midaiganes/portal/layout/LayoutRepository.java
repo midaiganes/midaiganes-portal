@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -16,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.ImmutableList;
 
-import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
@@ -30,7 +28,6 @@ import ee.midaiganes.services.exceptions.IllegalPageLayoutException;
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.StringUtil;
 
-@Resource(name = PortalBeans.LAYOUT_REPOSITORY)
 public class LayoutRepository {
     private static final Logger log = LoggerFactory.getLogger(LayoutRepository.class);
     private static final Pattern FRIENDLY_URL_PATTERN;

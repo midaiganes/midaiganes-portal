@@ -2,7 +2,6 @@ package ee.midaiganes.servlet.filter;
 
 import java.io.IOException;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -12,7 +11,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.portal.user.User;
 import ee.midaiganes.portal.user.UserRepository;
 import ee.midaiganes.util.RequestUtil;
@@ -26,7 +24,6 @@ public class LoginFilter extends HttpFilter {
     private static final String REDIRECT = "redirect";
 
     @Inject
-    @Resource(name = PortalBeans.USER_REPOSITORY)
     private UserRepository userRepository;
 
     @Override

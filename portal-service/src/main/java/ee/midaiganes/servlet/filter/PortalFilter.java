@@ -2,7 +2,7 @@ package ee.midaiganes.servlet.filter;
 
 import java.io.IOException;
 
-import javax.annotation.Resource;
+import javax.inject.Inject;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ee.midaiganes.beans.BeanRepositoryUtil;
-import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.model.PageDisplay;
 import ee.midaiganes.services.RequestParser;
 import ee.midaiganes.services.portal.PortalService;
@@ -23,7 +22,7 @@ import ee.midaiganes.util.SessionUtil;
 public class PortalFilter extends HttpFilter {
     private static final Logger log = LoggerFactory.getLogger(PortalFilter.class);
 
-    @Resource(name = PortalBeans.PORTALSERVICE)
+    @Inject
     private PortalService portalService;
 
     private RequestParser requestParser;

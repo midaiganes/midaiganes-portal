@@ -9,7 +9,6 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.annotation.Nullable;
-import javax.annotation.Resource;
 import javax.xml.bind.JAXBException;
 
 import org.slf4j.Logger;
@@ -17,12 +16,10 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
-import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.generated.xml.pagelayout.MidaiganesLayout;
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.XmlUtil;
 
-@Resource(name = PortalBeans.PAGE_LAYOUT_REPOSITORY)
 public class PageLayoutRepository {
     private static final Logger log = LoggerFactory.getLogger(PageLayoutRepository.class);
     private final ConcurrentHashMap<PageLayoutName, PageLayout> pageLayouts = new ConcurrentHashMap<>();

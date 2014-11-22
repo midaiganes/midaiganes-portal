@@ -2,12 +2,10 @@ package ee.midaiganes.secureservices;
 
 import java.util.Locale;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.portlet.PortletMode;
 import javax.portlet.WindowState;
 
-import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.portal.layoutportlet.LayoutPortlet;
 import ee.midaiganes.portal.permission.PermissionRepository;
 import ee.midaiganes.portal.portletinstance.PortletInstance;
@@ -17,7 +15,6 @@ import ee.midaiganes.services.exceptions.PrincipalException;
 import ee.midaiganes.services.exceptions.ResourceActionNotFoundException;
 import ee.midaiganes.services.exceptions.ResourceNotFoundException;
 
-@Resource(name = PortalBeans.SECURE_PORTLET_REPOSITORY)
 public class SecurePortletRepository {
 
     private final PortletRepository portletRepository;

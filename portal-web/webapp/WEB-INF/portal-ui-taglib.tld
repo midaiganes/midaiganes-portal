@@ -28,10 +28,6 @@
 		<path>/META-INF/tags/ui/form/form-input-row.tag</path>
 	</tag-file>
 	<tag-file>
-		<name>form-input-row-spring</name>
-		<path>/META-INF/tags/ui/form/form-input-row-spring.tag</path>
-	</tag-file>
-	<tag-file>
 		<name>form-select-row</name>
 		<path>/META-INF/tags/ui/form/form-select-row.tag</path>
 	</tag-file>
@@ -50,5 +46,17 @@
 	<tag-file>
 		<name>form-input</name>
 		<path>/META-INF/tags/ui/form/form-input.tag</path>
+	</tag-file>
+	<tag-file>
+		<name>form-buttons</name>
+		<path>/META-INF/tags/ui/form/form-buttons.tag</path>
+	</tag-file>
+	<tag-file>
+		<name>msg-error</name>
+		<path>/META-INF/tags/ui/msg/msg-error.tag</path>
+	</tag-file>
+	<tag-file>
+		<name>msg</name>
+		<path>/META-INF/tags/ui/msg/msg.tag</path>
 	</tag-file>
 </taglib>

@@ -1,6 +1,5 @@
 package ee.midaiganes.services.portal;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -8,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 import ee.midaiganes.aspect.Service;
-import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.portal.layout.Layout;
 import ee.midaiganes.portal.layout.LayoutRepository;
 import ee.midaiganes.portal.layoutset.LayoutSet;
@@ -23,7 +21,6 @@ import ee.midaiganes.services.exceptions.PrincipalException;
 import ee.midaiganes.util.StringPool;
 
 @Service(serviceInterface = PortalService.class)
-@Resource(name = PortalBeans.PORTALSERVICE)
 public class PortalServiceImpl implements PortalService {
     private static final Logger log = LoggerFactory.getLogger(PortalServiceImpl.class);
 

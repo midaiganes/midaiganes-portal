@@ -6,13 +6,13 @@
 </portlet:actionURL>
 
 <form action="${addWebContentUrl}" method="post">
-	<div>
-		<input type="text" name="title" />
-	</div>
-	<div>
-		<textarea rows="10" cols="80" name="content"></textarea>
-	</div>
-	<div>
-		<input type="submit" value="Save" />
-	</div>
+	<portal-ui:form-content>
+		<portal-ui:form-input-row message="Title" path="title" />
+		<div>
+			<textarea rows="10" cols="80" name="content"></textarea>
+		</div>
+		<portal-ui:form-buttons>
+			<button type="submit">Save</button>
+		</portal-ui:form-buttons>
+	</portal-ui:form-content>
 </form>

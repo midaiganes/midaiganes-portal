@@ -97,7 +97,7 @@ label > span:FIRST-CHILD {
 	display: block;
 	margin-bottom: 5px;
 }
-input[type="text"], input[type="password"] {
+input[type="text"], input[type="password"], select {
 	display: inline-block;
 	margin-bottom: 10px;
 	border-radius: 4px;
@@ -109,6 +109,10 @@ input[type="text"], input[type="password"] {
 	padding: 4px 6px;
 	width: 206px;
 	vertical-align: middle;
+}
+select {
+	height: 30px;
+	width: 220px;
 }
 input[type="text"]:FOCUS, input[type="password"]:FOCUS {
 	border-color: rgba(82, 168, 236, 0.8);
@@ -256,6 +260,44 @@ ul.chat li.selected{
 #dockbar + .content {
 	margin-top: 50px;
 }
+
+#dockbar + .content .portlet {
+	border: 1px solid #ddd;
+	border-radius: 5px;
+	padding: 0px;
+}
+
+#dockbar + .content .portlet + .portlet {
+	margin-top: 15px;
+}
+
+#dockbar + .content .portlet .portlet-body {
+	padding: 10px;
+	clear: both;
+}
+.portlet-body:before {
+	content: "";
+	display: block;
+	height: 1px;
+	background-image: linear-gradient(to right, #ddd, transparent 50%);
+	position: relative;
+	left: -10px;
+}
+.portlet-top {
+	float: right;
+	border: 1px solid #ddd;
+	border-top: 0;
+	border-right: 0;
+	border-bottom-left-radius: 5px;
+}
+.portlet-top a {
+	padding: 5px;
+	display: inline-block;
+}
+.portlet-top a + a {
+	border-left: 1px solid #ddd;
+}
+
 #dockbar ul li {
 	float: left;
 	line-height: 20px;

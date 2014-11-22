@@ -4,15 +4,12 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
 
-@Resource(name = PortalBeans.GROUP_REPOSITORY)
 public class GroupRepository {
     private static final String GET_GROUPS_CACHE_KEY = "getGroups";
     private final SingleVmCache cache;

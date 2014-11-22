@@ -21,10 +21,13 @@ import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 public class JettyLauncher {
 
     public static void main(String... args) throws Exception {
+        SLF4JBridgeHandler.removeHandlersForRootLogger();
+        SLF4JBridgeHandler.install();
         int minThreads = 1;
         int acceptors = 1;// 2;
         int selectors = 1;// 30;
@@ -65,29 +68,40 @@ public class JettyLauncher {
         JettyScheduledExecutorScheduler scheduler = new JettyScheduledExecutorScheduler();
         HttpConnectionFactory httpConnectionFactory = new HttpConnectionFactory(httpConfig);
         httpConnectionFactory.setInputBufferSize(1024 * 8);
-        ServerConnector serverConnector = new ServerConnector(server, serverConnectorExecutor, scheduler, null, acceptors, selectors,
-                new ConnectionFactory[] { httpConnectionFactory });
-        serverConnector.setHost("0.0.0.0");
-        serverConnector.setPort(8080);
-        serverConnector.setIdleTimeout(5000);// 30000
+        try (ServerConnector serverConnector = new ServerConnector(server, serverConnectorExecutor, scheduler, null, acceptors, selectors,
+                new ConnectionFactory[] { httpConnectionFactory })) {
+            serverConnector.setHost("0.0.0.0");
+            serverConnector.setPort(8080);
+            serverConnector.setIdleTimeout(5000);// 30000
 
-        server.addConnector(serverConnector);
+            server.addConnector(serverConnector);
 
-        DeploymentManager deploymentManager = new DeploymentManager();
-        deploymentManager.setContexts(contexts);
-        deploymentManager.setContextAttribute("org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern", ".*/servlet-api-[^/]*\\.jar$");
+            DeploymentManager deploymentManager = new DeploymentManager();
+            deploymentManager.setContexts(contexts);
+            deploymentManager.setContextAttribute("org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern",
+                    ".*/[^/]*servlet-api-[^/]*\\.jar$|.*/javax.servlet.jsp.jstl-.*\\.jar$|.*/org.apache.taglibs.taglibs-standard-impl-.*\\.jar$");
 
+            deploymentManager.addAppProvider(getWebAppProvider());
+
+            server.addBean(deploymentManager);
+            server.start();
+            server.join();
+        }
+    }
+
+    private static WebAppProvider getWebAppProvider() {
         WebAppProvider webappprovider = new WebAppProvider();
         webappprovider.setMonitoredDirName(System.getProperty("deploy.dir"));
         webappprovider.setDefaultsDescriptor(System.getProperty("project.basedir") + "/conf/jetty-webdefault.xml");
         webappprovider.setScanInterval(30);
         webappprovider.setExtractWars(true);
         webappprovider.setConfigurationManager(new PropertiesConfigurationManager());
-        deploymentManager.addAppProvider(webappprovider);
 
-        server.addBean(deploymentManager);
-        server.start();
-        server.join();
+        webappprovider.setConfigurationClasses(new String[] { org.eclipse.jetty.webapp.WebInfConfiguration.class.getName(),
+                org.eclipse.jetty.webapp.WebXmlConfiguration.class.getName(), org.eclipse.jetty.webapp.MetaInfConfiguration.class.getName(),
+                org.eclipse.jetty.webapp.FragmentConfiguration.class.getName(), org.eclipse.jetty.webapp.JettyWebXmlConfiguration.class.getName(),
+                org.eclipse.jetty.annotations.AnnotationConfiguration.class.getName() });
+        return webappprovider;
     }
 
     private static final class JettyThreadPoolExecutor extends ThreadPoolExecutor {

@@ -4,7 +4,6 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -13,7 +12,6 @@ import javax.servlet.ServletContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.portal.pagelayout.PageLayoutRepository;
 import ee.midaiganes.portal.theme.ThemeRepository;
 import ee.midaiganes.services.PortletRepository;
@@ -23,15 +21,12 @@ public class PortalPluginListener implements ServletContextListener {
     private static final Logger log = LoggerFactory.getLogger(PortalPluginListener.class);
 
     @Inject
-    @Resource(name = PortalBeans.PORTLET_REPOSITORY)
     private PortletRepository portletRepository;
 
     @Inject
-    @Resource(name = PortalBeans.THEME_REPOSITORY)
     private ThemeRepository themeRepository;
 
     @Inject
-    @Resource(name = PortalBeans.PAGE_LAYOUT_REPOSITORY)
     private PageLayoutRepository pageLayoutRepository;
 
     @Override

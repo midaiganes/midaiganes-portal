@@ -6,14 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
-import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
@@ -21,7 +19,6 @@ import ee.midaiganes.services.rowmapper.PortletPreferencesResultSetExtractor;
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.StringUtil;
 
-@Resource(name = PortalBeans.PORTLET_PREFERENCES_REPOSITORY)
 public class PortletPreferencesRepository {
 
     private final JdbcTemplate jdbcTemplate;

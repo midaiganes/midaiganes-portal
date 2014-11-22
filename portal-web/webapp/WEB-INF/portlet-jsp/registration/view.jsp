@@ -7,14 +7,12 @@
 	<portal-ui:form-content>
 		<portal-ui:form-title title="Registration" />
 		<c:if test="${not empty success and success}">
-			<div>
-				Registration complete!
-			</div>
+			<portal-ui:msg msg="Registration complete!"/>
 		</c:if>
 		<portal-ui:form-input-row message="Username" path="username"/>
 		<portal-ui:form-input-row message="Password" path="password" isPassword="true"/>
-		<div class="buttons">
+		<portal-ui:form-buttons>
 			<button type="button" class="ajax-submit">Register</button>
-		</div>
+		</portal-ui:form-buttons>
 	</portal-ui:form-content>
 </form>

@@ -8,9 +8,7 @@
 </portlet:actionURL>
 <form action="${changePermissionsUrl}" accept-charset="UTF-8" method="POST">
 	<c:if test="${not empty success and success}">
-		<p class="message">
-			Permissions updated.
-		</p>
+		<portal-ui:msg msg="Permissions updated." />
 	</c:if>
 	<table class="table-1">
 		<tr>
@@ -33,7 +31,7 @@
 			</tr>
 		</c:forEach>
 	</table>
-	<div class="buttons">
+	<portal-ui:form-buttons>
 		<button type="button" class="ajax-submit">Save</button>
-	</div>
+	</portal-ui:form-buttons>
 </form>

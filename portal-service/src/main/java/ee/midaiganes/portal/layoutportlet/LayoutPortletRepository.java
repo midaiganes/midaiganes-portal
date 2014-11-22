@@ -6,19 +6,15 @@ import java.util.Comparator;
 import java.util.List;
 
 import javax.annotation.Nullable;
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import ee.midaiganes.beans.PortalBeans;
 import ee.midaiganes.cache.SingleVmCache;
 import ee.midaiganes.cache.SingleVmPoolUtil;
 import ee.midaiganes.portal.portletinstance.PortletInstanceRepository;
 import ee.midaiganes.portlet.PortletName;
 
-@Resource(name = PortalBeans.LAYOUT_PORTLET_REPOSITORY)
 public class LayoutPortletRepository {
     private final PortletInstanceRepository portletInstanceRepository;
     private final LayoutPortletDao layoutPortletDao;
@@ -31,7 +27,7 @@ public class LayoutPortletRepository {
         this.cache = SingleVmPoolUtil.getCache(LayoutPortletRepository.class.getName());
     }
 
-    @Transactional(readOnly = false, value = PortalBeans.TXMANAGER, propagation = Propagation.REQUIRED)
+    @Transactional
     public void addLayoutPortlet(long layoutId, long rowId, PortletName portletName, int boxIndex) {
         try {
             long portletInstanceId = portletInstanceRepository.addPortletInstance(portletName);
