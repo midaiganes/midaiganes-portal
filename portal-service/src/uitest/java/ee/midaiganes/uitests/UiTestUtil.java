@@ -29,8 +29,8 @@ public class UiTestUtil {
     }
 
     private static final class WaitElementWithText implements com.google.common.base.Function<WebDriver, WebElement> {
-        private String text;
-        private By by;
+        private final String text;
+        private final By by;
 
         public WaitElementWithText(String text, By by) {
             this.text = text;
@@ -39,10 +39,12 @@ public class UiTestUtil {
 
         @Nullable
         @Override
-        public WebElement apply(WebDriver driver) {
-            WebElement el = driver.findElement(by);
-            if (text.equals(el.getText())) {
-                return el;
+        public WebElement apply(@Nullable WebDriver driver) {
+            if (driver != null) {
+                WebElement el = driver.findElement(by);
+                if (text.equals(el.getText())) {
+                    return el;
+                }
             }
             return null;
         }

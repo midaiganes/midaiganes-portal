@@ -5,6 +5,8 @@ import java.sql.SQLException;
 
 import org.springframework.jdbc.core.RowMapper;
 
+import com.google.common.collect.ImmutableList;
+
 import ee.midaiganes.portal.theme.ThemeName;
 import ee.midaiganes.util.StringUtil;
 
@@ -28,6 +30,6 @@ public class LayoutRowMapper implements RowMapper<Layout> {
         long parentId = rs.getLong(7);
         Long parent = rs.wasNull() ? null : Long.valueOf(parentId);
         long nr = rs.getLong(8);
-        return new Layout(id, layoutSetId, friendlyUrl, theme, pageLayoutId, nr, parent, rs.getLong(9), null);
+        return new Layout(id, layoutSetId, friendlyUrl, theme, pageLayoutId, nr, parent, rs.getLong(9), ImmutableList.<LayoutTitle> of());
     }
 }

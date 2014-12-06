@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ee.midaiganes.model.PageDisplay;
 import ee.midaiganes.portal.user.User;
 import ee.midaiganes.portal.user.UserRepository;
 import ee.midaiganes.util.RequestUtil;
@@ -50,7 +51,7 @@ public class LoginFilter extends HttpFilter {
                 User user = userRepository.getUser(login, password);
                 if (user != null) {
                     SessionUtil.setUserId(request, Long.valueOf(user.getId()));
-                    RequestUtil.getPageDisplay(request).setUser(user);
+                    RequestUtil.setPageDisplay(request, new PageDisplay(RequestUtil.getPageDisplay(request), user));
                     if (!StringUtil.isEmpty(redirect)) {
                         return removeRedirectLoop(redirect, login, password);
                     }

@@ -41,14 +41,14 @@ public class ContextAndName implements Serializable {
         StringBuilder ctx = new StringBuilder(length);
         StringBuilder name = new StringBuilder(length);
         boolean contextFound = false;
-        final char _ = SEPARATOR.charAt(0);
+        final char underscore = SEPARATOR.charAt(0);
         final char w = SEPARATOR.charAt(1);
         for (int i = 0; i < length;) {
             char c = fullName.charAt(i);
             if (!contextFound) {
-                if (c != _) {
+                if (c != underscore) {
                     ctx.append(c);
-                } else if (i + 2 < length && fullName.charAt(i + 1) == w && fullName.charAt(i + 2) == _) {
+                } else if (i + 2 < length && fullName.charAt(i + 1) == w && fullName.charAt(i + 2) == underscore) {
                     contextFound = true;
                     i += 2;
                 }

@@ -27,13 +27,13 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.google.inject.Module;
 
 import ee.midaiganes.generated.xml.portlet.DescriptionType;
 import ee.midaiganes.generated.xml.portlet.InitParamType;
 import ee.midaiganes.generated.xml.portlet.PortletAppType;
 import ee.midaiganes.generated.xml.portlet.PortletType;
 import ee.midaiganes.generated.xml.portlet.SupportedLocaleType;
-import ee.midaiganes.portal.layoutportlet.LayoutPortlet;
 import ee.midaiganes.portal.portletinstance.PortletInstance;
 import ee.midaiganes.portal.portletinstance.PortletInstanceRepository;
 import ee.midaiganes.portlet.MidaiganesPortlet;
@@ -50,6 +50,7 @@ import ee.midaiganes.util.TimeProviderUtil;
 import ee.midaiganes.util.XmlUtil;
 
 public class PortletRepository {
+    private static final String GUICE_PORTLET_MODULE_CLASS = "guice-portlet-module-class";
     private static final Logger log = LoggerFactory.getLogger(PortletRepository.class);
     private final ConcurrentHashMap<PortletName, PortletAndConfiguration> portlets = new ConcurrentHashMap<>();
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
@@ -124,10 +125,6 @@ public class PortletRepository {
         return null;
     }
 
-    public PortletApp getPortletApp(LayoutPortlet layoutPortlet, PortletMode portletMode, WindowState windowState) {
-        return getPortletApp(layoutPortlet.getPortletInstance(), portletMode, windowState);
-    }
-
     public PortletAndConfiguration getPortlet(PortletName portletName) {
         readLock.lock();
         try {
@@ -189,14 +186,36 @@ public class PortletRepository {
         }
     }
 
+    private Injector getPortletInjector(Class<? extends Portlet> portletClass, PortletType portletType, Injector injector) throws ClassNotFoundException, PortletException {
+        for (InitParamType ipt : portletType.getInitParam()) {
+            if (GUICE_PORTLET_MODULE_CLASS.equals(ipt.getName().getValue())) {
+                String guicePortletModuleClassName = ipt.getValue().getValue();
+                Class<?> guicePortletModuleClass = Class.forName(guicePortletModuleClassName);
+                if (Module.class.isAssignableFrom(guicePortletModuleClass)) {
+                    try {
+                        @SuppressWarnings("unchecked")
+                        Class<? extends Module> guiceModule = (Class<? extends Module>) guicePortletModuleClass;
+                        return injector.createChildInjector(guiceModule.newInstance());
+                    } catch (InstantiationException | IllegalAccessException e) {
+                        throw new PortletException(e);
+                    }
+                }
+                throw new RuntimeException(GUICE_PORTLET_MODULE_CLASS + " is not guice portlet module.");
+            }
+        }
+        return injector.createChildInjector(new PortletModule(portletClass));
+    }
+
     private PortletName initializePortlet(ServletContext servletContext, PortletType portletType, Injector injector) throws ClassNotFoundException {
         Class<?> obj = Class.forName(portletType.getPortletClass());
         if (Portlet.class.isAssignableFrom(obj)) {
             @SuppressWarnings("unchecked")
             final Class<? extends Portlet> portletClass = (Class<? extends Portlet>) obj;
-            Injector portletInjector = injector.createChildInjector(new PortletModule(portletClass));
-            Portlet portlet = portletInjector.getInstance(Portlet.class);
             try {
+                Injector portletInjector = getPortletInjector(portletClass, portletType, injector);
+                // injector.createChildInjector(new
+                // PortletModule(portletClass));
+                Portlet portlet = portletInjector.getInstance(Portlet.class);
                 PortletConfig portletConfig = getPortletConfig(servletContext, portletType);
                 PortletName portletName = new PortletName(getContextPathName(servletContext), portletType.getPortletName().getValue());
                 MidaiganesPortlet midaiganesPortlet = getMidaiganesPortlet(portlet, obj, portletName);

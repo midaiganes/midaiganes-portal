@@ -7,56 +7,48 @@ import ee.midaiganes.portal.theme.Theme;
 import ee.midaiganes.portal.user.User;
 
 public class PageDisplay {
-	private LayoutSet layoutSet;
-	private Layout layout;
-	private User user;
-	private RequestInfo requestInfo;
-	private Theme theme;
+    private final LayoutSet layoutSet;
+    private final Layout layout;
+    private final User user;
+    private final RequestInfo requestInfo;
+    private final Theme theme;
 
-	public LayoutSet getLayoutSet() {
-		return layoutSet;
-	}
+    public PageDisplay(LayoutSet layoutSet, Layout layout, User user, RequestInfo requestInfo, Theme theme) {
+        this.layoutSet = layoutSet;
+        this.layout = layout;
+        this.user = user;
+        this.requestInfo = requestInfo;
+        this.theme = theme;
+    }
 
-	public void setLayoutSet(LayoutSet layoutSet) {
-		this.layoutSet = layoutSet;
-	}
+    public PageDisplay(PageDisplay pd, User user) {
+        this(pd.getLayoutSet(), pd.getLayout(), user, pd.getRequestInfo(), pd.getTheme());
+    }
 
-	public Layout getLayout() {
-		return layout;
-	}
+    public LayoutSet getLayoutSet() {
+        return layoutSet;
+    }
 
-	public void setLayout(Layout layout) {
-		this.layout = layout;
-	}
+    public Layout getLayout() {
+        return layout;
+    }
 
-	public User getUser() {
-		return user;
-	}
+    public User getUser() {
+        return user;
+    }
 
-	public void setUser(User user) {
-		this.user = user;
-	}
+    public RequestInfo getRequestInfo() {
+        return requestInfo;
+    }
 
-	public RequestInfo getRequestInfo() {
-		return requestInfo;
-	}
+    public PortletURL getPortletURL() {
+        if (requestInfo != null) {
+            return requestInfo.getPortletURL();
+        }
+        return null;
+    }
 
-	public void setRequestInfo(RequestInfo requestInfo) {
-		this.requestInfo = requestInfo;
-	}
-
-	public PortletURL getPortletURL() {
-		if (requestInfo != null) {
-			return requestInfo.getPortletURL();
-		}
-		return null;
-	}
-
-	public Theme getTheme() {
-		return theme;
-	}
-
-	public void setTheme(Theme theme) {
-		this.theme = theme;
-	}
+    public Theme getTheme() {
+        return theme;
+    }
 }

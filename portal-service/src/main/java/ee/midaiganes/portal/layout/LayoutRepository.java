@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
@@ -52,6 +53,7 @@ public class LayoutRepository {
         this.layoutCache = SingleVmPoolUtil.getCache(LayoutRepository.class.getName() + ".Layout");
     }
 
+    @Nonnull
     public List<LayoutTitle> getLayoutTitles(long layoutId) {
         List<LayoutTitle> list = getLayoutTitlesFromCache(layoutId);
         if (list == null) {
@@ -66,12 +68,13 @@ public class LayoutRepository {
         return el != null ? el.<List<LayoutTitle>> get() : null;
     }
 
+    @Nonnull
     private List<LayoutTitle> loadAndCacheLayoutTitles(long layoutId) {
         List<LayoutTitle> list = null;
         try {
             list = ImmutableList.copyOf(layoutDao.loadLayoutTitles(layoutId));
         } finally {
-            list = list == null ? Collections.<LayoutTitle> emptyList() : list;
+            list = list == null ? ImmutableList.<LayoutTitle> of() : list;
             layoutTitleCache.put(Long.toString(layoutId), list);
         }
         return list;

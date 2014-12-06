@@ -6,6 +6,8 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.google.common.collect.ImmutableList;
+
 import ee.midaiganes.model.PortalResource;
 import ee.midaiganes.portal.theme.ThemeName;
 import ee.midaiganes.util.StringUtil;
@@ -22,12 +24,13 @@ public class Layout implements Serializable, PortalResource {
     private final long nr;
     private final Long parentId;
     private final long defaultLayoutTitleLanguageId;
-    private final List<LayoutTitle> layoutTitles;
+    @Nonnull
+    private final ImmutableList<LayoutTitle> layoutTitles;
 
     private static final long DEFAULT_LAYOUT_TITLE_LANGUAGE_ID = -1;
 
     private Layout(long layoutSetId, String friendlyUrl, ThemeName themeName, String pageLayoutId) {
-        this(DEFAULT_LAYOUT_ID, layoutSetId, friendlyUrl, themeName, pageLayoutId, 0, null, DEFAULT_LAYOUT_TITLE_LANGUAGE_ID, null);
+        this(DEFAULT_LAYOUT_ID, layoutSetId, friendlyUrl, themeName, pageLayoutId, 0, null, DEFAULT_LAYOUT_TITLE_LANGUAGE_ID, ImmutableList.<LayoutTitle> of());
     }
 
     public static Layout getDefault(long layoutSetId, String friendlyUrl, ThemeName themeName, String pageLayoutId) {
@@ -35,7 +38,7 @@ public class Layout implements Serializable, PortalResource {
     }
 
     public Layout(long id, long layoutSetId, String friendlyUrl, ThemeName themeName, String pageLayoutId, long nr, Long parentId, long defaultLayoutTitleLanguageId,
-            List<LayoutTitle> layoutTitles) {
+            @Nonnull List<LayoutTitle> layoutTitles) {
         this.id = id;
         this.layoutSetId = layoutSetId;
         this.friendlyUrl = friendlyUrl;
@@ -44,10 +47,10 @@ public class Layout implements Serializable, PortalResource {
         this.nr = nr;
         this.parentId = parentId;
         this.defaultLayoutTitleLanguageId = defaultLayoutTitleLanguageId;
-        this.layoutTitles = layoutTitles;
+        this.layoutTitles = ImmutableList.copyOf(layoutTitles);
     }
 
-    public Layout withLayoutTitles(List<LayoutTitle> layoutTitles) {
+    public Layout withLayoutTitles(@Nonnull List<LayoutTitle> layoutTitles) {
         return new Layout(id, layoutSetId, friendlyUrl, themeName, pageLayoutId, nr, parentId, defaultLayoutTitleLanguageId, layoutTitles);
     }
 
@@ -84,7 +87,7 @@ public class Layout implements Serializable, PortalResource {
         return parentId;
     }
 
-    public List<LayoutTitle> getLayoutTitles() {
+    public ImmutableList<LayoutTitle> getLayoutTitles() {
         return layoutTitles;
     }
 
@@ -99,11 +102,10 @@ public class Layout implements Serializable, PortalResource {
 
     @Nullable
     public LayoutTitle getLayoutTitle(long languageId) {
-        if (layoutTitles != null) {
-            for (LayoutTitle layoutTitle : layoutTitles) {
-                if (layoutTitle.getLanguageId() == languageId) {
-                    return layoutTitle;
-                }
+
+        for (LayoutTitle layoutTitle : layoutTitles) {
+            if (layoutTitle.getLanguageId() == languageId) {
+                return layoutTitle;
             }
         }
         return null;

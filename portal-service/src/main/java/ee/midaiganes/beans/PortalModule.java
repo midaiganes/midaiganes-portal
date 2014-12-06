@@ -83,6 +83,7 @@ public class PortalModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        binder().requireExplicitBindings();
         Properties properties = new Properties();
         try {
             properties.load(new InputStreamReader(new BufferedInputStream(getClass().getResourceAsStream(PropsValues.PORTAL_PROPERTIES)), Charsets.UTF_8));

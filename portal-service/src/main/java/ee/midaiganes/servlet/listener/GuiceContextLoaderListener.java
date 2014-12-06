@@ -24,7 +24,7 @@ public class GuiceContextLoaderListener implements ServletContextListener {
         BeanRepositoryUtil.setBeanRepository(new BeanRepositoryUtil.BeanRepository() {
             @Override
             public <A> void register(Class<A> clazz, A impl) {
-                log.warn("Bean registration not supported");
+                throw new RuntimeException("Bean registration not supported");
             }
 
             @Override

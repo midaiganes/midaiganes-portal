@@ -8,6 +8,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 
 import ee.midaiganes.portal.layout.Layout;
 import ee.midaiganes.util.PortalURLUtil;
@@ -15,11 +16,13 @@ import ee.midaiganes.util.PortalURLUtil;
 public class NavItem implements Serializable, Comparable<NavItem> {
     private static final long serialVersionUID = 1L;
     private final Layout layout;
-    private final List<NavItem> childs = new ArrayList<>();
+    private final ImmutableList<NavItem> childs;
 
     public NavItem(Layout layout, @Nonnull List<Layout> layouts) {
         Preconditions.checkNotNull(layouts, "Layouts is null");
+
         this.layout = Preconditions.checkNotNull(layout, "Layout is null");
+        List<NavItem> childs = new ArrayList<>();
         for (Layout l : layouts) {
             Long parentId = l.getParentId();
             if (parentId != null && parentId.longValue() == this.layout.getId()) {
@@ -27,6 +30,7 @@ public class NavItem implements Serializable, Comparable<NavItem> {
             }
         }
         Collections.sort(childs);
+        this.childs = ImmutableList.copyOf(childs);
     }
 
     public List<NavItem> getChilds() {
