@@ -4,11 +4,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="portlet" uri="http://java.sun.com/portlet_2_0" %>
 
-<c:set var="addPagePermission" value="${portalservice:hasUserPermission(pageDisplay.user.id, pageDisplay.layoutSet.resource, pageDisplay.layoutSet.id, 'EDIT')}" />
-<c:set var="changePageLayoutPermission" value="${portalservice:hasUserPermission(pageDisplay.user.id, pageDisplay.layout.resource, pageDisplay.layout.id, 'EDIT')}"/>
-<c:set var="addRemovePortletPermission" value="${portalservice:hasUserPermission(pageDisplay.user.id, pageDisplay.layout.resource, pageDisplay.layout.id, 'ADD_PORTLET')}"/>
-<c:set var="changePagePermissionsPermission" value="${portalservice:hasUserPermission(pageDisplay.user.id, pageDisplay.layout.resource, pageDisplay.layout.id, 'PERMISSIONS')}"/>
-
 <!DOCTYPE HTML>
 <html>
 	<head>

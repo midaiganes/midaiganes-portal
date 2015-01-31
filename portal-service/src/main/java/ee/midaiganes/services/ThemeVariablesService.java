@@ -13,8 +13,11 @@ import com.google.common.base.Preconditions;
 import ee.midaiganes.model.NavItem;
 import ee.midaiganes.model.PageDisplay;
 import ee.midaiganes.portal.layout.Layout;
+import ee.midaiganes.portal.permission.PermissionService;
 import ee.midaiganes.portlet.MidaiganesWindowState;
 import ee.midaiganes.secureservices.SecureLayoutRepository;
+import ee.midaiganes.services.exceptions.ResourceActionNotFoundException;
+import ee.midaiganes.services.exceptions.ResourceNotFoundException;
 import ee.midaiganes.util.MidaiganesPortlets;
 import ee.midaiganes.util.PropsValues;
 import ee.midaiganes.util.RequestUtil;
@@ -29,14 +32,16 @@ public class ThemeVariablesService {
 
     private final PortletURLFactory portletUrlFactor;
     private final SecureLayoutRepository secureLayoutRepository;
+    private final PermissionService permissionService;
 
     @Inject
-    public ThemeVariablesService(PortletURLFactory portletUrlFactor, SecureLayoutRepository secureLayoutRepository) {
+    public ThemeVariablesService(PortletURLFactory portletUrlFactor, SecureLayoutRepository secureLayoutRepository, PermissionService permissionService) {
         Preconditions.checkNotNull(portletUrlFactor, "Portlet url factory is null");
         Preconditions.checkNotNull(secureLayoutRepository, "Secure layout repository is null");
 
         this.portletUrlFactor = portletUrlFactor;
         this.secureLayoutRepository = secureLayoutRepository;
+        this.permissionService = permissionService;
     }
 
     public List<ThemeVariable> getThemeVariables(HttpServletRequest request) {
@@ -52,7 +57,20 @@ public class ThemeVariablesService {
                     MidaiganesWindowState.EXCLUSIVE)));
             variables.add(new ThemeVariable(CHANGE_PAGE_LAYOUT_URL, portletUrlFactor.makeRenderURL(request, MidaiganesPortlets.CHANGE_PAGE_LAYOUT.getPortletName(),
                     MidaiganesWindowState.EXCLUSIVE)));
-        } catch (WindowStateException e) {
+
+            //
+            long userId = pageDisplay.getUser().getId();
+
+                variables.add(new ThemeVariable("addPagePermission", Boolean.valueOf(permissionService.hasUserPermission(userId, pageDisplay.getLayoutSet().getResource(),
+                        pageDisplay.getLayoutSet().getId(), "EDIT"))));
+                variables.add(new ThemeVariable("changePageLayoutPermission", Boolean.valueOf(permissionService.hasUserPermission(userId, pageDisplay.getLayout().getResource(),
+                        pageDisplay.getLayout().getId(), "EDIT"))));
+                variables.add(new ThemeVariable("addRemovePortletPermission", Boolean.valueOf(permissionService.hasUserPermission(userId, pageDisplay.getLayout().getResource(),
+                        pageDisplay.getLayout().getId(), "ADD_PORTLET"))));
+                variables.add(new ThemeVariable("changePagePermissionsPermission", Boolean.valueOf(permissionService.hasUserPermission(userId, pageDisplay.getLayout()
+                        .getResource(), pageDisplay.getLayout().getId(), "PERMISSIONS"))));
+            
+        } catch (WindowStateException|ResourceNotFoundException | ResourceActionNotFoundException e) {
             throw new RuntimeException(e);
         }
         return variables;

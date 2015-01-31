@@ -1,6 +1,5 @@
 <%@ page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" language="java" trimDirectiveWhitespaces="true" session="false" %>
 <%@ taglib prefix="portal-taglib" uri="http://midaiganes.ee/portal-tags" %>
-<%@ taglib prefix="portalservice" uri="http://midaiganes.ee/portal-service-tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="portlet" uri="http://java.sun.com/portlet_2_0" %>
 
@@ -15,10 +14,6 @@
 		<script type="text/javascript" charset="UTF-8" src="${pageDisplay.theme.javascriptDir}/javascript.js"></script>
 	</head>
 	<body>
-		<c:set var="addPagePermission" value="${portalservice:hasUserPermission(pageDisplay.user.id, pageDisplay.layoutSet.resource, pageDisplay.layoutSet.id, 'EDIT')}" />
-		<c:set var="changePageLayoutPermission" value="${portalservice:hasUserPermission(pageDisplay.user.id, pageDisplay.layout.resource, pageDisplay.layout.id, 'EDIT')}"/>
-		<c:set var="addRemovePortletPermission" value="${portalservice:hasUserPermission(pageDisplay.user.id, pageDisplay.layout.resource, pageDisplay.layout.id, 'ADD_PORTLET')}"/>
-		<c:set var="changePagePermissionsPermission" value="${portalservice:hasUserPermission(pageDisplay.user.id, pageDisplay.layout.resource, pageDisplay.layout.id, 'PERMISSIONS')}"/>
 		<c:if test="${addPagePermission or changePageLayoutPermission or addRemovePortletPermission or changePagePermissionsPermission}">
 			<div id="dockbar">
 				<ul class="menu">
