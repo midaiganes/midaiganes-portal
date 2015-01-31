@@ -17,18 +17,6 @@
 	</function>
 	
 	<function>
-		<name>hasUserResourcePermission</name>
-		<function-class>ee.midaiganes.services.util.PermissionUtil</function-class>
-		<function-signature>boolean hasUserResourcePermission(long, ee.midaiganes.model.PortalResource, java.lang.String)</function-signature>
-	</function>
-	
-	<function>
-		<name>getPortletInstance</name>
-		<function-class>ee.midaiganes.services.util.PortletInstanceUtil</function-class>
-		<function-signature>ee.midaiganes.model.PortletInstance getPortletInstance(javax.portlet.PortletResponse)</function-signature>
-	</function>
-	
-	<function>
 		<name>getPageDisplay</name>
 		<function-class>ee.midaiganes.util.RequestUtil</function-class>
 		<function-signature>ee.midaiganes.model.PageDisplay getPageDisplay(javax.servlet.http.HttpServletRequest)</function-signature>

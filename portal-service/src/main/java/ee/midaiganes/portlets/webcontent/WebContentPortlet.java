@@ -32,7 +32,7 @@ public class WebContentPortlet extends BasePortlet {
     public void render(RenderRequest request, RenderResponse response) throws PortletException, IOException {
         PortletMode mode = request.getPortletMode();
         if (PortletMode.VIEW.equals(mode)) {
-            super.include(view.view(request), request, response);
+            super.include(view.view(request, response), request, response);
         } else if (PortletMode.EDIT.equals(mode)) {
             String action = request.getParameter("action");
             if ("add-web-content".equals(action)) {
