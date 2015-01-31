@@ -11,7 +11,7 @@ import javax.portlet.RenderResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.beans.BeanRepositoryUtil;
+import ee.midaiganes.beans.Utils;
 import ee.midaiganes.model.PageDisplay;
 import ee.midaiganes.portal.layoutportlet.LayoutPortletRepository;
 import ee.midaiganes.portlet.PortletName;
@@ -35,7 +35,7 @@ public class AddRemovePortletController extends BasePortlet {
         } else if ("add-portlet".equals(request.getParameter("action")) && request.getParameter("portletId") != null && request.getParameter("portletBoxId") != null) {
             log.info("add portlet view");
         } else {
-            request.setAttribute("portletNames", BeanRepositoryUtil.getBean(PortletRepository.class).getPortletNames());
+            request.setAttribute("portletNames", Utils.getInstance().getInstance(PortletRepository.class).getPortletNames());
             super.include("add-remove-portlet/view", request, response);
         }
     }
@@ -65,9 +65,9 @@ public class AddRemovePortletController extends BasePortlet {
         PageDisplay pageDisplay = RequestUtil.getPageDisplay(request);
         int rowId = StringUtil.isNumber(portletBoxId) ? Integer.parseInt(portletBoxId) : -1;
         if (rowId > 0) {
-            if (BeanRepositoryUtil.getBean(PortletRepository.class).getPortletNames().contains(portletName)) {
+            if (Utils.getInstance().getInstance(PortletRepository.class).getPortletNames().contains(portletName)) {
                 int boxIndex_ = StringUtil.isNumber(boxIndex) ? Integer.parseInt(boxIndex) : -1;
-                BeanRepositoryUtil.getBean(LayoutPortletRepository.class).addLayoutPortlet(pageDisplay.getLayout().getId(), rowId, portletName, boxIndex_);
+                Utils.getInstance().getInstance(LayoutPortletRepository.class).addLayoutPortlet(pageDisplay.getLayout().getId(), rowId, portletName, boxIndex_);
             } else {
                 log.warn("invalid portletId '{}'", portletId);
             }
@@ -81,7 +81,7 @@ public class AddRemovePortletController extends BasePortlet {
             long boxId = Long.parseLong(portletBoxId);
             long boxIdx = Long.parseLong(boxIndex);
             long layoutId = RequestUtil.getPageDisplay(request).getLayout().getId();
-            BeanRepositoryUtil.getBean(LayoutPortletRepository.class).moveLayoutPortlet(windowID, layoutId, boxId, boxIdx);
+            Utils.getInstance().getInstance(LayoutPortletRepository.class).moveLayoutPortlet(windowID, layoutId, boxId, boxIdx);
             log.info("Portlet with windowId '" + windowID + "' on layout '" + layoutId + "' moved in box '" + boxId + "' to '" + boxIdx + "'");
         } else {
             log.warn("Invalid boxId '{}' or boxIndex '{}'", portletBoxId, boxIndex);
@@ -89,7 +89,7 @@ public class AddRemovePortletController extends BasePortlet {
     }
 
     private void removePortletAction(String windowID, ActionRequest request, ActionResponse response) throws IOException {
-        BeanRepositoryUtil.getBean(LayoutPortletRepository.class).deleteLayoutPortlet(windowID);
+        Utils.getInstance().getInstance(LayoutPortletRepository.class).deleteLayoutPortlet(windowID);
         response.sendRedirect(PortalURLUtil.getFullURLByFriendlyURL(RequestUtil.getPageDisplay(request).getLayout().getFriendlyUrl()));
     }
 }

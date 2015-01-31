@@ -14,7 +14,7 @@ import javax.portlet.RenderResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.beans.BeanRepositoryUtil;
+import ee.midaiganes.beans.Utils;
 import ee.midaiganes.portal.group.Group;
 import ee.midaiganes.portal.group.GroupRepository;
 import ee.midaiganes.portal.user.User;
@@ -31,8 +31,8 @@ public class UsersGroupsController extends BasePortlet {
     private final UserRepository userRepository;
 
     public UsersGroupsController() {
-        this.userRepository = BeanRepositoryUtil.getBean(UserRepository.class);
-        this.groupRepository = BeanRepositoryUtil.getBean(GroupRepository.class);
+        this.userRepository = Utils.getInstance().getInstance(UserRepository.class);
+        this.groupRepository = Utils.getInstance().getInstance(GroupRepository.class);
 
     }
 

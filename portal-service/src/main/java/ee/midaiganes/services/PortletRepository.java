@@ -193,9 +193,7 @@ public class PortletRepository {
                 Class<?> guicePortletModuleClass = Class.forName(guicePortletModuleClassName);
                 if (Module.class.isAssignableFrom(guicePortletModuleClass)) {
                     try {
-                        @SuppressWarnings("unchecked")
-                        Class<? extends Module> guiceModule = (Class<? extends Module>) guicePortletModuleClass;
-                        return injector.createChildInjector(guiceModule.newInstance());
+                        return injector.createChildInjector((Module) guicePortletModuleClass.newInstance());
                     } catch (InstantiationException | IllegalAccessException e) {
                         throw new PortletException(e);
                     }

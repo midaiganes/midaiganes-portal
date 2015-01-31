@@ -17,7 +17,7 @@ import javax.portlet.RenderResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.beans.BeanRepositoryUtil;
+import ee.midaiganes.beans.Utils;
 import ee.midaiganes.model.PortalResource;
 import ee.midaiganes.portal.group.Group;
 import ee.midaiganes.portal.group.GroupRepository;
@@ -44,12 +44,12 @@ public class PermissionsController extends BasePortlet {
     private final PortletInstanceRepository portletInstanceRepository;
 
     public PermissionsController() {
-        this.portletInstanceRepository = BeanRepositoryUtil.getBean(PortletInstanceRepository.class);
-        this.userRepository = BeanRepositoryUtil.getBean(UserRepository.class);
-        this.groupRepository = BeanRepositoryUtil.getBean(GroupRepository.class);
-        this.resourceActionRepository = BeanRepositoryUtil.getBean(ResourceActionRepository.class);
-        this.permissionService = BeanRepositoryUtil.getBean(PermissionService.class);
-        this.resourceRepository = BeanRepositoryUtil.getBean(ResourceRepository.class);
+        this.portletInstanceRepository = Utils.getInstance().getInstance(PortletInstanceRepository.class);
+        this.userRepository = Utils.getInstance().getInstance(UserRepository.class);
+        this.groupRepository = Utils.getInstance().getInstance(GroupRepository.class);
+        this.resourceActionRepository = Utils.getInstance().getInstance(ResourceActionRepository.class);
+        this.permissionService = Utils.getInstance().getInstance(PermissionService.class);
+        this.resourceRepository = Utils.getInstance().getInstance(ResourceRepository.class);
     }
 
     @Override

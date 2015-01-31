@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.beans.BeanRepositoryUtil;
+import ee.midaiganes.beans.Utils;
 import ee.midaiganes.model.PageDisplay;
 import ee.midaiganes.model.RequestInfo.PortletURL;
 import ee.midaiganes.portal.portletinstance.PortletInstance;
@@ -34,8 +34,8 @@ public class RuntimePortletServlet extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        portletRepository = BeanRepositoryUtil.getBean(SecurePortletRepository.class);
-        portletInstanceRepository = BeanRepositoryUtil.getBean(PortletInstanceRepository.class);
+        portletRepository = Utils.getInstance().getInstance(SecurePortletRepository.class);
+        portletInstanceRepository = Utils.getInstance().getInstance(PortletInstanceRepository.class);
     }
 
     @Override

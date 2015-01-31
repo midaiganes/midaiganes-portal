@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.beans.BeanRepositoryUtil;
+import ee.midaiganes.beans.Utils;
 import ee.midaiganes.model.PageDisplay;
 import ee.midaiganes.model.RequestInfo.PortletURL;
 import ee.midaiganes.portal.layoutportlet.LayoutPortlet;
@@ -37,8 +37,8 @@ public class LayoutPortletServlet extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        layoutPortletRepository = BeanRepositoryUtil.getBean(LayoutPortletRepository.class);
-        portletRepository = BeanRepositoryUtil.getBean(SecurePortletRepository.class);
+        layoutPortletRepository = Utils.getInstance().getInstance(LayoutPortletRepository.class);
+        portletRepository = Utils.getInstance().getInstance(SecurePortletRepository.class);
     }
 
     @Override

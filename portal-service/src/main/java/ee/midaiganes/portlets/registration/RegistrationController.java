@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
-import ee.midaiganes.beans.BeanRepositoryUtil;
+import ee.midaiganes.beans.Utils;
 import ee.midaiganes.portal.user.UserRepository;
 import ee.midaiganes.portlets.BasePortlet;
 import ee.midaiganes.services.exceptions.DuplicateUsernameException;
@@ -42,7 +42,7 @@ public class RegistrationController extends BasePortlet {
             Preconditions.checkNotNull(username);
             Preconditions.checkNotNull(password);
             try {
-                long userid = BeanRepositoryUtil.getBean(UserRepository.class).addUser(username, password);
+                long userid = Utils.getInstance().getInstance(UserRepository.class).addUser(username, password);
                 log.debug("user added: id = {}; name = {}", Long.valueOf(userid), username);
                 request.setAttribute("success", Boolean.TRUE);
             } catch (DuplicateUsernameException e) {

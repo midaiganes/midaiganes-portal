@@ -6,8 +6,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import ee.midaiganes.util.TimeProviderUtil;
 import ee.midaiganes.util.PropsValues;
+import ee.midaiganes.util.TimeProviderUtil;
 
 public class SingleVmCache implements SingleVmCacheMBean {
     private final ReadWriteLock lock = new ReentrantReadWriteLock();

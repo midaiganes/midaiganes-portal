@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Charsets;
 
-import ee.midaiganes.beans.BeanRepositoryUtil;
+import ee.midaiganes.beans.Utils;
 import ee.midaiganes.portal.user.User;
 import ee.midaiganes.portal.user.UserRepository;
 import ee.midaiganes.portlets.BasePortlet;
@@ -53,7 +53,7 @@ public class ChatPortlet extends BasePortlet implements ResourceServingPortlet {
     private final UserRepository userRepository;
 
     public ChatPortlet() {
-        userRepository = BeanRepositoryUtil.getBean(UserRepository.class);
+        userRepository = Utils.getInstance().getInstance(UserRepository.class);
     }
 
     @Override

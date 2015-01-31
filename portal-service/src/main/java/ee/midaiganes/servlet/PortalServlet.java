@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.beans.BeanRepositoryUtil;
+import ee.midaiganes.beans.Utils;
 import ee.midaiganes.model.PageDisplay;
 import ee.midaiganes.model.RequestInfo;
 import ee.midaiganes.portal.layoutportlet.LayoutPortlet;
@@ -43,11 +43,11 @@ public class PortalServlet extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        layoutPortletRepository = BeanRepositoryUtil.getBean(LayoutPortletRepository.class);
-        portletRepository = BeanRepositoryUtil.getBean(SecurePortletRepository.class);
-        portletInstanceRepository = BeanRepositoryUtil.getBean(PortletInstanceRepository.class);
+        layoutPortletRepository = Utils.getInstance().getInstance(LayoutPortletRepository.class);
+        portletRepository = Utils.getInstance().getInstance(SecurePortletRepository.class);
+        portletInstanceRepository = Utils.getInstance().getInstance(PortletInstanceRepository.class);
         try {
-            BeanRepositoryUtil.getBean(DbInstallService.class).install(config.getServletContext());
+            Utils.getInstance().getInstance(DbInstallService.class).install(config.getServletContext());
         } catch (RuntimeException | DbInstallFailedException e) {
             log.error(e.getMessage(), e);
         }

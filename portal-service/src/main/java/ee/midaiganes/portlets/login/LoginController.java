@@ -12,7 +12,7 @@ import javax.portlet.WindowState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.beans.BeanRepositoryUtil;
+import ee.midaiganes.beans.Utils;
 import ee.midaiganes.portal.user.User;
 import ee.midaiganes.portal.user.UserRepository;
 import ee.midaiganes.portlet.MidaiganesWindowState;
@@ -49,7 +49,7 @@ public class LoginController extends BasePortlet {
     private void loginAction(ActionRequest request, ActionResponse response, LoginData loginData) throws IOException {
         log.trace("Login data = {}", loginData);
         if (!UserUtil.isLoggedIn(request)) {
-            User user = BeanRepositoryUtil.getBean(UserRepository.class).getUser(loginData.getUsername(), loginData.getPassword());
+            User user = Utils.getInstance().getInstance(UserRepository.class).getUser(loginData.getUsername(), loginData.getPassword());
             if (user != null) {
                 SessionUtil.setUserId(request, user.getId());
                 if (WindowState.NORMAL.equals(request.getWindowState())) {

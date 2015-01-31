@@ -6,12 +6,9 @@ import javax.servlet.ServletContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.Stage;
 
-import ee.midaiganes.beans.BeanRepositoryUtil;
-import ee.midaiganes.beans.PortalModule;
+import ee.midaiganes.beans.Utils;
 
 public class GuiceContextLoaderListener implements ServletContextListener {
     private static final Logger log = LoggerFactory.getLogger(GuiceContextLoaderListener.class);
@@ -19,19 +16,8 @@ public class GuiceContextLoaderListener implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        final Injector injector = Guice.createInjector(Stage.PRODUCTION, new PortalModule());
+        final Injector injector = Utils.getInstance();
         sce.getServletContext().setAttribute(SERVLET_ATTRIBUTE, injector);
-        BeanRepositoryUtil.setBeanRepository(new BeanRepositoryUtil.BeanRepository() {
-            @Override
-            public <A> void register(Class<A> clazz, A impl) {
-                throw new RuntimeException("Bean registration not supported");
-            }
-
-            @Override
-            public <A> A getBean(Class<A> clazz) {
-                return injector.getInstance(clazz);
-            }
-        });
     }
 
     @Override

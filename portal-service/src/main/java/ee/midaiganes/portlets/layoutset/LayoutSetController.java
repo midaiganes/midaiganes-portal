@@ -11,7 +11,7 @@ import javax.portlet.RenderResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.beans.BeanRepositoryUtil;
+import ee.midaiganes.beans.Utils;
 import ee.midaiganes.portal.layoutset.LayoutSet;
 import ee.midaiganes.portal.layoutset.LayoutSetRepository;
 import ee.midaiganes.portal.theme.ThemeName;
@@ -26,8 +26,8 @@ public class LayoutSetController extends BasePortlet {
     private final ThemeRepository themeRepository;
 
     public LayoutSetController() {
-        this.layoutSetRepository = BeanRepositoryUtil.getBean(LayoutSetRepository.class);
-        this.themeRepository = BeanRepositoryUtil.getBean(ThemeRepository.class);
+        this.layoutSetRepository = Utils.getInstance().getInstance(LayoutSetRepository.class);
+        this.themeRepository = Utils.getInstance().getInstance(ThemeRepository.class);
     }
 
     @Override

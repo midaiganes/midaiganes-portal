@@ -9,7 +9,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import ee.midaiganes.beans.BeanRepositoryUtil;
+import ee.midaiganes.beans.Utils;
 import ee.midaiganes.portal.pagelayout.PageLayout;
 import ee.midaiganes.portal.pagelayout.PageLayoutRepository;
 import ee.midaiganes.util.ContextUtil;
@@ -22,7 +22,7 @@ public class PageLayoutServlet extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        pageLayoutRepository = BeanRepositoryUtil.getBean(PageLayoutRepository.class);
+        pageLayoutRepository = Utils.getInstance().getInstance(PageLayoutRepository.class);
     }
 
     @Override
