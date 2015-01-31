@@ -76,10 +76,10 @@
 						<li>
 							<c:choose>
 								<c:when test="${navItem.layout.id == pageDisplay.layout.id}">
-									<a href="${navItem.url}" class="active">${portalservice:getLayoutTitle(navItem.layout, pageContext.request)}</a>
+									<a href="${navItem.url}" class="active">${navItem.layoutTitle}</a>
 								</c:when>
 								<c:otherwise>
-									<a href="${navItem.url}">${portalservice:getLayoutTitle(navItem.layout, pageContext.request)}</a>
+									<a href="${navItem.url}">${navItem.layoutTitle}</a>
 								</c:otherwise>
 							</c:choose>
 						</li>

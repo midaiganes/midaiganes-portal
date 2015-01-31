@@ -17,16 +17,17 @@ public class NavItem implements Serializable, Comparable<NavItem> {
     private static final long serialVersionUID = 1L;
     private final Layout layout;
     private final ImmutableList<NavItem> childs;
+    private final long languageId;
 
-    public NavItem(Layout layout, @Nonnull List<Layout> layouts) {
+    public NavItem(Layout layout, @Nonnull List<Layout> layouts, long languageId) {
         Preconditions.checkNotNull(layouts, "Layouts is null");
-
+        this.languageId = languageId;
         this.layout = Preconditions.checkNotNull(layout, "Layout is null");
         List<NavItem> childs = new ArrayList<>();
         for (Layout l : layouts) {
             Long parentId = l.getParentId();
             if (parentId != null && parentId.longValue() == this.layout.getId()) {
-                childs.add(new NavItem(l, layouts));
+                childs.add(new NavItem(l, layouts, languageId));
             }
         }
         Collections.sort(childs);
@@ -39,6 +40,11 @@ public class NavItem implements Serializable, Comparable<NavItem> {
 
     public Layout getLayout() {
         return layout;
+    }
+
+    public String getLayoutTitle() {
+        String title = layout.getTitle(languageId);
+        return title != null ? title : layout.getDefaultLayoutTitle().getTitle();
     }
 
     @Override

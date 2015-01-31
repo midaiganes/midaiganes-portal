@@ -63,7 +63,7 @@ public class ThemeVariablesService {
         List<Layout> layouts = secureLayoutRepository.getLayouts(getUserId(pageDisplay), getLayoutSetId(pageDisplay));
         for (Layout layout : layouts) {
             if (layout.getParentId() == null) {
-                navItems.add(new NavItem(layout, layouts));
+                navItems.add(new NavItem(layout, layouts, pageDisplay.getLanguageId()));
             }
         }
         Collections.sort(navItems);

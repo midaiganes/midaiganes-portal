@@ -12,17 +12,19 @@ public class PageDisplay {
     private final User user;
     private final RequestInfo requestInfo;
     private final Theme theme;
+    private final long languageId;
 
-    public PageDisplay(LayoutSet layoutSet, Layout layout, User user, RequestInfo requestInfo, Theme theme) {
+    public PageDisplay(LayoutSet layoutSet, Layout layout, User user, RequestInfo requestInfo, Theme theme, long languageId) {
         this.layoutSet = layoutSet;
         this.layout = layout;
         this.user = user;
         this.requestInfo = requestInfo;
         this.theme = theme;
+        this.languageId = languageId;
     }
 
     public PageDisplay(PageDisplay pd, User user) {
-        this(pd.getLayoutSet(), pd.getLayout(), user, pd.getRequestInfo(), pd.getTheme());
+        this(pd.getLayoutSet(), pd.getLayout(), user, pd.getRequestInfo(), pd.getTheme(), pd.getLanguageId());
     }
 
     public LayoutSet getLayoutSet() {
@@ -50,5 +52,9 @@ public class PageDisplay {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public long getLanguageId() {
+        return languageId;
     }
 }

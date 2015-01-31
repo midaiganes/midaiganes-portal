@@ -1,5 +1,7 @@
 package ee.midaiganes.services.portal;
 
+import java.util.Locale;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -17,6 +19,7 @@ import ee.midaiganes.portal.theme.ThemeRepository;
 import ee.midaiganes.portal.user.User;
 import ee.midaiganes.portal.user.UserRepository;
 import ee.midaiganes.secureservices.SecureLayoutRepository;
+import ee.midaiganes.services.LanguageRepository;
 import ee.midaiganes.services.exceptions.PrincipalException;
 import ee.midaiganes.util.StringPool;
 
@@ -29,15 +32,17 @@ public class PortalServiceImpl implements PortalService {
     private final SecureLayoutRepository secureLayoutRepository;
     private final LayoutRepository layoutRepository;
     private final ThemeRepository themeRepository;
+    private final LanguageRepository languageRepository;
 
     @Inject
     public PortalServiceImpl(LayoutSetRepository layoutSetRepository, UserRepository userRepository, SecureLayoutRepository secureLayoutRepository,
-            LayoutRepository layoutRepository, ThemeRepository themeRepository) {
+            LayoutRepository layoutRepository, ThemeRepository themeRepository, LanguageRepository languageRepository) {
         this.layoutSetRepository = layoutSetRepository;
         this.userRepository = userRepository;
         this.secureLayoutRepository = secureLayoutRepository;
         this.layoutRepository = layoutRepository;
         this.themeRepository = themeRepository;
+        this.languageRepository = languageRepository;
     }
 
     @Override
@@ -48,7 +53,17 @@ public class PortalServiceImpl implements PortalService {
         response.setUser(getUser(request.getUserId()));
         response.setLayout(getLayout(request.getUserId(), response.getLayoutSet().getId(), request.getFriendlyUrl()));
         response.setTheme(getTheme(response.getLayout(), response.getLayoutSet()));
+        response.setLanguageId(getLanguageId(request.getLocale()));
         return response;
+    }
+
+    private long getLanguageId(Locale locale) {// TODO
+        String languageId = languageRepository.getLanguageId(locale);
+        Long language_id = languageRepository.getId(languageId);
+        if (language_id == null) {
+            language_id = languageRepository.getId(languageRepository.getSupportedLanguageIds().get(0));
+        }
+        return language_id.longValue();
     }
 
     private LayoutSet getLayoutSet(String virtualHost) {

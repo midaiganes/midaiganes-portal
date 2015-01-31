@@ -33,12 +33,6 @@
 		<function-class>ee.midaiganes.util.RequestUtil</function-class>
 		<function-signature>ee.midaiganes.model.PageDisplay getPageDisplay(javax.servlet.http.HttpServletRequest)</function-signature>
 	</function>
-
-	<function>
-		<name>getLayoutTitle</name>
-		<function-class>ee.midaiganes.util.LayoutUtil</function-class>
-		<function-signature>java.lang.String getLayoutTitle(ee.midaiganes.portal.layout.Layout, javax.servlet.http.HttpServletRequest)</function-signature>
-	</function>
 	<function>
 		<name>midaiganesPortletName</name>
 		<function-class>ee.midaiganes.tag.PortletNameFunctions</function-class>

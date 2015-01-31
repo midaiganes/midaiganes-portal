@@ -34,7 +34,7 @@ public class PortalFilter extends HttpFilter {
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         try {
             PortalService.GetRequestedPageResponse resp = portalService.getRequestedPage(new PortalService.GetRequestedPageRequest(request.getServerName(), SessionUtil
-                    .getUserId(request), RequestUtil.getFriendlyURL(request.getRequestURI())));
+                    .getUserId(request), RequestUtil.getFriendlyURL(request.getRequestURI()), request.getLocale()));
 
             PageDisplay pageDisplay = getPageDisplay(request, resp);
             RequestUtil.setPageDisplay(request, pageDisplay);
@@ -52,6 +52,6 @@ public class PortalFilter extends HttpFilter {
     }
 
     private PageDisplay getPageDisplay(HttpServletRequest request, PortalService.GetRequestedPageResponse resp) {
-        return new PageDisplay(resp.getLayoutSet(), resp.getLayout(), resp.getUser(), requestParser.parserRequest(request), resp.getTheme());
+        return new PageDisplay(resp.getLayoutSet(), resp.getLayout(), resp.getUser(), requestParser.parserRequest(request), resp.getTheme(), resp.getLanguageId());
     }
 }
