@@ -28,9 +28,9 @@
 		<dependency org="javax.portlet" name="portlet-api" rev="2.0" conf="global->default"/>
 
 		<!--  8.0.14 -->
-		<dependency org="org.apache.tomcat" name="tomcat-jdbc" rev="7.0.50" conf="server->default"/>
+		<dependency org="org.apache.tomcat" name="tomcat-jdbc" rev="7.0.59" conf="server->default"/>
 		
-		<dependency org="mysql" name="mysql-connector-java" rev="5.1.33" conf="server->default;dbupdate->default" />
+		<dependency org="mysql" name="mysql-connector-java" rev="5.1.34" conf="server->default;dbupdate->default" />
 		<!--  1.1.2 -->
 		<dependency org="ch.qos.logback" name="logback-classic" rev="1.1.2" conf="server->default">
 			<exclude module="servlet-api"/>
@@ -51,7 +51,7 @@
 		<dependency org="org.slf4j" name="jul-to-slf4j" rev="1.7.6" conf="server->default">
 			<exclude module="slf4j-log4j12" />
 		</dependency>
-		<dependency org="joda-time" name="joda-time" rev="2.5" conf="server->default"/>
+		<dependency org="joda-time" name="joda-time" rev="2.7" conf="server->default"/>
 
 		<dependency org="org.springframework" name="spring-jdbc" rev="${spring.version}" conf="global->default" />
 		<!-- for @Transactional -->
@@ -76,7 +76,7 @@
 			<exclude module="slf4j-api"/>
 			<exclude module="slf4j-log4j12"/>
 		</dependency>
-        <dependency org="com.google.code.gson" name="gson" rev="2.3" conf="global->default">
+        <dependency org="com.google.code.gson" name="gson" rev="2.3.1" conf="global->default">
         	<exclude module="junit" />
         </dependency>
         <dependency org="com.google.guava" name="guava" rev="18.0" conf="global->default">
