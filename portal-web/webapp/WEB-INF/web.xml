@@ -23,10 +23,6 @@
 	</listener>
 	
 	<listener>
-		<listener-class>ee.midaiganes.javax.servlet.PortalServletRequestListener</listener-class>
-	</listener>
-	
-	<listener>
 		<listener-class>ee.midaiganes.javax.servlet.PortalPluginListener</listener-class>
 	</listener>
 	

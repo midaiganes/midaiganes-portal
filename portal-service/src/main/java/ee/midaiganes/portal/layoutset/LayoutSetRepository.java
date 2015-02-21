@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
-import ee.midaiganes.cache.SingleVmPoolUtil;
+import ee.midaiganes.cache.SingleVmPool;
 import ee.midaiganes.portal.theme.ThemeName;
 
 public class LayoutSetRepository {
@@ -23,9 +23,9 @@ public class LayoutSetRepository {
     private final LayoutSetDao layoutSetDao;
 
     @Inject
-    public LayoutSetRepository(LayoutSetDao layoutSetDao) {
+    public LayoutSetRepository(LayoutSetDao layoutSetDao, SingleVmPool singleVmPool) {
         this.layoutSetDao = layoutSetDao;
-        this.cache = SingleVmPoolUtil.getCache(LayoutSetRepository.class.getName());
+        this.cache = singleVmPool.getCache(LayoutSetRepository.class.getName());
     }
 
     public List<LayoutSet> getLayoutSets() {

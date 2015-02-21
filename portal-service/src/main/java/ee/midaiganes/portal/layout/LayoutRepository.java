@@ -18,7 +18,7 @@ import com.google.common.collect.ImmutableList;
 
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
-import ee.midaiganes.cache.SingleVmPoolUtil;
+import ee.midaiganes.cache.SingleVmPool;
 import ee.midaiganes.portal.pagelayout.PageLayoutName;
 import ee.midaiganes.portal.pagelayout.PageLayoutRepository;
 import ee.midaiganes.portal.theme.Theme;
@@ -44,13 +44,13 @@ public class LayoutRepository {
     private final SingleVmCache layoutCache;
 
     @Inject
-    public LayoutRepository(LayoutDao layoutDao, ThemeRepository themeRepository, PageLayoutRepository pageLayoutRepository) {
+    public LayoutRepository(LayoutDao layoutDao, ThemeRepository themeRepository, PageLayoutRepository pageLayoutRepository, SingleVmPool singleVmPool) {
         this.layoutDao = layoutDao;
         this.themeRepository = themeRepository;
         this.pageLayoutRepository = pageLayoutRepository;
-        this.cache = SingleVmPoolUtil.getCache(LayoutRepository.class.getName());
-        this.layoutTitleCache = SingleVmPoolUtil.getCache(LayoutRepository.class.getName() + ".LayoutTitle");
-        this.layoutCache = SingleVmPoolUtil.getCache(LayoutRepository.class.getName() + ".Layout");
+        this.cache = singleVmPool.getCache(LayoutRepository.class.getName());
+        this.layoutTitleCache = singleVmPool.getCache(LayoutRepository.class.getName() + ".LayoutTitle");
+        this.layoutCache = singleVmPool.getCache(LayoutRepository.class.getName() + ".Layout");
     }
 
     @Nonnull

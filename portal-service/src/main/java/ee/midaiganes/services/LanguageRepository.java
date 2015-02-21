@@ -12,7 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
-import ee.midaiganes.cache.SingleVmPoolUtil;
+import ee.midaiganes.cache.SingleVmPool;
 import ee.midaiganes.services.rowmapper.LongResultSetExtractor;
 import ee.midaiganes.services.rowmapper.StringRowMapper;
 import ee.midaiganes.util.StringUtil;
@@ -24,9 +24,9 @@ public class LanguageRepository {
     private final SingleVmCache cache;
 
     @Inject
-    public LanguageRepository(JdbcTemplate jdbcTemplate) {
+    public LanguageRepository(JdbcTemplate jdbcTemplate, SingleVmPool singleVmPool) {
         this.jdbcTemplate = jdbcTemplate;
-        this.cache = SingleVmPoolUtil.getCache(LanguageRepository.class.getName());
+        this.cache = singleVmPool.getCache(LanguageRepository.class.getName());
     }
 
     public List<String> getSupportedLanguageIds() {

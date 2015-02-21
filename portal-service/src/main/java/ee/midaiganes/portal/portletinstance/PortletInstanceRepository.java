@@ -13,20 +13,21 @@ import com.google.common.base.Charsets;
 
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
-import ee.midaiganes.cache.SingleVmPoolUtil;
+import ee.midaiganes.cache.SingleVmPool;
 import ee.midaiganes.portlet.PortletName;
 import ee.midaiganes.util.StringPool;
 
 public class PortletInstanceRepository {
     private static final Logger log = LoggerFactory.getLogger(PortletInstanceRepository.class);
     private static final SecureRandom random = new SecureRandom(new Object().toString().getBytes(Charsets.UTF_8));
-    private final SingleVmCache cache = SingleVmPoolUtil.getCache(PortletInstanceRepository.class.getName());
+    private final SingleVmCache cache;
 
     private final PortletInstanceDao portletInstanceDao;
 
     @Inject
-    public PortletInstanceRepository(PortletInstanceDao portletInstanceDao) {
+    public PortletInstanceRepository(PortletInstanceDao portletInstanceDao, SingleVmPool singleVmPool) {
         this.portletInstanceDao = portletInstanceDao;
+        this.cache = singleVmPool.getCache(PortletInstanceRepository.class.getName());
     }
 
     public PortletInstance getPortletInstance(long id) {

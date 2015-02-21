@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
-import ee.midaiganes.cache.SingleVmPoolUtil;
+import ee.midaiganes.cache.SingleVmPool;
 import ee.midaiganes.model.PortalResource;
 import ee.midaiganes.portal.group.Group;
 import ee.midaiganes.portal.group.GroupRepository;
@@ -31,12 +31,12 @@ public class PermissionRepository {
 
     @Inject
     public PermissionRepository(ResourceRepository resourceRepository, GroupRepository groupRepository, PermissionDao permissionDao,
-            ResourceActionRepository resourceActionPermissionRepository) {
+            ResourceActionRepository resourceActionPermissionRepository, SingleVmPool singleVmPool) {
         this.resourceRepository = resourceRepository;
         this.groupRepository = groupRepository;
         this.permissionDao = permissionDao;
         this.resourceActionPermissionRepository = resourceActionPermissionRepository;
-        this.cache = SingleVmPoolUtil.getCache(PermissionRepository.class.getName());
+        this.cache = singleVmPool.getCache(PermissionRepository.class.getName());
     }
 
     @Transactional

@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
-import ee.midaiganes.cache.SingleVmPoolUtil;
+import ee.midaiganes.cache.SingleVmPool;
 import ee.midaiganes.services.rowmapper.PortletPreferencesResultSetExtractor;
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.StringUtil;
@@ -27,12 +27,13 @@ public class PortletPreferencesRepository {
     private static final String INSERT_INTO_PORTLETPREFERENCE = "INSERT INTO PortletPreference(portletInstanceId, preferenceName) VALUES(?, ?)";
     private static final String INSERT_INTO_PORTLETPREFERENCEVALUES = "INSERT INTO PortletPreferenceValue (portletPreferenceId, preferenceValue) VALUES ((SELECT id FROM PortletPreference WHERE preferenceName = ? AND portletInstanceId = ?), ?)";
 
-    private final SingleVmCache cache = SingleVmPoolUtil.getCache(PortletPreferencesRepository.class.getName());
+    private final SingleVmCache cache;
     private static final PortletPreferencesResultSetExtractor getPortletPreferencesExtractor = new PortletPreferencesResultSetExtractor();
 
     @Inject
-    public PortletPreferencesRepository(JdbcTemplate jdbcTemplate) {
+    public PortletPreferencesRepository(JdbcTemplate jdbcTemplate, SingleVmPool singleVmPool) {
         this.jdbcTemplate = jdbcTemplate;
+        this.cache = singleVmPool.getCache(PortletPreferencesRepository.class.getName());
     }
 
     @Transactional

@@ -3,11 +3,15 @@ package ee.midaiganes.beans;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Properties;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
+import javax.management.MBeanServer;
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -18,13 +22,13 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
 
 import com.google.common.base.Charsets;
 import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Names;
 
 import ee.midaiganes.aspect.Service;
 import ee.midaiganes.aspect.ServiceMethodInterceptor;
+import ee.midaiganes.cache.SingleVmPool;
 import ee.midaiganes.portal.group.GroupDao;
 import ee.midaiganes.portal.group.GroupRepository;
 import ee.midaiganes.portal.layout.LayoutDao;
@@ -62,8 +66,8 @@ public class PortalModule extends AbstractModule {
     public static class PortalDataSourceTransactionManager extends DataSourceTransactionManager {
         private static final long serialVersionUID = 1L;
 
-        @Inject
         @Override
+        @Inject
         public void setDataSource(DataSource dataSource) {
             super.setDataSource(dataSource);
         }
@@ -78,6 +82,20 @@ public class PortalModule extends AbstractModule {
 
         private boolean isVoid(Class<?> klass) {
             return void.class.equals(klass) || Void.class.equals(klass);
+        }
+    }
+
+    private static class JdbcTemplateProvider implements Provider<JdbcTemplate> {
+        private final DataSource dataSource;
+
+        @Inject
+        public JdbcTemplateProvider(DataSource dataSource) {
+            this.dataSource = dataSource;
+        }
+
+        @Override
+        public JdbcTemplate get() {
+            return new JdbcTemplate(dataSource);
         }
     }
 
@@ -99,11 +117,14 @@ public class PortalModule extends AbstractModule {
 
         bindInterceptor(Matchers.any(), Matchers.annotatedWith(Transactional.class), new TransactionInterceptor(ptm, new AnnotationTransactionAttributeSource()));
 
-        try {
-            bind(JdbcTemplate.class).toConstructor(JdbcTemplate.class.getConstructor(DataSource.class)).in(Singleton.class);
-        } catch (NoSuchMethodException | SecurityException e) {
-            super.addError(e);
-        }
+        bind(JdbcTemplate.class).toProvider(JdbcTemplateProvider.class).in(Singleton.class);
+
+        bind(MBeanServer.class).toProvider(new Provider<MBeanServer>() {
+            @Override
+            public MBeanServer get() {
+                return ManagementFactory.getPlatformMBeanServer();
+            }
+        }).in(Singleton.class);
 
         bind(DbInstallService.class).asEagerSingleton();
 
@@ -159,5 +180,7 @@ public class PortalModule extends AbstractModule {
         bind(PortletURLFactory.class).in(Singleton.class);
 
         bindListener(Matchers.any(), new ResourceTypeListener());
+
+        bind(SingleVmPool.class).in(Singleton.class);
     }
 }

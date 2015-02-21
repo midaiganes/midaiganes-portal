@@ -7,7 +7,7 @@ import com.google.common.base.Preconditions;
 
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
-import ee.midaiganes.cache.SingleVmPoolUtil;
+import ee.midaiganes.cache.SingleVmPool;
 import ee.midaiganes.services.exceptions.ResourceNotFoundException;
 
 public class ResourceRepository {
@@ -15,9 +15,9 @@ public class ResourceRepository {
     private final ResourceDao resourceDao;
 
     @Inject
-    public ResourceRepository(ResourceDao resourceDao) {
+    public ResourceRepository(ResourceDao resourceDao, SingleVmPool singleVmPool) {
         this.resourceDao = resourceDao;
-        cache = SingleVmPoolUtil.getCache(ResourceRepository.class.getName());
+        cache = singleVmPool.getCache(ResourceRepository.class.getName());
     }
 
     public long getResourceId(@Nonnull String resource) throws ResourceNotFoundException {

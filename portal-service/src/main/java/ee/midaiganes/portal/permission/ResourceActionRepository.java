@@ -8,7 +8,7 @@ import javax.inject.Inject;
 
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
-import ee.midaiganes.cache.SingleVmPoolUtil;
+import ee.midaiganes.cache.SingleVmPool;
 import ee.midaiganes.services.exceptions.ResourceActionNotFoundException;
 import ee.midaiganes.services.exceptions.ResourceHasNoActionsException;
 
@@ -17,8 +17,8 @@ public class ResourceActionRepository {
     private final ResourceActionDao resourceActionDao;
 
     @Inject
-    public ResourceActionRepository(ResourceActionDao resourceActionDao) {
-        this.cache = SingleVmPoolUtil.getCache(ResourceActionRepository.class.getName());
+    public ResourceActionRepository(ResourceActionDao resourceActionDao, SingleVmPool singleVmPool) {
+        this.cache = singleVmPool.getCache(ResourceActionRepository.class.getName());
         this.resourceActionDao = resourceActionDao;
     }
 

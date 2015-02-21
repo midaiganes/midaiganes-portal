@@ -8,7 +8,7 @@ import javax.inject.Inject;
 
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
-import ee.midaiganes.cache.SingleVmPoolUtil;
+import ee.midaiganes.cache.SingleVmPool;
 
 public class GroupRepository {
     private static final String GET_GROUPS_CACHE_KEY = "getGroups";
@@ -17,8 +17,8 @@ public class GroupRepository {
     private static final long[] EMPTY_ARRAY = new long[0];
 
     @Inject
-    public GroupRepository(GroupDao groupDao) {
-        cache = SingleVmPoolUtil.getCache(GroupRepository.class.getName());
+    public GroupRepository(GroupDao groupDao, SingleVmPool singleVmPool) {
+        this.cache = singleVmPool.getCache(GroupRepository.class.getName());
         this.groupDao = groupDao;
     }
 

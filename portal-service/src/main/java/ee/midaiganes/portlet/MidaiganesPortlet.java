@@ -1,12 +1,11 @@
 package ee.midaiganes.portlet;
 
-import static java.lang.management.ManagementFactory.getPlatformMBeanServer;
-
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanRegistrationException;
+import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
@@ -23,6 +22,8 @@ import javax.portlet.ResourceServingPortlet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ee.midaiganes.beans.Utils;
 
 public class MidaiganesPortlet implements MidaiganesPortletMBean, Portlet {
     private static final Logger log = LoggerFactory.getLogger(MidaiganesPortlet.class);
@@ -41,7 +42,7 @@ public class MidaiganesPortlet implements MidaiganesPortletMBean, Portlet {
         this.portlet = portlet;
         try {
             objectName = new ObjectName("ee.midaiganes:type=Portlet,name=" + portletName.getFullName());
-            getPlatformMBeanServer().registerMBean(this, objectName);
+            Utils.getInstance().getInstance(MBeanServer.class).registerMBean(this, objectName);
         } catch (InstanceAlreadyExistsException | MBeanRegistrationException | NotCompliantMBeanException | MalformedObjectNameException e) {
             throw new RuntimeException(e);
         }
@@ -77,7 +78,7 @@ public class MidaiganesPortlet implements MidaiganesPortletMBean, Portlet {
 
     private void unregisterMBean() {
         try {
-            getPlatformMBeanServer().unregisterMBean(objectName);
+            Utils.getInstance().getInstance(MBeanServer.class).unregisterMBean(objectName);
         } catch (Throwable e) {
             log.error(e.getMessage(), e);
         }

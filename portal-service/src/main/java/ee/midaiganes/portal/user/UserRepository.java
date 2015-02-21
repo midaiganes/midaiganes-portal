@@ -9,7 +9,7 @@ import javax.inject.Inject;
 
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
-import ee.midaiganes.cache.SingleVmPoolUtil;
+import ee.midaiganes.cache.SingleVmPool;
 import ee.midaiganes.services.exceptions.DuplicateUsernameException;
 
 public class UserRepository {
@@ -17,9 +17,9 @@ public class UserRepository {
     private final UserDao userDao;
 
     @Inject
-    public UserRepository(UserDao userDao) {
+    public UserRepository(UserDao userDao, SingleVmPool singleVmPool) {
         this.userDao = userDao;
-        this.cache = SingleVmPoolUtil.getCache(UserRepository.class.getName());
+        this.cache = singleVmPool.getCache(UserRepository.class.getName());
     }
 
     public long getUsersCount() {

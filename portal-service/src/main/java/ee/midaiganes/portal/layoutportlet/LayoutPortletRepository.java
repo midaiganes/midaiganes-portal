@@ -11,7 +11,7 @@ import javax.inject.Inject;
 import org.springframework.transaction.annotation.Transactional;
 
 import ee.midaiganes.cache.SingleVmCache;
-import ee.midaiganes.cache.SingleVmPoolUtil;
+import ee.midaiganes.cache.SingleVmPool;
 import ee.midaiganes.portal.portletinstance.PortletInstanceRepository;
 import ee.midaiganes.portlet.PortletName;
 
@@ -21,10 +21,10 @@ public class LayoutPortletRepository {
     private final SingleVmCache cache;
 
     @Inject
-    public LayoutPortletRepository(LayoutPortletDao layoutPortletDao, PortletInstanceRepository portletInstanceRepository) {
+    public LayoutPortletRepository(LayoutPortletDao layoutPortletDao, PortletInstanceRepository portletInstanceRepository, SingleVmPool singleVmPool) {
         this.layoutPortletDao = layoutPortletDao;
         this.portletInstanceRepository = portletInstanceRepository;
-        this.cache = SingleVmPoolUtil.getCache(LayoutPortletRepository.class.getName());
+        this.cache = singleVmPool.getCache(LayoutPortletRepository.class.getName());
     }
 
     @Transactional

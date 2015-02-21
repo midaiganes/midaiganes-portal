@@ -19,7 +19,7 @@ import org.springframework.jdbc.support.KeyHolder;
 
 import ee.midaiganes.cache.Element;
 import ee.midaiganes.cache.SingleVmCache;
-import ee.midaiganes.cache.SingleVmPoolUtil;
+import ee.midaiganes.cache.SingleVmPool;
 
 @Singleton
 public class WebContentRepository {
@@ -30,10 +30,10 @@ public class WebContentRepository {
     private static final WebContentRowMapper webContentRowMapper = new WebContentRowMapper();
 
     @Inject
-    public WebContentRepository(JdbcTemplate jdbcTemplate) {
+    public WebContentRepository(JdbcTemplate jdbcTemplate, SingleVmPool singleVmPool) {
         this.jdbcTemplate = jdbcTemplate;
-        cache = SingleVmPoolUtil.getCache(WebContentRepository.class.getName());
-        webContentCache = SingleVmPoolUtil.getCache(WebContentRepository.class.getName() + "." + WebContent.class.getName());
+        cache = singleVmPool.getCache(WebContentRepository.class.getName());
+        webContentCache = singleVmPool.getCache(WebContentRepository.class.getName() + "." + WebContent.class.getName());
     }
 
     public WebContent getWebContent(long id) {
