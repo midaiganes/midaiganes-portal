@@ -248,6 +248,7 @@
 		</path>
 		<!-- property name="javaweaver.path" location="${jetty.run.dir}/spring-instrument.jar" / -->
 		<property name="javaweaver.path" location="${jetty.run.dir}/aspectjweaver.jar" />
+		<mkdir dir="${jetty.run.dir}/deploy"/>
 	</target>
 	
 	<target name="start-jetty" depends="prepare-start-jetty" description="start jetty server">

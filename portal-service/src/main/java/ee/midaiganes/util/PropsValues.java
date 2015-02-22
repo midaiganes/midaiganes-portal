@@ -1,5 +1,6 @@
 package ee.midaiganes.util;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -37,15 +38,15 @@ public final class PropsValues {
         private static final Pattern pattern = Pattern.compile("^.*?\\$\\{([a-zA-Z\\.]*)\\}.*?$", Pattern.MULTILINE | Pattern.DOTALL);
         private static final String PREFIX = "${";
         private static final String SUFFIX = "}";
-        private static ConcurrentHashMap<String, String> properties;
+        public static final ConcurrentHashMap<String, String> properties;
 
         static {
             properties = loadProperties();
         }
 
         private static ConcurrentHashMap<String, String> loadProperties() {
-            Properties properties = new Properties();
-            try (InputStreamReader reader = new InputStreamReader(PropsUtil.class.getResourceAsStream(PropsValues.PORTAL_PROPERTIES), Charsets.UTF_8)) {
+            Properties properties = new Properties(System.getProperties());
+            try (InputStreamReader reader = new InputStreamReader(new BufferedInputStream(PropsUtil.class.getResourceAsStream(PropsValues.PORTAL_PROPERTIES)), Charsets.UTF_8)) {
                 properties.load(reader);
                 return replaceProperties(properties);
             } catch (IOException e) {

@@ -53,6 +53,7 @@ public class AutoDeployer implements Runnable {
     private final WatchService watcher;
     private final Path autodeployDir;
     private final Path webappsDir;
+    private final DocumentBuilderFactory documentBuilderFactory;
     private boolean run = true;
 
     public AutoDeployer(Path autodeployDir, Path webappsDir) throws IOException {
@@ -60,6 +61,7 @@ public class AutoDeployer implements Runnable {
         this.webappsDir = webappsDir;
         log.info("AUTODEPLOY DIR: '" + autodeployDir.toFile().getAbsolutePath() + "'; WEBAPPS DIR: '" + this.webappsDir.toFile().getAbsolutePath() + "'");
         watcher = FileSystems.getDefault().newWatchService();
+        documentBuilderFactory = DocumentBuilderFactory.newInstance();
         // WatchKey key =
         autodeployDir.register(watcher, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
     }
@@ -71,7 +73,11 @@ public class AutoDeployer implements Runnable {
             try {
                 key = watcher.take();// throws
                 for (WatchEvent<?> event : key.pollEvents()) {
-                    doWithWatchEvent(event);
+                    try {
+                        doWithWatchEvent(event);
+                    } catch (ZipException e) {
+                        log.info(e.getMessage(), e);
+                    }
                 }
             } catch (ClosedWatchServiceException e) {
                 log.info("AUTODEPLOYER STOPPED");
@@ -102,7 +108,7 @@ public class AutoDeployer implements Runnable {
     }
 
     private boolean isReadableWarFileCreated(WatchEvent.Kind<?> kind, Path child) {
-        if (kind.equals(StandardWatchEventKinds.ENTRY_CREATE)) {
+        if (kind.equals(StandardWatchEventKinds.ENTRY_CREATE) || kind.equals(StandardWatchEventKinds.ENTRY_MODIFY)) {
             if (Files.isRegularFile(child, LinkOption.NOFOLLOW_LINKS)) {
                 if (Files.isReadable(child)) {
                     return true;
@@ -119,23 +125,23 @@ public class AutoDeployer implements Runnable {
 
     private void doWithWarFile(Path warFilePath) throws ZipException, IOException {
         File childFile = warFilePath.toFile();
-        TempZipFile tempZipFile = getTempZipFile(childFile.getName());
-        try (ZipFile warFile = new ZipFile(childFile, ZipFile.OPEN_READ, Charsets.UTF_8); ZipOutputStream tempZipFileStream = tempZipFile.getZipOutputStream()) {
-            Enumeration<? extends ZipEntry> e = warFile.entries();
-            while (e.hasMoreElements()) {
-                doWithZipEntry(warFile, tempZipFileStream, e.nextElement());
+        try (ZipFile warFile = new ZipFile(childFile, ZipFile.OPEN_READ, Charsets.UTF_8)) {
+            TempZipFile tempZipFile = new TempZipFile();
+            try (ZipOutputStream tempZipFileStream = tempZipFile.getZipOutputStream()) {
+                Enumeration<? extends ZipEntry> e = warFile.entries();
+                while (e.hasMoreElements()) {
+                    doWithZipEntry(warFile, tempZipFileStream, e.nextElement());
+                }
             }
+            Files.move(tempZipFile.file.toPath(), this.webappsDir.resolve(childFile.getName()), StandardCopyOption.ATOMIC_MOVE);
         }
-        // TODO
-        Files.move(tempZipFile.file.toPath(), autodeployDir.getParent().resolve("apache-tomcat-7.0.26").resolve("webapps").resolve(childFile.getName()),
-                StandardCopyOption.ATOMIC_MOVE);
     }
 
     private void doWithZipEntry(ZipFile warFile, ZipOutputStream tempZipFile, ZipEntry entry) throws IOException {
         try {
             String name = entry.getName();
             log.debug("zip-entry: '{}'", name);
-            if (name.equals("WEB-INF/web.xml") && !entry.isDirectory()) {
+            if ((name.equals("WEB-INF/web.xml") || name.equals("/WEB-INF/web.xml")) && !entry.isDirectory()) {
                 doWithWebXmlZipEntry(warFile, tempZipFile, entry);
             } else {
                 tempZipFile.putNextEntry(entry);
@@ -153,14 +159,17 @@ public class AutoDeployer implements Runnable {
     private void doWithWebXmlZipEntry(ZipFile warFile, ZipOutputStream tempZipFile, ZipEntry entry) {
         try (InputStream is = new BufferedInputStream(warFile.getInputStream(entry))) {
             try {
-                Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(is);
+                Document doc = documentBuilderFactory.newDocumentBuilder().parse(is);
                 Node webapp = doc.getFirstChild();
 
                 NodeList filters = doc.getElementsByTagName("filter");
                 NodeList servlets = doc.getElementsByTagName("servlet");
 
                 Node listenerPosition = filters.getLength() != 0 ? filters.item(0) : servlets.item(0);
-
+                listenerPosition = listenerPosition != null ? listenerPosition : doc.getElementsByTagName("jsp-config").item(0);
+                if (listenerPosition == null) {
+                    log.warn("filter, servlet or jsp-config not found! Plugin will not work!");
+                }
                 webapp.insertBefore(createListenerElement(doc, PortalPluginListener.class.getName()), listenerPosition);
 
                 //
@@ -194,10 +203,6 @@ public class AutoDeployer implements Runnable {
         return el;
     }
 
-    private TempZipFile getTempZipFile(String name) throws FileNotFoundException, IOException {
-        return new TempZipFile(name, autodeployDir);
-    }
-
     public void stop() {
         try {
             this.run = false;
@@ -210,9 +215,8 @@ public class AutoDeployer implements Runnable {
     private static class TempZipFile {
         private final File file;
 
-        public TempZipFile(String name, Path autodeployDir) throws IOException {
-            // TODO create file into webapps dir?
-            file = Files.createFile(autodeployDir.getParent().resolve(name)).toFile();
+        public TempZipFile() throws IOException {
+            file = Files.createTempFile(null, null).toFile();
         }
 
         public ZipOutputStream getZipOutputStream() throws FileNotFoundException {

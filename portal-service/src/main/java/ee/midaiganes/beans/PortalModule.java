@@ -1,26 +1,13 @@
 package ee.midaiganes.beans;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Properties;
 
-import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.management.MBeanServer;
-import javax.sql.DataSource;
 
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionInterceptor;
-
-import com.google.common.base.Charsets;
 import com.google.inject.AbstractModule;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
@@ -57,21 +44,13 @@ import ee.midaiganes.services.LanguageRepository;
 import ee.midaiganes.services.PortletPreferencesRepository;
 import ee.midaiganes.services.PortletRepository;
 import ee.midaiganes.services.PortletURLFactory;
+import ee.midaiganes.services.ServletContextResourceRepository;
 import ee.midaiganes.services.ThemeVariablesService;
 import ee.midaiganes.services.portal.PortalService;
 import ee.midaiganes.services.portal.PortalServiceImpl;
 import ee.midaiganes.util.PropsValues;
 
 public class PortalModule extends AbstractModule {
-    public static class PortalDataSourceTransactionManager extends DataSourceTransactionManager {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        @Inject
-        public void setDataSource(DataSource dataSource) {
-            super.setDataSource(dataSource);
-        }
-    }
 
     private static class ServiceMethodMatcher extends AbstractMatcher<Method> {
         @Override
@@ -85,39 +64,15 @@ public class PortalModule extends AbstractModule {
         }
     }
 
-    private static class JdbcTemplateProvider implements Provider<JdbcTemplate> {
-        private final DataSource dataSource;
-
-        @Inject
-        public JdbcTemplateProvider(DataSource dataSource) {
-            this.dataSource = dataSource;
-        }
-
-        @Override
-        public JdbcTemplate get() {
-            return new JdbcTemplate(dataSource);
-        }
-    }
-
     @Override
     protected void configure() {
         binder().requireExplicitBindings();
-        Properties properties = new Properties();
-        try {
-            properties.load(new InputStreamReader(new BufferedInputStream(getClass().getResourceAsStream(PropsValues.PORTAL_PROPERTIES)), Charsets.UTF_8));
-            Names.bindProperties(binder(), properties);
-        } catch (IOException e) {
-            super.addError(e);
-        }
+
+        Names.bindProperties(binder(), PropsValues.PropsUtil.properties);
+
         bindInterceptor(Matchers.annotatedWith(Service.class), new ServiceMethodMatcher(), new ServiceMethodInterceptor());
-        bind(DataSource.class).toProvider(PortalDataSourceProvider.class).in(Singleton.class);
 
-        DataSourceTransactionManager ptm = new PortalDataSourceTransactionManager();
-        requestInjection(ptm);
-
-        bindInterceptor(Matchers.any(), Matchers.annotatedWith(Transactional.class), new TransactionInterceptor(ptm, new AnnotationTransactionAttributeSource()));
-
-        bind(JdbcTemplate.class).toProvider(JdbcTemplateProvider.class).in(Singleton.class);
+        install(new DatabaseModule());
 
         bind(MBeanServer.class).toProvider(new Provider<MBeanServer>() {
             @Override
@@ -151,7 +106,7 @@ public class PortalModule extends AbstractModule {
 
         bind(PageLayoutRepository.class).in(Singleton.class);
 
-        bind(ee.midaiganes.services.ServletContextResourceRepository.class).in(Singleton.class);
+        bind(ServletContextResourceRepository.class).in(Singleton.class);
 
         bind(ResourceRepository.class).in(Singleton.class);
         bind(ResourceDao.class).in(Singleton.class);
@@ -178,8 +133,6 @@ public class PortalModule extends AbstractModule {
         bind(ThemeVariablesService.class).in(Singleton.class);
 
         bind(PortletURLFactory.class).in(Singleton.class);
-
-        bindListener(Matchers.any(), new ResourceTypeListener());
 
         bind(SingleVmPool.class).in(Singleton.class);
     }
