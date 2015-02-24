@@ -71,12 +71,7 @@ public class PortalPluginListener implements ServletContextListener {
     }
 
     private void autowire(ServletContext sc) {
-        GuiceUtil.getInjector(getPortalServletContext(sc)).injectMembers(this);
-    }
-
-    private ServletContext getPortalServletContext(ServletContext sc) {
-        // return sc.getContext(PropsValues.PORTAL_CONTEXT);TODO
-        return sc;
+        GuiceUtil.getPortalInjector(sc).injectMembers(this);
     }
 
     private void initThemes(ServletContext sc) {

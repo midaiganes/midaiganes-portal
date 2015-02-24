@@ -10,8 +10,8 @@
 		<conf name="gen"/>
 		<conf name="global"/><!-- global webapps dependencies -->
 		<conf name="server"/><!-- server dependencied -->
-		<conf name="runtime" extends="global"/>
-		<conf name="compile" extends="runtime,server,aspect"/>
+		<conf name="runtime"/>
+		<conf name="compile" extends="runtime,global,server,aspect"/>
 		<conf name="test" extends="compile"/>
 		<conf name="dbupdate"/>
 		<conf name="aspect" />

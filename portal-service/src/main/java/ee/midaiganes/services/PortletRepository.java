@@ -81,7 +81,7 @@ public class PortletRepository implements PortletRegistryRepository {
         try {
             PortletAppType portletAppType = XmlUtil.unmarshal(PortletAppType.class, portletXmlInputStream);
             if (portletAppType != null) {
-                initializePortletApp(servletContext, portletAppType, GuiceUtil.getInjector(servletContext));
+                initializePortletApp(servletContext, portletAppType, GuiceUtil.getCurrentOrPortalInjector(servletContext));
             }
         } catch (JAXBException e) {
             log.error(e.getMessage(), e);
@@ -101,7 +101,7 @@ public class PortletRepository implements PortletRegistryRepository {
             if (entry.getContextWithSlash().equals(contextPath)) {
                 try {
                     writeLock.lock();
-                    PortletAndConfiguration conf = null;
+                    PortletAndConfiguration conf;
                     try {
                         conf = portlets.remove(entry);
                     } finally {
@@ -193,7 +193,7 @@ public class PortletRepository implements PortletRegistryRepository {
         for (InitParamType ipt : portletType.getInitParam()) {
             if (GUICE_PORTLET_MODULE_CLASS.equals(ipt.getName().getValue())) {
                 String guicePortletModuleClassName = ipt.getValue().getValue();
-                Class<?> guicePortletModuleClass = Class.forName(guicePortletModuleClassName);
+                Class<?> guicePortletModuleClass = Class.forName(guicePortletModuleClassName, true, Thread.currentThread().getContextClassLoader());
                 if (Module.class.isAssignableFrom(guicePortletModuleClass)) {
                     try {
                         return injector.createChildInjector((Module) guicePortletModuleClass.newInstance());
@@ -208,14 +208,12 @@ public class PortletRepository implements PortletRegistryRepository {
     }
 
     private PortletName initializePortlet(ServletContext servletContext, PortletType portletType, Injector injector) throws ClassNotFoundException {
-        Class<?> obj = Class.forName(portletType.getPortletClass());
+        Class<?> obj = Class.forName(portletType.getPortletClass(), true, Thread.currentThread().getContextClassLoader());
         if (Portlet.class.isAssignableFrom(obj)) {
             @SuppressWarnings("unchecked")
             final Class<? extends Portlet> portletClass = (Class<? extends Portlet>) obj;
             try {
                 Injector portletInjector = getPortletInjector(portletClass, portletType, injector);
-                // injector.createChildInjector(new
-                // PortletModule(portletClass));
                 Portlet portlet = portletInjector.getInstance(Portlet.class);
                 PortletConfig portletConfig = getPortletConfig(servletContext, portletType);
                 PortletName portletName = new PortletName(getContextPathName(servletContext), portletType.getPortletName().getValue());

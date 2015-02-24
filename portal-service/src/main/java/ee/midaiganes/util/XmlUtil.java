@@ -23,7 +23,7 @@ public class XmlUtil {
     }
 
     private static JAXBContext getContext(Class<?> clazz) throws JAXBException {
-        return JAXBContext.newInstance(clazz.getPackage().getName());
+        return JAXBContext.newInstance(clazz.getPackage().getName(), clazz.getClassLoader());
     }
 
     private static Unmarshaller getUnmarshaller(Class<?> clazz) throws JAXBException {

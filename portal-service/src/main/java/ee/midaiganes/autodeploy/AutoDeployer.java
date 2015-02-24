@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.ClosedWatchServiceException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -133,7 +134,15 @@ public class AutoDeployer implements Runnable {
                     doWithZipEntry(warFile, tempZipFileStream, e.nextElement());
                 }
             }
-            Files.move(tempZipFile.file.toPath(), this.webappsDir.resolve(childFile.getName()), StandardCopyOption.ATOMIC_MOVE);
+            Path source = tempZipFile.file.toPath();
+            Path target = this.webappsDir.resolve(childFile.getName());
+            try {
+                Files.move(source, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+            } catch (AtomicMoveNotSupportedException e) {
+                log.debug(e.getMessage(), e);
+                Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
+            }
+            log.info("Moved '{}' to '{}'.", source, target);
         }
     }
 

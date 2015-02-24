@@ -73,6 +73,7 @@
 		<delete dir="dist"/>
 		<delete dir="portal-gen/build"/>
 		<delete dir="portal-service/build"/>
+		<delete dir="portal-service-shared/build"/>
 		<delete dir="portal-web/webapp/WEB-INF/lib"/>
 	</target>
 	
@@ -109,6 +110,14 @@
 	
 	<target name="ivy-path-compile" depends="init">
 		<ivy:cachepath pathid="ivy.compile.path" conf="compile"/>
+	</target>
+	
+	<target name="ivy-path-global" depends="init">
+		<ivy:cachepath pathid="ivy.global.path" conf="global"/>
+	</target>
+	
+	<target name="ivy-path-server" depends="init">
+		<ivy:cachepath pathid="ivy.server.path" conf="server"/>
 	</target>
 	
 	<target name="ivy-path-test" depends="init">
@@ -152,9 +161,25 @@
 		<jar basedir="portal-gen/build/classes" destfile="portal-gen/build/portal-gen.jar" encoding="UTF-8" />
 	</target>
 	
-	<target name="compile-service-classpath" depends="jar-gen, ivy-path-compile">
+	<target name="compile-service-shared-classpath" depends="ivy-path-global, ivy-path-server">
+		<path id="compile.service.shared">
+			<path refid="ivy.global.path"/>
+			<path refid="ivy.server.path"/>
+		</path>
+	</target>
+	
+	<target name="compile-service-shared" depends="compile-service-shared-classpath">
+		<compile-basedir basedir="portal-service-shared" classpathref="compile.service.shared"/>
+	</target>
+	
+	<target name="jar-service-shared" depends="compile-service-shared">
+		<jar basedir="portal-service-shared/build/classes" destfile="portal-service-shared/build/portal-service-shared.jar" encoding="UTF-8" />
+	</target>
+	
+	<target name="compile-service-classpath" depends="jar-gen, ivy-path-compile, jar-service-shared">
 		<path id="compile.classpath">
 			<fileset file="portal-gen/build/portal-gen.jar" />
+			<fileset file="portal-service-shared/build/portal-service-shared.jar" />
 			<path refid="ivy.compile.path" />
 		</path>
 	</target>
@@ -245,6 +270,7 @@
 			<pathelement location="portal-server-jetty/build/classes"/>
 			<path refid="server.ivy.path" />
 			<path refid="portal.global.ivy.path" />
+			<fileset file="portal-service-shared/build/portal-service-shared.jar" />
 		</path>
 		<!-- property name="javaweaver.path" location="${jetty.run.dir}/spring-instrument.jar" / -->
 		<property name="javaweaver.path" location="${jetty.run.dir}/aspectjweaver.jar" />
@@ -257,6 +283,7 @@
 			<sysproperty key="deploy.dir" value="${deploy.dir}"/>
 			<sysproperty key="java.security.policy" value="${project.basedir}/conf/catalina.policy"/>
 			<sysproperty key="file.encoding" value="UTF-8"/>
+			<sysproperty key="portal.context" value="${portal.context}"/>
 			<jvmarg line="-javaagent:${javaweaver.path}"/>
 			<jvmarg line="${jetty.jvm.args}"/>
 		</java>

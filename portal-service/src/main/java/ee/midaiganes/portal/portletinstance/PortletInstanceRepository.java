@@ -48,6 +48,7 @@ public class PortletInstanceRepository {
 
     public void addDefaultPortletInstance(PortletName portletName) {
         try {
+            // TODO fix duplicatekeyexception @ transactional
             addPortletInstance(portletName, StringPool.DEFAULT_PORTLET_WINDOWID);
         } catch (DuplicateKeyException e) {
             log.debug(e.getMessage(), e);

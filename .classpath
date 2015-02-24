@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry kind="src" path="portal-service-shared/src/main/java"/>
 	<classpathentry kind="src" path="portal-service/src/main/java"/>
 	<classpathentry kind="src" path="portal-gen/src/main/java"/>
 	<classpathentry kind="src" path="portal-service/src/test/java"/>
 	<classpathentry kind="src" path="portal-server-jetty/src/main/java"/>
+	<classpathentry kind="src" path="portal-service/src/uitest/java"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.apache.ivyde.eclipse.cpcontainer.IVYDE_CONTAINER/?project=portal&amp;ivyXmlPath=ivy.xml&amp;confs=*"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
