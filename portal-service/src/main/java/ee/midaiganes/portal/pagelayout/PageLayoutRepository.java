@@ -17,10 +17,11 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 
 import ee.midaiganes.generated.xml.pagelayout.MidaiganesLayout;
+import ee.midaiganes.services.PageLayoutRegistryRepository;
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.XmlUtil;
 
-public class PageLayoutRepository {
+public class PageLayoutRepository implements PageLayoutRegistryRepository {
     private static final Logger log = LoggerFactory.getLogger(PageLayoutRepository.class);
     private final ConcurrentHashMap<PageLayoutName, PageLayout> pageLayouts = new ConcurrentHashMap<>();
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
@@ -84,6 +85,7 @@ public class PageLayoutRepository {
         return new PageLayout(new PageLayoutName(context, l.getId()), path);
     }
 
+    @Override
     public void registerPageLayouts(String contextPath, InputStream pageLayoutXmlStream) {
         try {
             MidaiganesLayout pageLayouts = XmlUtil.unmarshalWithoutJAXBElement(MidaiganesLayout.class, pageLayoutXmlStream);
@@ -99,6 +101,7 @@ public class PageLayoutRepository {
         }
     }
 
+    @Override
     public void unregisterPageLayouts(String contextPath) {
         for (PageLayout pageLayout : getPageLayouts()) {
             if (pageLayout.getPageLayoutName().getContextWithSlash().equals(contextPath)) {

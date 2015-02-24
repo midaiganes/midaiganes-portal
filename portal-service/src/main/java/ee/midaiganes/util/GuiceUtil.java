@@ -2,12 +2,13 @@ package ee.midaiganes.util;
 
 import javax.servlet.ServletContext;
 
+import com.google.common.base.Preconditions;
 import com.google.inject.Injector;
 
-import ee.midaiganes.servlet.listener.GuiceContextLoaderListener;
-
 public class GuiceUtil {
+    public static final String SERVLET_ATTRIBUTE = GuiceUtil.class.getName();
+
     public static Injector getInjector(ServletContext sc) {
-        return (Injector) (sc.getAttribute(GuiceContextLoaderListener.SERVLET_ATTRIBUTE));
+        return Preconditions.checkNotNull((Injector) (sc.getAttribute(GuiceUtil.SERVLET_ATTRIBUTE)));
     }
 }

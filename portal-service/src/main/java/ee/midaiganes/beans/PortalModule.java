@@ -41,10 +41,13 @@ import ee.midaiganes.secureservices.SecureLayoutRepository;
 import ee.midaiganes.secureservices.SecurePortletRepository;
 import ee.midaiganes.services.DbInstallService;
 import ee.midaiganes.services.LanguageRepository;
+import ee.midaiganes.services.PageLayoutRegistryRepository;
 import ee.midaiganes.services.PortletPreferencesRepository;
+import ee.midaiganes.services.PortletRegistryRepository;
 import ee.midaiganes.services.PortletRepository;
 import ee.midaiganes.services.PortletURLFactory;
 import ee.midaiganes.services.ServletContextResourceRepository;
+import ee.midaiganes.services.ThemeRegistryRepository;
 import ee.midaiganes.services.ThemeVariablesService;
 import ee.midaiganes.services.portal.PortalService;
 import ee.midaiganes.services.portal.PortalServiceImpl;
@@ -90,8 +93,10 @@ public class PortalModule extends AbstractModule {
         bind(LayoutSetDao.class).in(Singleton.class);
 
         bind(ThemeRepository.class).in(Singleton.class);
+        bind(ThemeRegistryRepository.class).toProvider(getProvider(ThemeRepository.class)).in(Singleton.class);
 
         bind(PortletRepository.class).in(Singleton.class);
+        bind(PortletRegistryRepository.class).toProvider(getProvider(PortletRepository.class)).in(Singleton.class);
 
         bind(SecurePortletRepository.class).in(Singleton.class);
 
@@ -105,6 +110,7 @@ public class PortalModule extends AbstractModule {
         bind(LanguageRepository.class).in(Singleton.class);
 
         bind(PageLayoutRepository.class).in(Singleton.class);
+        bind(PageLayoutRegistryRepository.class).toProvider(getProvider(PageLayoutRepository.class)).in(Singleton.class);
 
         bind(ServletContextResourceRepository.class).in(Singleton.class);
 

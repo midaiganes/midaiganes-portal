@@ -9,15 +9,15 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Injector;
 
 import ee.midaiganes.beans.Utils;
+import ee.midaiganes.util.GuiceUtil;
 
 public class GuiceContextLoaderListener implements ServletContextListener {
     private static final Logger log = LoggerFactory.getLogger(GuiceContextLoaderListener.class);
-    public static final String SERVLET_ATTRIBUTE = GuiceContextLoaderListener.class.getName();
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         final Injector injector = Utils.getInstance();
-        sce.getServletContext().setAttribute(SERVLET_ATTRIBUTE, injector);
+        sce.getServletContext().setAttribute(GuiceUtil.SERVLET_ATTRIBUTE, injector);
     }
 
     @Override

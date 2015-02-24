@@ -22,10 +22,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 
 import ee.midaiganes.generated.xml.theme.MidaiganesTheme;
+import ee.midaiganes.services.ThemeRegistryRepository;
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.XmlUtil;
 
-public class ThemeRepository {
+public class ThemeRepository implements ThemeRegistryRepository {
     private static final Logger log = LoggerFactory.getLogger(ThemeRepository.class);
     private final Map<ThemeName, Theme> themes = new ConcurrentHashMap<>();
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
@@ -72,6 +73,7 @@ public class ThemeRepository {
         return new Theme(new ThemeName(contextPath, theme.getId()), theme.getPath(), theme.getJavascriptPath(), theme.getCssPath());
     }
 
+    @Override
     public void registerThemes(String contextPath, InputStream themeXmlInputStream) {
         try {
             MidaiganesTheme theme = XmlUtil.unmarshalWithoutJAXBElement(MidaiganesTheme.class, themeXmlInputStream);
@@ -87,6 +89,7 @@ public class ThemeRepository {
         }
     }
 
+    @Override
     public void unregisterThemes(String contextPath) {
         try {
             lock.writeLock().lock();

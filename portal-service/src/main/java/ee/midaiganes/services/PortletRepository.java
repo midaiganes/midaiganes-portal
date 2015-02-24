@@ -49,7 +49,7 @@ import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.TimeProviderUtil;
 import ee.midaiganes.util.XmlUtil;
 
-public class PortletRepository {
+public class PortletRepository implements PortletRegistryRepository {
     private static final String GUICE_PORTLET_MODULE_CLASS = "guice-portlet-module-class";
     private static final Logger log = LoggerFactory.getLogger(PortletRepository.class);
     private final ConcurrentHashMap<PortletName, PortletAndConfiguration> portlets = new ConcurrentHashMap<>();
@@ -76,6 +76,7 @@ public class PortletRepository {
         }
     }
 
+    @Override
     public void registerPortlets(ServletContext servletContext, InputStream portletXmlInputStream) {
         try {
             PortletAppType portletAppType = XmlUtil.unmarshal(PortletAppType.class, portletXmlInputStream);
@@ -92,6 +93,8 @@ public class PortletRepository {
     // TODO Before the portlet container calls the destroy method, it should
     // allow any threads that are currently processing requests within the
     // portlet object to complete execution
+
+    @Override
     public void unregisterPortlets(ServletContext sc) {
         String contextPath = sc.getContextPath();
         for (PortletName entry : getPortletNames()) {

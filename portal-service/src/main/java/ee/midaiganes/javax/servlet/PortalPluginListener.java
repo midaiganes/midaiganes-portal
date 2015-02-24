@@ -12,22 +12,22 @@ import javax.servlet.ServletContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.portal.pagelayout.PageLayoutRepository;
-import ee.midaiganes.portal.theme.ThemeRepository;
-import ee.midaiganes.services.PortletRepository;
+import ee.midaiganes.services.PageLayoutRegistryRepository;
+import ee.midaiganes.services.PortletRegistryRepository;
+import ee.midaiganes.services.ThemeRegistryRepository;
 import ee.midaiganes.util.GuiceUtil;
 
 public class PortalPluginListener implements ServletContextListener {
     private static final Logger log = LoggerFactory.getLogger(PortalPluginListener.class);
 
     @Inject
-    private PortletRepository portletRepository;
+    private PortletRegistryRepository portletRepository;
 
     @Inject
-    private ThemeRepository themeRepository;
+    private ThemeRegistryRepository themeRepository;
 
     @Inject
-    private PageLayoutRepository pageLayoutRepository;
+    private PageLayoutRegistryRepository pageLayoutRepository;
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
