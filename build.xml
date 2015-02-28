@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="portal" default="deploy" xmlns:ivy="antlib:org.apache.ivy.ant" xmlns:fa="antlib:de.thetaphi.forbiddenapis">
 	<property name="project.basedir" location="${basedir}" />
-	<property name="jdk.version" value="1.7"/>
+	<property name="jdk.version" value="1.8"/>
 
 	<property file="conf/portal.properties" />
 	<property name="liquibase.changeLogFile" value="portal-db/liquibase/master.xml" />
@@ -17,42 +17,42 @@
 	
 	<path id="empty.path" />
 	
-    <macrodef name="compile">
-        <attribute name="destdir" />
-    	<attribute name="srcdir" />
-    	<attribute name="classpathref" default="empty.path"/>
-        <sequential>
-        	<mkdir dir="@{destdir}"/>
-    		<javac
-    			classpathref="@{classpathref}"
-    			compiler="modern"
-    			debug="true"
-    			debuglevel="lines,vars,source"
-    			deprecation="true"
-    			destdir="@{destdir}"
-    			encoding="UTF-8"
-    			fork="false"
-    			includeantruntime="false"
-    			includejavaruntime="false"
-    			listfiles="true"
-    			nowarn="false"
-    			source="${jdk.version}"
-    			target="${jdk.version}"
-    			srcdir="@{srcdir}"
-    			>
-    			<compilerarg value="-Xlint:serial"/>
-    			<compilerarg value="-Xlint:deprecation"/>
-    			<compilerarg value="-Xlint:cast"/>
-    			<compilerarg value="-Xlint:finally"/>
-    			<compilerarg value="-Xlint:overrides"/>
-    			<compilerarg value="-Xlint:rawtypes"/>
-    			<compilerarg value="-Xlint:static"/>
-    			<compilerarg value="-Xlint:try"/>
-    			<compilerarg value="-Xlint:unchecked"/>
-    			<compilerarg value="-Xlint:varargs"/>
-    		</javac>
-        </sequential>
-    </macrodef>
+	<macrodef name="compile">
+		<attribute name="destdir" />
+		<attribute name="srcdir" />
+		<attribute name="classpathref" default="empty.path"/>
+		<sequential>
+			<mkdir dir="@{destdir}"/>
+			<javac
+				classpathref="@{classpathref}"
+				compiler="modern"
+				debug="true"
+				debuglevel="lines,vars,source"
+				deprecation="true"
+				destdir="@{destdir}"
+				encoding="UTF-8"
+				fork="false"
+				includeantruntime="false"
+				includejavaruntime="false"
+				listfiles="true"
+				nowarn="false"
+				source="${jdk.version}"
+				target="${jdk.version}"
+				srcdir="@{srcdir}"
+				>
+				<compilerarg value="-Xlint:serial"/>
+				<compilerarg value="-Xlint:deprecation"/>
+				<compilerarg value="-Xlint:cast"/>
+				<compilerarg value="-Xlint:finally"/>
+				<compilerarg value="-Xlint:overrides"/>
+				<compilerarg value="-Xlint:rawtypes"/>
+				<compilerarg value="-Xlint:static"/>
+				<compilerarg value="-Xlint:try"/>
+				<compilerarg value="-Xlint:unchecked"/>
+				<compilerarg value="-Xlint:varargs"/>
+			</javac>
+		</sequential>
+	</macrodef>
 	
 	<macrodef name="compile-basedir">
 		<attribute name="basedir"/>
@@ -202,10 +202,10 @@
 		</zip>
 	</target>
 	
-    <target name="build" depends="jar-service" description="build">
-    	<!-- jstl.jar doesn't work without version -->
+	<target name="build" depends="jar-service" description="build">
+		<!-- jstl.jar doesn't work without version -->
 		<ivy:retrieve pattern="portal-web/webapp/WEB-INF/lib/[artifact]-[revision].[ext]" sync="false" type="jar,bundle" conf="runtime" file="ivy.xml"/>
-    </target>
+	</target>
 	
 	<target name="war" depends="build" description="war">
 		<mkdir dir="dist"/>
@@ -290,9 +290,9 @@
 	</target>
 	
 	<target name="report" depends="init">
-	    <mkdir dir="report" />
-	    <ivy:resolve />
-	    <ivy:report todir="report" />
+		<mkdir dir="report" />
+		<ivy:resolve />
+		<ivy:report todir="report" />
 	</target>
 	
 	

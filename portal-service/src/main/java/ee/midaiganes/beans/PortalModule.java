@@ -84,7 +84,7 @@ public class PortalModule extends AbstractModule {
             }
         }).in(Singleton.class);
 
-        bind(DbInstallService.class).asEagerSingleton();
+        bind(DbInstallService.class).in(Singleton.class);
 
         bind(UserRepository.class).in(Singleton.class);
         bind(UserDao.class).in(Singleton.class);
