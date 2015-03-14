@@ -83,7 +83,7 @@ public class PortletApp {
             PortletPreferences portletPreferences = getPortletPreferences();
             RenderRequestImpl renderRequest = getRenderRequest(request, resp, portletPreferences);
             portlet.render(renderRequest, getRenderResponse(resp, renderRequest));
-            ThemeUtil.includePortletJsp(request, response, portletInstance, new String(resp.getBytes(), resp.getCharacterEncoding()));
+            ThemeUtil.includePortletJsp(request, response, portletInstance, resp.getContentAsString(resp.getCharacterEncoding()));
         } catch (ServletException | IOException | RuntimeException | PortletException e) {
             log.error(e.getMessage(), e);
         }
