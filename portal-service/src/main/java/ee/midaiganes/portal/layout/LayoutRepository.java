@@ -3,7 +3,10 @@ package ee.midaiganes.portal.layout;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
@@ -14,11 +17,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.primitives.Longs;
 
-import ee.midaiganes.cache.Element;
-import ee.midaiganes.cache.SingleVmCache;
-import ee.midaiganes.cache.SingleVmPool;
 import ee.midaiganes.portal.pagelayout.PageLayoutName;
 import ee.midaiganes.portal.pagelayout.PageLayoutRepository;
 import ee.midaiganes.portal.theme.Theme;
@@ -28,6 +33,7 @@ import ee.midaiganes.services.exceptions.IllegalFriendlyUrlException;
 import ee.midaiganes.services.exceptions.IllegalPageLayoutException;
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.StringUtil;
+import gnu.trove.map.hash.TLongObjectHashMap;
 
 public class LayoutRepository {
     private static final Logger log = LoggerFactory.getLogger(LayoutRepository.class);
@@ -39,107 +45,78 @@ public class LayoutRepository {
     private final ThemeRepository themeRepository;
     private final PageLayoutRepository pageLayoutRepository;
 
-    private final SingleVmCache cache;
-    private final SingleVmCache layoutTitleCache;
-    private final SingleVmCache layoutCache;
+    private final LoadingCache<Long, ImmutableList<LayoutTitle>> layoutTitleCache;
+    private final LoadingCache<Long, Layout> layoutCache;
+    private final LoadingCache<Long, ImmutableList<Layout>> layoutSetLayouts;
 
     @Inject
-    public LayoutRepository(LayoutDao layoutDao, ThemeRepository themeRepository, PageLayoutRepository pageLayoutRepository, SingleVmPool singleVmPool) {
+    public LayoutRepository(LayoutDao layoutDao, ThemeRepository themeRepository, PageLayoutRepository pageLayoutRepository) {
         this.layoutDao = layoutDao;
         this.themeRepository = themeRepository;
         this.pageLayoutRepository = pageLayoutRepository;
-        this.cache = singleVmPool.getCache(LayoutRepository.class.getName());
-        this.layoutTitleCache = singleVmPool.getCache(LayoutRepository.class.getName() + ".LayoutTitle");
-        this.layoutCache = singleVmPool.getCache(LayoutRepository.class.getName() + ".Layout");
+
+        this.layoutTitleCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new CacheLoader<Long, ImmutableList<LayoutTitle>>() {
+            @Override
+            public ImmutableList<LayoutTitle> load(Long layoutId) {
+                return ImmutableList.copyOf(layoutDao.loadLayoutTitles(layoutId.longValue()));
+            }
+
+            @Override
+            public Map<Long, ImmutableList<LayoutTitle>> loadAll(Iterable<? extends Long> layoutIds) throws Exception {
+                TLongObjectHashMap<List<LayoutTitle>> map = layoutDao.loadLayoutTitles(ImmutableList.copyOf(layoutIds));
+                Map<Long, ImmutableList<LayoutTitle>> result = new HashMap<>();
+                for (Long layoutId : layoutIds) {
+                    List<LayoutTitle> titles = map.get(layoutId.longValue());
+                    result.put(layoutId, titles == null ? ImmutableList.of() : ImmutableList.copyOf(titles));
+                }
+                return result;
+            }
+        });
+        this.layoutCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new CacheLoader<Long, Layout>() {
+            @Override
+            public Layout load(Long layoutId) throws Exception {
+                Layout layout = layoutDao.loadLayout(layoutId.longValue());
+                return layout.withLayoutTitles(layoutTitleCache.getUnchecked(layoutId));
+            }
+
+            @Override
+            public Map<Long, Layout> loadAll(Iterable<? extends Long> layoutIds) throws Exception {
+                List<Layout> layouts = layoutDao.loadLayouts(ImmutableList.copyOf(layoutIds));
+                ImmutableMap<Long, ImmutableList<LayoutTitle>> titlesMap = layoutTitleCache.getAll(layoutIds);
+                Map<Long, Layout> result = new HashMap<>(layouts.size());
+                for (Layout l : layouts) {
+                    result.put(Long.valueOf(l.getId()), l.withLayoutTitles(titlesMap.get(Long.valueOf(l.getId()))));
+                }
+                return result;
+            }
+        });
+
+        this.layoutSetLayouts = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new CacheLoader<Long, ImmutableList<Layout>>() {
+            @Override
+            public ImmutableList<Layout> load(Long key) throws Exception {
+                long[] layoutIds = layoutDao.loadLayoutIds(key.longValue()).toArray();
+                return ImmutableList.copyOf(layoutCache.getAll(Longs.asList(layoutIds)).values());
+            }
+        });
     }
 
     @Nonnull
     public List<LayoutTitle> getLayoutTitles(long layoutId) {
-        List<LayoutTitle> list = getLayoutTitlesFromCache(layoutId);
-        if (list == null) {
-            return loadAndCacheLayoutTitles(layoutId);
-        }
-        return list;
-    }
-
-    @Nullable
-    private List<LayoutTitle> getLayoutTitlesFromCache(long layoutId) {
-        Element el = layoutTitleCache.getElement(Long.toString(layoutId));
-        return el != null ? el.<List<LayoutTitle>> get() : null;
+        return this.layoutTitleCache.getUnchecked(Long.valueOf(layoutId));
     }
 
     @Nonnull
-    private List<LayoutTitle> loadAndCacheLayoutTitles(long layoutId) {
-        List<LayoutTitle> list = null;
-        try {
-            list = ImmutableList.copyOf(layoutDao.loadLayoutTitles(layoutId));
-        } finally {
-            list = list == null ? ImmutableList.<LayoutTitle> of() : list;
-            layoutTitleCache.put(Long.toString(layoutId), list);
-        }
-        return list;
-    }
-
-    @Nullable
     public Layout getLayout(long layoutId) {
-        Element el = layoutCache.getElement(Long.toString(layoutId));
-        if (el != null) {
-            return el.get();
-        }
-        Layout layout = null;
-        try {
-            layout = layoutDao.loadLayout(layoutId);
-            if (layout != null) {
-                layout = layout.withLayoutTitles(getLayoutTitles(layoutId));
-            }
-        } finally {
-            layoutCache.put(Long.toString(layoutId), layout);
-        }
-        return layout;
-    }
-
-    public List<Layout> getLayouts(long[] layoutIds) {
-        if (layoutIds != null) {
-            List<Layout> list = new ArrayList<>(layoutIds.length);
-            for (long id : layoutIds) {
-                list.add(getLayout(id));
-            }
-            return list;
-        }
-        return Collections.emptyList();
+        return this.layoutCache.getUnchecked(Long.valueOf(layoutId));
     }
 
     public List<Layout> getLayouts(long layoutSetId) {
-        String cacheKey = Long.toString(layoutSetId);
-        Element el = cache.getElement(cacheKey);
-        if (el != null) {
-            return getLayouts(el.<long[]> get());
-        }
-        List<Layout> result = null;
-        try {
-            List<Layout> layouts = layoutDao.loadLayouts(layoutSetId);
-            long[] layoutIds = new long[layouts.size()];
-            int i = 0;
-            result = new ArrayList<>(layouts.size());
-            for (Layout layout : layouts) {
-                layout = layout.withLayoutTitles(getLayoutTitles(layout.getId()));
-                result.add(layout);
-                layoutCache.put(Long.toString(layout.getId()), layout);
-                layoutIds[i++] = layout.getId();
-            }
-            cache.put(cacheKey, layoutIds);
-        } catch (RuntimeException e) {
-            cache.put(cacheKey, null);
-        } finally {
-            result = result == null ? Collections.<Layout> emptyList() : result;
-        }
-
-        return result;
+        return this.layoutSetLayouts.getUnchecked(Long.valueOf(layoutSetId));
     }
 
     public List<Layout> getChildLayouts(long layoutSetId, Long parentId) {
         List<Layout> layouts = new ArrayList<>();
-        for (Layout layout : getLayouts(layoutSetId)) {
+        for (Layout layout : this.layoutSetLayouts.getUnchecked(Long.valueOf(layoutSetId))) {
             Long layoutParentId = layout.getParentId();
             if (parentId == null) {
                 if (layoutParentId == null) {
@@ -160,7 +137,7 @@ public class LayoutRepository {
 
     @Nullable
     public Layout getLayout(long layoutSetId, String friendlyUrl) {
-        for (Layout layout : getLayouts(layoutSetId)) {
+        for (Layout layout : this.layoutSetLayouts.getUnchecked(Long.valueOf(layoutSetId))) {
             if (layout.getFriendlyUrl().equals(friendlyUrl)) {
                 return layout;
             }
@@ -171,49 +148,43 @@ public class LayoutRepository {
     public long addLayout(long layoutSetId, String friendlyUrl, ThemeName themeName, PageLayoutName pageLayoutName, Long parentId, long defaultLayoutTitleLanguageId)
             throws IllegalFriendlyUrlException, IllegalPageLayoutException {
         validateLayoutData(friendlyUrl, pageLayoutName);
-        try {
-            return layoutDao.addLayout(layoutSetId, friendlyUrl, themeName, pageLayoutName, parentId, defaultLayoutTitleLanguageId);
-        } finally {
-            cache.clear();
-        }
+        long layoutId = layoutDao.addLayout(layoutSetId, friendlyUrl, themeName, pageLayoutName, parentId, defaultLayoutTitleLanguageId);
+        this.layoutTitleCache.invalidate(Long.valueOf(layoutId));
+        this.layoutSetLayouts.invalidate(Long.valueOf(layoutSetId));
+        return layoutId;
     }
 
     public void updateLayout(String friendlyUrl, PageLayoutName pageLayoutName, Long parentId, long defaultLayoutTitleLanguageId, long id) throws IllegalFriendlyUrlException,
             IllegalPageLayoutException {
         validateLayoutData(friendlyUrl, pageLayoutName);
-        try {
-            layoutDao.updateLayout(friendlyUrl, pageLayoutName, parentId, defaultLayoutTitleLanguageId, id);
-        } finally {
-            cache.clear();
-            layoutCache.remove(Long.toString(id));
-        }
+        layoutDao.updateLayout(friendlyUrl, pageLayoutName, parentId, defaultLayoutTitleLanguageId, id);
+        this.layoutSetLayouts.invalidateAll();
+        this.layoutCache.invalidate(Long.valueOf(id));
+        this.layoutTitleCache.invalidate(Long.valueOf(id));
     }
 
     public void addLayoutTitle(long layoutId, long languageId, String title) {
-        try {
-            layoutDao.addLayoutTitle(layoutId, languageId, title);
-        } finally {
-            layoutCache.remove(Long.toString(layoutId));
-            layoutTitleCache.remove(Long.toString(layoutId));
-        }
+        layoutDao.addLayoutTitle(layoutId, languageId, title);
+
+        this.layoutSetLayouts.invalidateAll();
+        this.layoutCache.invalidate(Long.valueOf(layoutId));
+        this.layoutTitleCache.invalidate(Long.valueOf(layoutId));
     }
 
     public void updateLayoutTitle(long layoutId, long languageId, String title) {
-        try {
-            layoutDao.updateLayoutTitle(layoutId, languageId, title);
-        } finally {
-            layoutTitleCache.remove(Long.toString(layoutId));
-            layoutCache.remove(Long.toString(layoutId));
-        }
+        layoutDao.updateLayoutTitle(layoutId, languageId, title);
+
+        this.layoutSetLayouts.invalidateAll();
+        this.layoutCache.invalidate(Long.valueOf(layoutId));
+        this.layoutTitleCache.invalidate(Long.valueOf(layoutId));
     }
 
     public void deleteLayoutTitle(long layoutId, long languageId) {
-        try {
-            layoutDao.deleteLayoutTitle(layoutId, languageId);
-        } finally {
-            layoutTitleCache.remove(Long.toString(layoutId));
-            layoutCache.remove(Long.toString(layoutId));
-        }
+        layoutDao.deleteLayoutTitle(layoutId, languageId);
+
+        this.layoutSetLayouts.invalidateAll();
+        this.layoutCache.invalidate(Long.valueOf(layoutId));
+        this.layoutTitleCache.invalidate(Long.valueOf(layoutId));
     }
 
     private void validateLayoutData(final String friendlyUrl, final PageLayoutName pageLayoutName) throws IllegalFriendlyUrlException, IllegalPageLayoutException {
@@ -226,26 +197,24 @@ public class LayoutRepository {
     }
 
     public void updatePageLayout(long layoutId, PageLayoutName pageLayoutName) {
-        try {
-            layoutDao.updatePageLayout(layoutId, pageLayoutName);
-        } finally {
-            layoutCache.remove(Long.toString(layoutId));
-        }
+        layoutDao.updatePageLayout(layoutId, pageLayoutName);
+
+        this.layoutSetLayouts.invalidateAll();
+        this.layoutCache.invalidate(Long.valueOf(layoutId));
+        this.layoutTitleCache.invalidate(Long.valueOf(layoutId));
     }
 
     @Transactional
     public void deleteLayout(long layoutId) {
         Layout layout = getLayout(layoutId);
         if (layout != null) {
-            try {
-                int deleted = layoutDao.deleteLayout(layoutId);
-                int updated = layoutDao.moveLayoutsUp(layout.getLayoutSetId(), layout.getParentId(), layout.getNr());
-                log.debug("Deleted {} and updated {} layout(s)", Integer.valueOf(deleted), Integer.valueOf(updated));
-            } finally {
-                cache.clear();
-                layoutTitleCache.remove(Long.toString(layoutId));
-                layoutCache.remove(Long.toString(layoutId));
-            }
+            int deleted = layoutDao.deleteLayout(layoutId);
+            int updated = layoutDao.moveLayoutsUp(layout.getLayoutSetId(), layout.getParentId(), layout.getNr());
+            log.debug("Deleted {} and updated {} layout(s)", Integer.valueOf(deleted), Integer.valueOf(updated));
+
+            this.layoutSetLayouts.invalidateAll();
+            this.layoutCache.invalidateAll();
+            this.layoutTitleCache.invalidate(Long.valueOf(layoutId));
         } else {
             throw new IllegalArgumentException("Layout not found with id " + layoutId);
         }
@@ -256,8 +225,8 @@ public class LayoutRepository {
         try {
             return layoutDao.moveLayoutUp(layoutId) == 2;
         } finally {
-            cache.clear();
-            layoutCache.clear();
+            this.layoutSetLayouts.invalidateAll();
+            this.layoutCache.invalidateAll();
         }
     }
 
@@ -265,8 +234,8 @@ public class LayoutRepository {
         try {
             return layoutDao.moveLayoutDown(layoutId) == 2;
         } finally {
-            cache.clear();
-            layoutCache.clear();
+            this.layoutSetLayouts.invalidateAll();
+            this.layoutCache.invalidateAll();
         }
     }
 

@@ -1,29 +1,40 @@
 package ee.midaiganes.portal.layout;
 
+import ee.midaiganes.portal.pagelayout.PageLayoutName;
+import ee.midaiganes.portal.theme.ThemeName;
+import ee.midaiganes.services.rowmapper.TLongArrayListResultSetExtractor;
+import ee.midaiganes.util.StringUtil;
+import gnu.trove.list.array.TLongArrayList;
+import gnu.trove.map.hash.TLongObjectHashMap;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
 import com.google.common.base.Preconditions;
 
-import ee.midaiganes.portal.pagelayout.PageLayoutName;
-import ee.midaiganes.portal.theme.ThemeName;
-
 public class LayoutDao {
     private final JdbcTemplate jdbcTemplate;
-    private static final LayoutRowMapper layoutRowMapper = new LayoutRowMapper();
     private static final LayoutTitleRowMapper layoutTitleRowMapper = new LayoutTitleRowMapper();
+    private static final LayoutRowMapper layoutRowMapper = new LayoutRowMapper();
     private static final LayoutResultSetExtractor layoutResultSetExtractor = new LayoutResultSetExtractor();
     private static final String QRY_DELETE_LAYOUT = "DELETE FROM Layout WHERE id = ?";
     private static final String QRY_UPDATE_PAGE_LAYOUT = "UPDATE Layout SET pageLayoutId = ? WHERE id = ?";
     private static final String QRY_GET_LAYOUT_TITLES = "SELECT LayoutTitle.id, LayoutTitle.languageId, LayoutTitle.layoutId, LayoutTitle.title FROM LayoutTitle WHERE LayoutTitle.layoutId = ?";
+    private static final String QRY_GET_LAYOUT_TITLES_BY_LAYOUTIDS = "SELECT LayoutTitle.id, LayoutTitle.languageId, LayoutTitle.layoutId, LayoutTitle.title FROM LayoutTitle WHERE LayoutTitle.layoutId IN";
     private static final String QRY_GET_LAYOUT_BY_ID = "SELECT Layout.id, Layout.layoutSetId, Layout.friendlyUrl, Layout.pageLayoutId, Theme.name, Theme.context, Layout.parentId, Layout.nr, Layout.defaultLayoutTitleLanguageId FROM Layout LEFT JOIN Theme ON (Layout.themeId = Theme.id) WHERE Layout.id = ?";
-    private static final String QRY_GET_LAYOUT_BY_LAYOUTSETID = "SELECT Layout.id, Layout.layoutSetId, Layout.friendlyUrl, Layout.pageLayoutId, Theme.name, Theme.context, Layout.parentId, Layout.nr, Layout.defaultLayoutTitleLanguageId FROM Layout LEFT JOIN Theme ON (Layout.themeId = Theme.id) WHERE layoutSetId = ?";
+    private static final String QRY_GET_LAYOUTS_BY_IDS = "SELECT Layout.id, Layout.layoutSetId, Layout.friendlyUrl, Layout.pageLayoutId, Theme.name, Theme.context, Layout.parentId, Layout.nr, Layout.defaultLayoutTitleLanguageId FROM Layout LEFT JOIN Theme ON (Layout.themeId = Theme.id) WHERE Layout.id IN ";
+    private static final String QRY_GET_LAYOUT_IDS_BY_LAYOUTSETID = "SELECT Layout.id FROM Layout WHERE layoutSetId = ?";
     private static final String QRY_UPDATE_LAYOUT = "UPDATE Layout SET friendlyUrl = ?, pageLayoutId = ?, parentId = ?, defaultLayoutTitleLanguageId = ? WHERE id = ?";
     private static final String QRY_MOVE_LAYOUT_UP = "UPDATE Layout AS l1 JOIN Layout AS l2 ON (l1.id = ? AND (l2.parentId = l1.parentId or (l2.parentId is null and l1.parentId is null)) and l2.nr = l1.nr - 1) SET l1.nr = l2.nr, l2.nr = l1.nr";
     private static final String QRY_MOVE_LAYOUT_DOWN = "UPDATE Layout AS l1 JOIN Layout AS l2 ON (l1.id = ? AND (l2.parentId = l1.parentId or (l2.parentId is null and l1.parentId is null)) and l2.nr = l1.nr + 1) SET l1.nr = l2.nr, l2.nr = l1.nr";
@@ -39,12 +50,36 @@ public class LayoutDao {
         return Preconditions.checkNotNull(list);
     }
 
+    public TLongObjectHashMap<List<LayoutTitle>> loadLayoutTitles(List<Long> layoutIds) {
+        return jdbcTemplate.query(QRY_GET_LAYOUT_TITLES_BY_LAYOUTIDS + "(" + StringUtil.repeat("?", ",", layoutIds.size()) + ")", layoutIds.toArray(),
+                new ResultSetExtractor<TLongObjectHashMap<List<LayoutTitle>>>() {
+                    @Override
+                    public TLongObjectHashMap<List<LayoutTitle>> extractData(ResultSet rs) throws SQLException, DataAccessException {
+                        TLongObjectHashMap<List<LayoutTitle>> map = new TLongObjectHashMap<>(layoutIds.size());
+                        while (rs.next()) {
+                            LayoutTitle title = layoutTitleRowMapper.mapRow(rs, 0);
+                            List<LayoutTitle> titles = map.get(title.getLayoutId());
+                            if (titles == null) {
+                                titles = new ArrayList<>();
+                                map.put(title.getLayoutId(), titles);
+                            }
+                            titles.add(title);
+                        }
+                        return map;
+                    }
+                });
+    }
+
     public Layout loadLayout(long layoutId) {
         return jdbcTemplate.query(QRY_GET_LAYOUT_BY_ID, layoutResultSetExtractor, Long.valueOf(layoutId));
     }
 
-    public List<Layout> loadLayouts(long layoutSetId) {
-        return jdbcTemplate.query(QRY_GET_LAYOUT_BY_LAYOUTSETID, layoutRowMapper, Long.valueOf(layoutSetId));
+    public List<Layout> loadLayouts(List<Long> ids) {
+        return jdbcTemplate.query(QRY_GET_LAYOUTS_BY_IDS + "(" + StringUtil.repeat("?", ",", ids.size()) + ")", ids.toArray(), layoutRowMapper);
+    }
+
+    public TLongArrayList loadLayoutIds(long layoutSetId) {
+        return jdbcTemplate.query(QRY_GET_LAYOUT_IDS_BY_LAYOUTSETID, new TLongArrayListResultSetExtractor(), Long.valueOf(layoutSetId));
     }
 
     public void updateLayout(String friendlyUrl, PageLayoutName pageLayoutName, Long parentId, long defaultLayoutTitleLanguageId, long id) {
