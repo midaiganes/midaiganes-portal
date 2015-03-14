@@ -1,44 +1,49 @@
 package ee.midaiganes.portal.group;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
-import ee.midaiganes.cache.Element;
-import ee.midaiganes.cache.SingleVmCache;
-import ee.midaiganes.cache.SingleVmPool;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableList;
 
 public class GroupRepository {
-    private static final String GET_GROUPS_CACHE_KEY = "getGroups";
-    private final SingleVmCache cache;
     private final GroupDao groupDao;
-    private static final long[] EMPTY_ARRAY = new long[0];
+
+    private final LoadingCache<Long, long[]> userGroupsCache;
+    private final LoadingCache<Boolean, ImmutableList<Group>> allGroupsCache;
 
     @Inject
-    public GroupRepository(GroupDao groupDao, SingleVmPool singleVmPool) {
-        this.cache = singleVmPool.getCache(GroupRepository.class.getName());
+    public GroupRepository(GroupDao groupDao) {
         this.groupDao = groupDao;
+
+        this.userGroupsCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new CacheLoader<Long, long[]>() {
+            @Override
+            public long[] load(Long userId) {
+                return groupDao.loadUserGroupIds(userId.longValue()).toArray();
+            }
+        });
+        this.allGroupsCache = CacheBuilder.newBuilder().concurrencyLevel(1).maximumSize(1).expireAfterAccess(1, TimeUnit.HOURS)
+                .build(new CacheLoader<Boolean, ImmutableList<Group>>() {
+                    @Override
+                    public ImmutableList<Group> load(Boolean key) throws Exception {
+                        return ImmutableList.copyOf(groupDao.loadGroups());
+                    }
+                });
     }
 
-    public List<Group> getGroups() {
-        List<Group> groups = cache.get(GET_GROUPS_CACHE_KEY);
-        if (groups == null) {
-            try {
-                groups = groupDao.loadGroups();
-            } finally {
-                cache.put(GET_GROUPS_CACHE_KEY, groups == null ? Collections.emptyList() : groups);
-            }
-        }
-        return groups;
+    public ImmutableList<Group> getGroups() {
+        return allGroupsCache.getUnchecked(Boolean.TRUE);
     }
 
     public void addGroup(@Nonnull String name, boolean userGroup) {
         try {
             groupDao.addGroup(name, userGroup);
         } finally {
-            cache.clear();
+            allGroupsCache.invalidateAll();
         }
     }
 
@@ -46,7 +51,7 @@ public class GroupRepository {
         try {
             groupDao.addUserGroup(userId, groupId);
         } finally {
-            cache.remove(Long.toString(userId));
+            userGroupsCache.invalidate(Long.valueOf(userId));
         }
     }
 
@@ -54,27 +59,16 @@ public class GroupRepository {
         try {
             groupDao.removeUserGroup(userId, groupId);
         } finally {
-            cache.clear();
+            userGroupsCache.invalidate(Long.valueOf(userId));
         }
     }
 
     public long[] getUserGroupIds(long userId) {
-        String cacheKey = Long.toString(userId);
-        Element el = cache.getElement(cacheKey);
-        if (el != null) {
-            return el.get();
-        }
-        long[] list = null;
-        try {
-            list = groupDao.loadUserGroupIds(userId).toArray();
-        } finally {
-            cache.put(cacheKey, list == null ? EMPTY_ARRAY : list);
-        }
-        return list;
+        return userGroupsCache.getUnchecked(Long.valueOf(userId));
     }
 
     public Long getGroupId(String name) {
-        for (Group group : getGroups()) {
+        for (Group group : allGroupsCache.getUnchecked(Boolean.TRUE)) {
             if (group.getName().equals(name)) {
                 return Long.valueOf(group.getId());
             }
@@ -86,7 +80,8 @@ public class GroupRepository {
         try {
             groupDao.deleteGroup(groupId);
         } finally {
-            cache.clear();
+            userGroupsCache.invalidateAll();
+            allGroupsCache.invalidateAll();
         }
     }
 }

@@ -15,7 +15,6 @@ import com.google.inject.name.Names;
 
 import ee.midaiganes.aspect.Service;
 import ee.midaiganes.aspect.ServiceMethodInterceptor;
-import ee.midaiganes.cache.SingleVmPool;
 import ee.midaiganes.portal.group.GroupDao;
 import ee.midaiganes.portal.group.GroupRepository;
 import ee.midaiganes.portal.layout.LayoutDao;
@@ -42,6 +41,7 @@ import ee.midaiganes.secureservices.SecurePortletRepository;
 import ee.midaiganes.services.DbInstallService;
 import ee.midaiganes.services.LanguageRepository;
 import ee.midaiganes.services.PageLayoutRegistryRepository;
+import ee.midaiganes.services.PasswordEncryptor;
 import ee.midaiganes.services.PortletPreferencesRepository;
 import ee.midaiganes.services.PortletRegistryRepository;
 import ee.midaiganes.services.PortletRepository;
@@ -140,6 +140,6 @@ public class PortalModule extends AbstractModule {
 
         bind(PortletURLFactory.class).in(Singleton.class);
 
-        bind(SingleVmPool.class).in(Singleton.class);
+        bind(PasswordEncryptor.class).in(Singleton.class);
     }
 }

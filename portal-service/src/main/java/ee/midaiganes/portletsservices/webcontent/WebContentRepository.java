@@ -4,9 +4,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -17,61 +19,83 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
-import ee.midaiganes.cache.Element;
-import ee.midaiganes.cache.SingleVmCache;
-import ee.midaiganes.cache.SingleVmPool;
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
+import ee.midaiganes.services.rowmapper.LongRowMapper;
+import ee.midaiganes.util.StringUtil;
 
 @Singleton
 public class WebContentRepository {
     private final JdbcTemplate jdbcTemplate;
 
-    private final SingleVmCache cache;
-    private final SingleVmCache webContentCache;
+    private final LoadingCache<Long, ImmutableList<WebContent>> cache;
+    private final LoadingCache<Long, Optional<WebContent>> webContentCache;
     private static final WebContentRowMapper webContentRowMapper = new WebContentRowMapper();
 
     @Inject
-    public WebContentRepository(JdbcTemplate jdbcTemplate, SingleVmPool singleVmPool) {
+    public WebContentRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        cache = singleVmPool.getCache(WebContentRepository.class.getName());
-        webContentCache = singleVmPool.getCache(WebContentRepository.class.getName() + "." + WebContent.class.getName());
+
+        this.webContentCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new CacheLoader<Long, Optional<WebContent>>() {
+            @Override
+            public Optional<WebContent> load(Long id) {
+                List<WebContent> wcs = jdbcTemplate.query("SELECT id, layoutSetId, title, content, createDate FROM WebContent WHERE id = ?", webContentRowMapper, id);
+                return Optional.fromNullable(wcs.isEmpty() ? null : wcs.get(0));
+            }
+
+            @Override
+            public Map<Long, Optional<WebContent>> loadAll(Iterable<? extends Long> keys) {
+                Object[] keysArray = ImmutableList.copyOf(keys).toArray();
+                List<WebContent> wcs = jdbcTemplate.query(
+                        "SELECT id, layoutSetId, title, content, createDate FROM WebContent WHERE id in (" + StringUtil.repeat("?", ",", keysArray.length) + ")", keysArray,
+                        webContentRowMapper);
+                return Maps.uniqueIndex(Lists.transform(wcs, new Function<WebContent, Optional<WebContent>>() {
+                    @Override
+                    @Nullable
+                    public Optional<WebContent> apply(@Nullable WebContent input) {
+                        return Optional.of(input);
+                    }
+
+                }), new Function<Optional<WebContent>, Long>() {
+                    @Override
+                    @Nullable
+                    public Long apply(@Nullable Optional<WebContent> input) {
+                        return Long.valueOf(input.get().getId());
+                    }
+                });
+            }
+        });
+        this.cache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new CacheLoader<Long, ImmutableList<WebContent>>() {
+            @Override
+            public ImmutableList<WebContent> load(Long layoutSetId) throws Exception {
+                List<Long> list = jdbcTemplate.query("SELECT id FROM WebContent WHERE layoutSetId = ?", new LongRowMapper(), layoutSetId);
+                return ImmutableList.copyOf(Collections2.transform(webContentCache.getAll(list).values(), new Function<Optional<WebContent>, WebContent>() {
+                    @Override
+                    @Nullable
+                    public WebContent apply(@Nullable Optional<WebContent> input) {
+                        return input.get();
+                    }
+
+                }));
+            }
+
+        });
     }
 
     public WebContent getWebContent(long id) {
-        Element el = webContentCache.getElement(Long.toString(id));
-        if (el != null) {
-            return el.get();
-        }
-        WebContent webContent = null;
-        try {
-            List<WebContent> wcs = jdbcTemplate.query("SELECT id, layoutSetId, title, content, createDate FROM WebContent WHERE id = ?", webContentRowMapper, Long.valueOf(id));
-            webContent = wcs.isEmpty() ? null : wcs.get(0);
-        } finally {
-            webContentCache.put(Long.toString(id), webContent);
-        }
-        return webContent;
+        return webContentCache.getUnchecked(Long.valueOf(id)).orNull();
     }
 
     public List<WebContent> getWebContents(long layoutSetId) {
-        Element el = cache.getElement(Long.toString(layoutSetId));
-        List<WebContent> wcs = el != null ? el.<List<WebContent>> get() : null;
-        if (wcs == null) {
-            try {
-                wcs = jdbcTemplate
-                        .query("SELECT id, layoutSetId, title, content, createDate FROM WebContent WHERE layoutSetId = ?", webContentRowMapper, Long.valueOf(layoutSetId));
-
-            } finally {
-                wcs = wcs == null ? Collections.<WebContent> emptyList() : wcs;
-                cacheWebContents(layoutSetId, wcs);
-            }
-        }
-        return wcs;
-    }
-
-    private void cacheWebContents(long layoutSetId, List<WebContent> wcs) {
-        cache.put(Long.toString(layoutSetId), wcs);
-        for (WebContent wc : wcs) {
-            webContentCache.put(Long.toString(wc.getId()), wc);
-        }
+        return cache.getUnchecked(Long.valueOf(layoutSetId));
     }
 
     public long addWebContent(final long layoutSet, final String title, final String content) {
@@ -89,7 +113,7 @@ public class WebContentRepository {
             }, keyHolder);
             return keyHolder.getKey().longValue();
         } finally {
-            cache.remove(Long.toString(layoutSet));
+            cache.invalidate(Long.valueOf(layoutSet));
         }
     }
 
@@ -97,8 +121,8 @@ public class WebContentRepository {
         try {
             jdbcTemplate.update("UPDATE WebContent SET title = ?, content = ? WHERE id = ?", title, content, Long.valueOf(id));
         } finally {
-            webContentCache.remove(Long.toString(id));
-            cache.clear();
+            webContentCache.invalidate(Long.valueOf(id));
+            cache.invalidateAll();
         }
     }
 

@@ -11,10 +11,15 @@ import ee.midaiganes.util.TimeProviderUtil;
 
 public class ServiceMethodInterceptor implements MethodInterceptor {
     private static final Logger log = LoggerFactory.getLogger(ServiceMethodInterceptor.class);
+    private final Gson gson;
+
+    public ServiceMethodInterceptor() {
+        this.gson = new Gson();
+    }
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
-        String method = invocation.getMethod().getDeclaringClass().getAnnotation(Service.class).serviceInterface().getSimpleName() + '.' + invocation.getMethod().getName()
+        String method = invocation.getMethod().getDeclaringClass().getAnnotation(Service.class).service().getSimpleName() + '.' + invocation.getMethod().getName()
                 + " took ";
         StringBuilder sb = new StringBuilder(256);
         toJson(sb, invocation.getArguments()[0]);
@@ -51,7 +56,7 @@ public class ServiceMethodInterceptor implements MethodInterceptor {
             }
         } else {
             sb.append(o.getClass().getSimpleName()).append(" ");
-            new Gson().toJson(o, sb);
+            gson.toJson(o, sb);
         }
     }
 }
