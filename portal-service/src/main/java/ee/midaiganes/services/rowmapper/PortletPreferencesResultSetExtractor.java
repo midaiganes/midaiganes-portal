@@ -7,9 +7,11 @@ import java.util.Map;
 
 import org.springframework.jdbc.core.ResultSetExtractor;
 
-public class PortletPreferencesResultSetExtractor implements ResultSetExtractor<Map<String, String[]>> {
+import com.google.common.collect.ImmutableMap;
+
+public class PortletPreferencesResultSetExtractor implements ResultSetExtractor<ImmutableMap<String, String[]>> {
     @Override
-    public Map<String, String[]> extractData(ResultSet rs) throws SQLException {
+    public ImmutableMap<String, String[]> extractData(ResultSet rs) throws SQLException {
         Map<String, String[]> map = new HashMap<>();
         while (rs.next()) {
             String name = rs.getString(1);
@@ -25,7 +27,7 @@ public class PortletPreferencesResultSetExtractor implements ResultSetExtractor<
             }
             map.put(name, values);
         }
-        return map;
+        return ImmutableMap.copyOf(map);
     }
 
 }
