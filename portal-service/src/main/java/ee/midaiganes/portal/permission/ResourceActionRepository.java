@@ -1,30 +1,35 @@
 package ee.midaiganes.portal.permission;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import ee.midaiganes.cache.Element;
-import ee.midaiganes.cache.SingleVmCache;
-import ee.midaiganes.cache.SingleVmPool;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableList;
+
 import ee.midaiganes.services.exceptions.ResourceActionNotFoundException;
 import ee.midaiganes.services.exceptions.ResourceHasNoActionsException;
 
 public class ResourceActionRepository {
-    private final SingleVmCache cache;
-    private final ResourceActionDao resourceActionDao;
+    private final LoadingCache<Long, ImmutableList<ResourceActionPermission>> cache;
 
     @Inject
-    public ResourceActionRepository(ResourceActionDao resourceActionDao, SingleVmPool singleVmPool) {
-        this.cache = singleVmPool.getCache(ResourceActionRepository.class.getName());
-        this.resourceActionDao = resourceActionDao;
+    public ResourceActionRepository(ResourceActionDao resourceActionDao) {
+        this.cache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new CacheLoader<Long, ImmutableList<ResourceActionPermission>>() {
+            @Override
+            public ImmutableList<ResourceActionPermission> load(Long resourceId) throws Exception {
+                return ImmutableList.copyOf(resourceActionDao.loadResourceActionPermissions(resourceId.longValue()));
+            }
+        });
     }
 
     public long getResourceActionPermission(long resourceId, String action) throws ResourceActionNotFoundException {
-        List<ResourceActionPermission> resourceActionPermissions = getResourceActionPermissions(resourceId);
-        if (resourceActionPermissions != null) {
+        List<ResourceActionPermission> resourceActionPermissions = cache.getUnchecked(Long.valueOf(resourceId));
+        if (!resourceActionPermissions.isEmpty()) {
             for (ResourceActionPermission resourceActionPermission : resourceActionPermissions) {
                 if (resourceActionPermission.getResourceId() == resourceId && resourceActionPermission.getAction().equals(action)) {
                     return resourceActionPermission.getPermission();
@@ -35,31 +40,12 @@ public class ResourceActionRepository {
         throw new ResourceHasNoActionsException(resourceId, action);
     }
 
-    public List<String> getResourceActions(long resourceId) {
-        List<ResourceActionPermission> resourceActionPermissions = getResourceActionPermissions(resourceId);
-        if (resourceActionPermissions != null) {
-            List<String> actions = new ArrayList<>(resourceActionPermissions.size());
-            for (ResourceActionPermission resourceActionPermission : resourceActionPermissions) {
-                actions.add(resourceActionPermission.getAction());
-            }
-            return actions;
+    public ImmutableList<String> getResourceActions(long resourceId) {
+        List<ResourceActionPermission> resourceActionPermissions = cache.getUnchecked(Long.valueOf(resourceId));
+        List<String> actions = new ArrayList<>(resourceActionPermissions.size());
+        for (ResourceActionPermission resourceActionPermission : resourceActionPermissions) {
+            actions.add(resourceActionPermission.getAction());
         }
-        return Collections.emptyList();
+        return ImmutableList.copyOf(actions);
     }
-
-    private List<ResourceActionPermission> getResourceActionPermissions(long resourceId) {
-        String cacheKey = Long.toString(resourceId);
-        Element el = cache.getElement(cacheKey);
-        if (el == null) {
-            List<ResourceActionPermission> list = null;
-            try {
-                list = resourceActionDao.loadResourceActionPermissions(resourceId);
-            } finally {
-                cache.put(cacheKey, list == null || list.isEmpty() ? Collections.emptyList() : list);
-            }
-            return list;
-        }
-        return el.get();
-    }
-
 }

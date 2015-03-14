@@ -2,6 +2,7 @@ package ee.midaiganes.portal.portletinstance;
 
 import java.security.SecureRandom;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -10,38 +11,39 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Optional;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
-import ee.midaiganes.cache.Element;
-import ee.midaiganes.cache.SingleVmCache;
-import ee.midaiganes.cache.SingleVmPool;
 import ee.midaiganes.portlet.PortletName;
 import ee.midaiganes.util.StringPool;
 
 public class PortletInstanceRepository {
     private static final Logger log = LoggerFactory.getLogger(PortletInstanceRepository.class);
     private static final SecureRandom random = new SecureRandom(new Object().toString().getBytes(Charsets.UTF_8));
-    private final SingleVmCache cache;
+    private final Cache<String, Optional<PortletInstance>> cache;
 
     private final PortletInstanceDao portletInstanceDao;
 
     @Inject
-    public PortletInstanceRepository(PortletInstanceDao portletInstanceDao, SingleVmPool singleVmPool) {
+    public PortletInstanceRepository(PortletInstanceDao portletInstanceDao) {
         this.portletInstanceDao = portletInstanceDao;
-        this.cache = singleVmPool.getCache(PortletInstanceRepository.class.getName());
+        this.cache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).<String, Optional<PortletInstance>> build();
     }
 
     public PortletInstance getPortletInstance(long id) {
         String cacheKey = Long.toString(id);
-        Element el = cache.getElement(cacheKey);
+
+        Optional<PortletInstance> el = cache.getIfPresent(cacheKey);
         if (el != null) {
-            return el.get();
+            return el.orNull();
         }
 
         PortletInstance instance = null;
         try {
             instance = portletInstanceDao.loadPortletInstance(id);
         } finally {
-            cache.put(cacheKey, instance);
+            cache.put(cacheKey, Optional.fromNullable(instance));
         }
         return instance;
     }
@@ -61,9 +63,9 @@ public class PortletInstanceRepository {
 
     public PortletInstance getPortletInstance(PortletName portletName, String windowID) {
         String cacheKey = "getPortletInstance" + portletName.getFullName() + "#" + windowID;
-        Element el = cache.getElement(cacheKey);
+        Optional<PortletInstance> el = cache.getIfPresent(cacheKey);
         if (el != null) {
-            return el.get();
+            return el.orNull();
         }
         PortletInstance instance = null;
         try {
@@ -72,7 +74,7 @@ public class PortletInstanceRepository {
                 instance = new PortletInstance(value.longValue(), new PortletNamespace(portletName, windowID));
             }
         } finally {
-            cache.put(cacheKey, instance);
+            cache.put(cacheKey, Optional.fromNullable(instance));
         }
         return instance;
     }
@@ -89,7 +91,7 @@ public class PortletInstanceRepository {
         try {
             return portletInstanceDao.addPortletInstance(portletName, windowID);
         } finally {
-            cache.clear();
+            cache.invalidateAll();
         }
     }
 
@@ -97,7 +99,7 @@ public class PortletInstanceRepository {
         try {
             portletInstanceDao.deletePortletInstance(windowID);
         } finally {
-            cache.clear();
+            cache.invalidateAll();
         }
     }
 

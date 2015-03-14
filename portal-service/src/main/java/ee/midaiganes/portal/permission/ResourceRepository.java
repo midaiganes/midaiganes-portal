@@ -1,44 +1,35 @@
 package ee.midaiganes.portal.permission;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
-import com.google.common.base.Preconditions;
+import com.google.common.base.Optional;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
-import ee.midaiganes.cache.Element;
-import ee.midaiganes.cache.SingleVmCache;
-import ee.midaiganes.cache.SingleVmPool;
 import ee.midaiganes.services.exceptions.ResourceNotFoundException;
 
 public class ResourceRepository {
-    private final SingleVmCache cache;
-    private final ResourceDao resourceDao;
+    private final LoadingCache<String, Optional<Long>> cache;
 
     @Inject
-    public ResourceRepository(ResourceDao resourceDao, SingleVmPool singleVmPool) {
-        this.resourceDao = resourceDao;
-        cache = singleVmPool.getCache(ResourceRepository.class.getName());
+    public ResourceRepository(ResourceDao resourceDao) {
+        this.cache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new CacheLoader<String, Optional<Long>>() {
+            @Override
+            public Optional<Long> load(String resource) throws Exception {
+                return Optional.fromNullable(resourceDao.loadResourceId(resource));
+            }
+        });
     }
 
     public long getResourceId(@Nonnull String resource) throws ResourceNotFoundException {
-        final String cacheKey = Preconditions.checkNotNull(resource);
-        final Element el = cache.getElement(cacheKey);
-        if (el != null) {
-            Long val = el.get();
-            if (val == null) {
-                throw new ResourceNotFoundException("Invalid resource from cache: '" + resource + "'");
-            }
-            return val.longValue();
+        Optional<Long> val = cache.getUnchecked(resource);
+        if (!val.isPresent()) {
+            throw new ResourceNotFoundException("Invalid resource from cache: '" + resource + "'");
         }
-        Long value = null;
-        try {
-            value = resourceDao.loadResourceId(resource);
-            if (value == null) {
-                throw new ResourceNotFoundException("Invalid resource: '" + resource + "'");
-            }
-            return value.longValue();
-        } finally {
-            cache.put(cacheKey, value);
-        }
+        return val.get().longValue();
     }
 }

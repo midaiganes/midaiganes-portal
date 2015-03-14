@@ -1,13 +1,18 @@
 package ee.midaiganes.portal.permission;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.springframework.transaction.annotation.Transactional;
 
-import ee.midaiganes.cache.Element;
-import ee.midaiganes.cache.SingleVmCache;
-import ee.midaiganes.cache.SingleVmPool;
+import com.google.common.base.Optional;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+
 import ee.midaiganes.model.PortalResource;
 import ee.midaiganes.portal.group.Group;
 import ee.midaiganes.portal.group.GroupRepository;
@@ -27,16 +32,49 @@ public class PermissionRepository {
     private final PermissionDao permissionDao;
     private final ResourceActionRepository resourceActionPermissionRepository;
 
-    private final SingleVmCache cache;
+    private final LoadingCache<CacheKey, Optional<Long>> cache;
 
     @Inject
     public PermissionRepository(ResourceRepository resourceRepository, GroupRepository groupRepository, PermissionDao permissionDao,
-            ResourceActionRepository resourceActionPermissionRepository, SingleVmPool singleVmPool) {
+            ResourceActionRepository resourceActionPermissionRepository) {
         this.resourceRepository = resourceRepository;
         this.groupRepository = groupRepository;
         this.permissionDao = permissionDao;
         this.resourceActionPermissionRepository = resourceActionPermissionRepository;
-        this.cache = singleVmPool.getCache(PermissionRepository.class.getName());
+        this.cache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new CacheLoader<CacheKey, Optional<Long>>() {
+            @Override
+            public Optional<Long> load(CacheKey key) throws Exception {
+                return Optional.fromNullable(permissionDao.loadPermissions(key.resource1, key.resource1PrimKey, key.resource2, key.resource2PrimKey));
+            }
+        });
+    }
+
+    private static final class CacheKey {
+        private final long resource1;
+        private final long resource1PrimKey;
+        private final long resource2;
+        private final long resource2PrimKey;
+
+        private CacheKey(long resource1, long resource1PrimKey, long resource2, long resource2PrimKey) {
+            this.resource1 = resource1;
+            this.resource1PrimKey = resource1PrimKey;
+            this.resource2 = resource2;
+            this.resource2PrimKey = resource2PrimKey;
+        }
+
+        @Override
+        public int hashCode() {
+            return (int) (resource1 + resource1PrimKey + resource2 + resource2PrimKey);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof CacheKey) {
+                CacheKey c = (CacheKey) o;
+                return resource1 == c.resource1 && resource1PrimKey == c.resource1PrimKey && resource2 == c.resource2 && resource2PrimKey == c.resource2PrimKey;
+            }
+            return false;
+        }
     }
 
     @Transactional
@@ -103,19 +141,9 @@ public class PermissionRepository {
         return permissions != null && (permissions.longValue() & resourceActionPermission) == resourceActionPermission;
     }
 
+    @Nullable
     private Long getPermissions(long resource1, long resource1PrimKey, long resource2, long resource2PrimKey) {
-        String cacheKey = resource1 + "#" + resource1PrimKey + "#" + resource2 + "#" + resource2PrimKey;
-        Element el = cache.getElement(cacheKey);
-        if (el == null) {
-            Long permissions = null;
-            try {
-                permissions = permissionDao.loadPermissions(resource1, resource1PrimKey, resource2, resource2PrimKey);
-            } finally {
-                cache.put(cacheKey, permissions);
-            }
-            return permissions;
-        }
-        return el.get();
+        return cache.getUnchecked(new CacheKey(resource1, resource1PrimKey, resource2, resource2PrimKey)).orNull();
     }
 
     protected void setPermissions(long resource1, long resource1PrimKey, long resource2, long resource2PrimKey, long actionPermissions) {
@@ -126,9 +154,9 @@ public class PermissionRepository {
             } else {
                 permissionDao.updatePermissions(id.longValue(), actionPermissions);
             }
-            cache.put(resource1 + "#" + resource1PrimKey + "#" + resource2 + "#" + resource2PrimKey, Long.valueOf(actionPermissions));
+            cache.put(new CacheKey(resource1, resource1PrimKey, resource2, resource2PrimKey), Optional.of(Long.valueOf(actionPermissions)));
         } catch (RuntimeException e) {
-            cache.clear();
+            cache.invalidateAll();
             throw e;
         }
     }
