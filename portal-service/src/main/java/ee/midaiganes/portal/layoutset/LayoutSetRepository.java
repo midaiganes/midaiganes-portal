@@ -1,6 +1,10 @@
 package ee.midaiganes.portal.layoutset;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -8,73 +12,115 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.cache.Element;
-import ee.midaiganes.cache.SingleVmCache;
-import ee.midaiganes.cache.SingleVmPool;
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
+import com.google.common.primitives.Longs;
+
 import ee.midaiganes.portal.theme.ThemeName;
 
 public class LayoutSetRepository {
     private static final Logger log = LoggerFactory.getLogger(LayoutSetRepository.class);
 
-    private static final String GET_LAYOUT_SETS_CACHE_KEY = "getLayoutSets";
-    private static final String GET_LAYOUT_SET_BY_VIRTUAL_HOST_CACHE_KEY_PREFIX = "getLayoutSet#";
-
-    private final SingleVmCache cache;
     private final LayoutSetDao layoutSetDao;
 
+    private final LoadingCache<String, Optional<LayoutSet>> virtualHostLayoutSetCache;
+    private final LoadingCache<Long, Optional<LayoutSet>> idLayoutSetCache;
+    private final LoadingCache<Boolean, ImmutableList<Long>> allLayoutSetsCache;
+
     @Inject
-    public LayoutSetRepository(LayoutSetDao layoutSetDao, SingleVmPool singleVmPool) {
+    public LayoutSetRepository(LayoutSetDao layoutSetDao) {
         this.layoutSetDao = layoutSetDao;
-        this.cache = singleVmPool.getCache(LayoutSetRepository.class.getName());
+        this.virtualHostLayoutSetCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new CacheLoader<String, Optional<LayoutSet>>() {
+            @Override
+            public Optional<LayoutSet> load(String virtualHost) throws Exception {
+                LayoutSet layoutSet = layoutSetDao.getLayoutSet(virtualHost);
+                Optional<LayoutSet> ols = Optional.fromNullable(layoutSet);
+                if (layoutSet != null) {
+                    idLayoutSetCache.put(Long.valueOf(layoutSet.getId()), ols);
+                }
+                return ols;
+            }
+        });
+
+        this.idLayoutSetCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new CacheLoader<Long, Optional<LayoutSet>>() {
+            @Override
+            public Optional<LayoutSet> load(Long id) {
+                LayoutSet layoutSet = layoutSetDao.getLayoutSet(id.longValue());
+                Optional<LayoutSet> ols = Optional.fromNullable(layoutSet);
+                if (layoutSet != null) {
+                    virtualHostLayoutSetCache.put(layoutSet.getVirtualHost(), ols);
+                }
+                return ols;
+            }
+
+            @Override
+            public Map<Long, Optional<LayoutSet>> loadAll(Iterable<? extends Long> keys) {
+                List<LayoutSet> layoutSets = layoutSetDao.getLayoutSets(ImmutableList.<Long> copyOf(keys));
+                Map<Long, Optional<LayoutSet>> result = new HashMap<>(layoutSets.size());
+                for (LayoutSet ls : layoutSets) {
+                    Optional<LayoutSet> ols = Optional.of(ls);
+                    virtualHostLayoutSetCache.put(ls.getVirtualHost(), ols);
+                    result.put(Long.valueOf(ls.getId()), ols);
+                }
+                return result;
+            }
+        });
+        this.allLayoutSetsCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).initialCapacity(1).maximumSize(1)
+                .build(new CacheLoader<Boolean, ImmutableList<Long>>() {
+                    @Override
+                    public ImmutableList<Long> load(Boolean key) throws Exception {
+                        return ImmutableList.copyOf(Longs.asList(layoutSetDao.getLayoutSetIds().toArray()));
+                    }
+
+                });
     }
 
     public List<LayoutSet> getLayoutSets() {
-        Element el = cache.getElement(GET_LAYOUT_SETS_CACHE_KEY);
-        List<LayoutSet> layoutSets = el != null ? el.<List<LayoutSet>> get() : null;
-        if (layoutSets == null) {
-            layoutSets = layoutSetDao.getLayoutSets();
-            cache.put(GET_LAYOUT_SETS_CACHE_KEY, layoutSets);
+        ImmutableList<Long> ids = allLayoutSetsCache.getUnchecked(Boolean.TRUE);
+        try {
+            return ImmutableList.copyOf(Collections2.transform(idLayoutSetCache.getAll(ids).values(), new Function<Optional<LayoutSet>, LayoutSet>() {
+                @Override
+                @Nullable
+                public LayoutSet apply(@Nullable Optional<LayoutSet> input) {
+                    return input.get();
+                }
+            }));
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
         }
-        return layoutSets;
     }
 
     @Nullable
     public LayoutSet getLayoutSet(String virtualHost) {
-        String cacheKey = GET_LAYOUT_SET_BY_VIRTUAL_HOST_CACHE_KEY_PREFIX + virtualHost;
-        Element el = cache.getElement(cacheKey);
-        LayoutSet layoutSet = el != null ? el.<LayoutSet> get() : null;
-        if (el == null) {
-            List<LayoutSet> list = layoutSetDao.getLayoutSet(virtualHost);
-            layoutSet = list.isEmpty() ? null : list.get(0);
-            // TODO mem leak?
-            cache.put(cacheKey, layoutSet);
-        }
-        return layoutSet;
+        return virtualHostLayoutSetCache.getUnchecked(virtualHost).orNull();
     }
 
+    @Nullable
     public LayoutSet getLayoutSet(long id) {
-        for (LayoutSet ls : getLayoutSets()) {
-            if (ls.getId() == id) {
-                return ls;
-            }
-        }
-        return null;
+        return idLayoutSetCache.getUnchecked(Long.valueOf(id)).orNull();
     }
 
     public long addLayoutSet(String virtualHost, ThemeName themeName) {
-        try {
-            return layoutSetDao.addLayoutSet(virtualHost, themeName);
-        } finally {
-            cache.clear();
+        long id = layoutSetDao.addLayoutSet(virtualHost, themeName);
+        idLayoutSetCache.invalidate(Long.valueOf(id));
+        virtualHostLayoutSetCache.invalidate(virtualHost);
+
+        ImmutableList<Long> idsList = allLayoutSetsCache.getIfPresent(Boolean.TRUE);
+        if (idsList != null) {
+            allLayoutSetsCache.put(Boolean.TRUE, ImmutableList.<Long> builder().addAll(idsList).add(Long.valueOf(id)).build());
         }
+        return id;
     }
 
     public void updateLayoutSet(long id, String virtualHost, ThemeName themeName) {
-        try {
-            layoutSetDao.updateLayoutSet(id, virtualHost, themeName);
-        } finally {
-            cache.clear();
-        }
+        layoutSetDao.updateLayoutSet(id, virtualHost, themeName);
+        idLayoutSetCache.invalidate(Long.valueOf(id));
+        virtualHostLayoutSetCache.invalidateAll();
     }
 
     public LayoutSet getDefaultLayoutSet(String virtualHost) {
