@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -12,9 +13,11 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
-import ee.midaiganes.cache.Element;
-import ee.midaiganes.cache.SingleVmCache;
-import ee.midaiganes.cache.SingleVmPool;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableMap;
+
 import ee.midaiganes.services.rowmapper.PortletPreferencesResultSetExtractor;
 import ee.midaiganes.util.StringPool;
 import ee.midaiganes.util.StringUtil;
@@ -27,30 +30,23 @@ public class PortletPreferencesRepository {
     private static final String INSERT_INTO_PORTLETPREFERENCE = "INSERT INTO PortletPreference(portletInstanceId, preferenceName) VALUES(?, ?)";
     private static final String INSERT_INTO_PORTLETPREFERENCEVALUES = "INSERT INTO PortletPreferenceValue (portletPreferenceId, preferenceValue) VALUES ((SELECT id FROM PortletPreference WHERE preferenceName = ? AND portletInstanceId = ?), ?)";
 
-    private final SingleVmCache cache;
+    private final LoadingCache<Long, ImmutableMap<String, String[]>> cache;
     private static final PortletPreferencesResultSetExtractor getPortletPreferencesExtractor = new PortletPreferencesResultSetExtractor();
 
     @Inject
-    public PortletPreferencesRepository(JdbcTemplate jdbcTemplate, SingleVmPool singleVmPool) {
+    public PortletPreferencesRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.cache = singleVmPool.getCache(PortletPreferencesRepository.class.getName());
+        this.cache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new CacheLoader<Long, ImmutableMap<String, String[]>>() {
+            @Override
+            public ImmutableMap<String, String[]> load(Long portletInstanceId) throws Exception {
+                return jdbcTemplate.query(GET_PORTLET_PREFERENCES, getPortletPreferencesExtractor, portletInstanceId);
+            }
+        });
     }
 
     @Transactional
-    public Map<String, String[]> getPortletPreferences(long portletInstanceId) {
-        String key = Long.toString(portletInstanceId);
-        Element element = cache.getElement(key);
-        if (element != null) {
-            return element.get();
-        }
-
-        Map<String, String[]> preferences = null;
-        try {
-            preferences = loadPortletPreferences(portletInstanceId);
-        } finally {
-            cache.put(key, preferences);
-        }
-        return preferences;
+    public ImmutableMap<String, String[]> getPortletPreferences(long portletInstanceId) {
+        return cache.getUnchecked(Long.valueOf(portletInstanceId));
     }
 
     @Transactional
@@ -65,12 +61,8 @@ public class PortletPreferencesRepository {
         try {
             savePortletPreferences(portletInstanceId, keys, values);
         } finally {
-            cache.remove(Long.toString(portletInstanceId));
+            cache.invalidate(Long.valueOf(portletInstanceId));
         }
-    }
-
-    private Map<String, String[]> loadPortletPreferences(long portletInstanceId) {
-        return jdbcTemplate.query(GET_PORTLET_PREFERENCES, getPortletPreferencesExtractor, Long.valueOf(portletInstanceId));
     }
 
     private void savePortletPreferences(final long portletInstanceId, final List<String> keys, final List<String[]> values) {

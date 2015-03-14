@@ -23,7 +23,7 @@ import ee.midaiganes.services.LanguageRepository;
 import ee.midaiganes.services.exceptions.PrincipalException;
 import ee.midaiganes.util.StringPool;
 
-@Service(serviceInterface = PortalService.class)
+@Service(service = PortalService.class)
 public class PortalServiceImpl implements PortalService {
     private static final Logger log = LoggerFactory.getLogger(PortalServiceImpl.class);
 
