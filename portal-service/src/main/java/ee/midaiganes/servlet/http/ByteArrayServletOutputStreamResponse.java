@@ -1,6 +1,7 @@
 package ee.midaiganes.servlet.http;
 
 import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -10,40 +11,36 @@ import ee.midaiganes.servlet.io.ServletOutputStreamImpl;
 
 public class ByteArrayServletOutputStreamResponse extends HttpServletResponseWrapper {
 
-	private final ByteArrayServletOutputStream basos;
+    private final ByteArrayServletOutputStream basos;
 
-	public ByteArrayServletOutputStreamResponse(HttpServletResponse response) {
-		super(response);
-		basos = new ByteArrayServletOutputStream();
-	}
+    public ByteArrayServletOutputStreamResponse(HttpServletResponse response) {
+        super(response);
+        basos = new ByteArrayServletOutputStream();
+    }
 
-	@Override
-	public ServletOutputStream getOutputStream() {
-		return basos;
-	}
+    @Override
+    public ServletOutputStream getOutputStream() {
+        return basos;
+    }
 
-	public byte[] getBytes() {
-		return basos.getBytes();
-	}
+    public static class ByteArrayServletOutputStream extends ServletOutputStreamImpl {
+        private final ByteArrayOutputStream baos;
 
-	public static class ByteArrayServletOutputStream extends ServletOutputStreamImpl {
-		private final ByteArrayOutputStream baos;
+        public ByteArrayServletOutputStream() {
+            this(new ByteArrayOutputStream());
+        }
 
-		public ByteArrayServletOutputStream() {
-			this(new ByteArrayOutputStream());
-		}
+        public ByteArrayServletOutputStream(ByteArrayOutputStream baos) {
+            super(baos);
+            this.baos = baos;
+        }
 
-		public ByteArrayServletOutputStream(ByteArrayOutputStream baos) {
-			super(baos);
-			this.baos = baos;
-		}
+        public String getContentAsString(String encoding) throws UnsupportedEncodingException {
+            return baos.toString(encoding);
+        }
 
-		public byte[] getBytes() {
-			return baos.toByteArray();
-		}
-
-		public ByteArrayOutputStream getByteArrayOutputStream() {
-			return baos;
-		}
-	}
+        public ByteArrayOutputStream getByteArrayOutputStream() {
+            return baos;
+        }
+    }
 }

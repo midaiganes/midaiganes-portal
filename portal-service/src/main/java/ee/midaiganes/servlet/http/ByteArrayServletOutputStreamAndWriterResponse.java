@@ -12,53 +12,53 @@ import javax.servlet.http.HttpServletResponseWrapper;
 import ee.midaiganes.servlet.http.ByteArrayServletOutputStreamResponse.ByteArrayServletOutputStream;
 
 public class ByteArrayServletOutputStreamAndWriterResponse extends HttpServletResponseWrapper {
-	private final ByteArrayServletOutputStream basos;
-	private PrintWriter writer;
-	private boolean outputStreamCalled = false;
-	private boolean writerCalled = false;
+    private final ByteArrayServletOutputStream basos;
+    private PrintWriter writer;
+    private boolean outputStreamCalled = false;
+    private boolean writerCalled = false;
 
-	public ByteArrayServletOutputStreamAndWriterResponse(HttpServletResponse response) {
-		super(response);
-		basos = new ByteArrayServletOutputStream();
-	}
+    public ByteArrayServletOutputStreamAndWriterResponse(HttpServletResponse response) {
+        super(response);
+        basos = new ByteArrayServletOutputStream();
+    }
 
-	@Override
-	public ServletOutputStream getOutputStream() throws IOException {
-		if (writerCalled) {
-			throw new IllegalStateException("getWriter already called");
-		}
-		outputStreamCalled = true;
-		return basos;
-	}
+    @Override
+    public ServletOutputStream getOutputStream() throws IOException {
+        if (writerCalled) {
+            throw new IllegalStateException("getWriter already called");
+        }
+        outputStreamCalled = true;
+        return basos;
+    }
 
-	@Override
-	public PrintWriter getWriter() throws IOException {
-		if (outputStreamCalled) {
-			throw new IllegalStateException("getOutputStream already called");
-		}
-		if (!writerCalled) {
-			initWriter();
-		}
-		writerCalled = true;
-		return writer;
-	}
+    @Override
+    public PrintWriter getWriter() throws IOException {
+        if (outputStreamCalled) {
+            throw new IllegalStateException("getOutputStream already called");
+        }
+        if (!writerCalled) {
+            initWriter();
+        }
+        writerCalled = true;
+        return writer;
+    }
 
-	public byte[] getBytes() {
-		if (writer != null) {
-			writer.close();
-		}
-		return basos.getBytes();
-	}
+    public String getContentAsString(String encoding) throws UnsupportedEncodingException {
+        if (writer != null) {
+            writer.close();
+        }
+        return basos.getContentAsString(encoding);
+    }
 
-	private void initWriter() throws IOException {
-		try {
-			writer = new PrintWriter(getOutputStreamWriter(), true);
-		} catch (UnsupportedEncodingException e) {
-			throw new IOException(e);
-		}
-	}
+    private void initWriter() throws IOException {
+        try {
+            writer = new PrintWriter(getOutputStreamWriter(), true);
+        } catch (UnsupportedEncodingException e) {
+            throw new IOException(e);
+        }
+    }
 
-	private OutputStreamWriter getOutputStreamWriter() throws UnsupportedEncodingException {
-		return new OutputStreamWriter(basos, getCharacterEncoding());
-	}
+    private OutputStreamWriter getOutputStreamWriter() throws UnsupportedEncodingException {
+        return new OutputStreamWriter(basos, getCharacterEncoding());
+    }
 }
