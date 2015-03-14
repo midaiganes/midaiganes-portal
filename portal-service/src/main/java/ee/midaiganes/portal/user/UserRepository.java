@@ -1,25 +1,86 @@
 package ee.midaiganes.portal.user;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 
-import ee.midaiganes.cache.Element;
-import ee.midaiganes.cache.SingleVmCache;
-import ee.midaiganes.cache.SingleVmPool;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.cache.RemovalCause;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
+
+import ee.midaiganes.services.PasswordEncryptor;
 import ee.midaiganes.services.exceptions.DuplicateUsernameException;
 
 public class UserRepository {
-    private final SingleVmCache cache;
     private final UserDao userDao;
+    private final PasswordEncryptor encryptor;
+    private final LoadingCache<Long, User> cache;
+    private final LoadingCache<UsernamePasswordCacheKey, Optional<User>> usernamePasswordCache;
 
     @Inject
-    public UserRepository(UserDao userDao, SingleVmPool singleVmPool) {
+    public UserRepository(UserDao userDao, PasswordEncryptor encryptor) {
+        this.encryptor = encryptor;
         this.userDao = userDao;
-        this.cache = singleVmPool.getCache(UserRepository.class.getName());
+        this.cache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new CacheLoader<Long, User>() {
+            @Override
+            public User load(Long key) {
+                return userDao.getUser(key.longValue());
+            }
+        });
+        usernamePasswordCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).removalListener(new RemovalListener<UsernamePasswordCacheKey, Optional<User>>() {
+            @Override
+            public void onRemoval(RemovalNotification<UsernamePasswordCacheKey, Optional<User>> notification) {
+                if (RemovalCause.EXPLICIT == notification.getCause()) {
+                    User user = notification.getValue().orNull();
+                    if (user != null) {
+                        cache.invalidate(Long.valueOf(user.getId()));
+                    }
+                }
+            }
+        }).build(new CacheLoader<UsernamePasswordCacheKey, Optional<User>>() {
+            @Override
+            public Optional<User> load(UsernamePasswordCacheKey key) throws Exception {
+                User user = userDao.getUser(key.username, key.password);
+                if (user != null) {
+                    cache.put(Long.valueOf(user.getId()), user);
+                }
+                return Optional.fromNullable(user);
+            }
+        });
+    }
+
+    private static final class UsernamePasswordCacheKey {
+        @Nonnull
+        private final String username;
+        @Nonnull
+        private final String password;
+
+        private UsernamePasswordCacheKey(String username, String password) {
+            this.username = Preconditions.checkNotNull(username);
+            this.password = Preconditions.checkNotNull(password);
+        }
+
+        @Override
+        public int hashCode() {
+            return password.hashCode() + username.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof UsernamePasswordCacheKey) {
+                UsernamePasswordCacheKey o = (UsernamePasswordCacheKey) obj;
+                return username.equals(o.username) && password.equals(o.password);
+            }
+            return false;
+        }
     }
 
     public long getUsersCount() {
@@ -31,74 +92,27 @@ public class UserRepository {
     }
 
     public User getUser(long userid) {
-        String cacheKey = Long.toString(userid);
-        User user = cache.get(cacheKey);
-        if (user == null) {
-            user = userDao.getUser(userid);
-            if (user != null) {
-                cache.put(cacheKey, user);
-            }
-        }
-        return user;
+        return cache.getUnchecked(Long.valueOf(userid));
     }
 
-    public List<User> getUsers(long[] userIds) {
-        if (userIds != null && userIds.length >= 0) {
-            List<User> users = new ArrayList<>(userIds.length);
-            List<Long> qryUserIds = new ArrayList<>(userIds.length);
-            for (long userId : userIds) {
-                User user = cache.get(Long.toString(userId));
-                if (user != null) {
-                    users.add(user);
-                } else {
-                    qryUserIds.add(Long.valueOf(userId));
-                }
-            }
-            if (!qryUserIds.isEmpty()) {
-                users.addAll(getAndCacheUsers(qryUserIds.toArray(new Long[qryUserIds.size()])));
-            }
-            return users;
-        }
-        return Collections.emptyList();
+    public long addUser(@Nonnull String username, @Nonnull String password) throws DuplicateUsernameException {
+        String encryptedPassword = encryptor.encrypt(password);
+        long userId = userDao.addUser(username, encryptedPassword);
+        usernamePasswordCache.invalidate(new UsernamePasswordCacheKey(username, encryptedPassword));
+        return userId;
     }
 
-    private List<User> getAndCacheUsers(Long[] userIds) {
-        List<User> users = userDao.getUsers(userIds);
-        for (User u : users) {
-            cache.put(Long.toString(u.getId()), u);
-        }
-        return users;
-    }
-
-    public long addUser(@Nonnull final String username, @Nonnull final String password) throws DuplicateUsernameException {
-        // TODO plain text password
-        return userDao.addUser(username, password);
-    }
-
-    public User getUser(String username, String password) {
-        // TODO plain text password
-        String cacheKey = "getUser#" + username + "#" + password;
-        Element el = cache.getElement(cacheKey);
-        if (el != null) {
-            return el.get();
-        }
-        User user = null;
-        try {
-            user = userDao.getUser(username, password);
-            if (user != null) {
-                cache.put(Long.toString(user.getId()), user);
-            }
-        } finally {
-            cache.put(cacheKey, user);
-        }
-        return user;
+    @Nullable
+    public User getUser(@Nonnull String username, @Nonnull String password) {
+        String encryptedPassword = encryptor.encrypt(password);
+        return usernamePasswordCache.getUnchecked(new UsernamePasswordCacheKey(username, encryptedPassword)).orNull();
     }
 
     public User getUser(String username) {
         // TODO cache
         User user = userDao.getUser(username);
         if (user != null) {
-            cache.put(Long.toString(user.getId()), user);
+            cache.put(Long.valueOf(user.getId()), user);
         }
         return user;
     }

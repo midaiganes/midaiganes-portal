@@ -63,13 +63,16 @@ public class UserDao {
     }
 
     @Nullable
-    public User getUser(String username, String password) {
+    public User getUser(@Nonnull String username, @Nonnull String password) {
+        Preconditions.checkNotNull(username, "Username is null.");
+        Preconditions.checkNotNull(password, "Password is null.");
         List<User> list = jdbcTemplate.query(GET_USER_BY_USERNAME_PASSWORD, userRowMapper, username, password);
         return list.isEmpty() ? null : list.get(0);
     }
 
     @Nullable
-    public User getUser(String username) {
+    public User getUser(@Nonnull String username) {
+        Preconditions.checkNotNull(username);
         List<User> list = jdbcTemplate.query(GET_USER_BY_USERNAME, userRowMapper, username);
         return list.isEmpty() ? null : list.get(0);
     }
