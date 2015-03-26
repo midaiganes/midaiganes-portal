@@ -1,9 +1,7 @@
 package ee.midaiganes.portal.pagelayout;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -15,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 
 import ee.midaiganes.generated.xml.pagelayout.MidaiganesLayout;
 import ee.midaiganes.services.PageLayoutRegistryRepository;
@@ -26,10 +25,10 @@ public class PageLayoutRepository implements PageLayoutRegistryRepository {
     private final ConcurrentHashMap<PageLayoutName, PageLayout> pageLayouts = new ConcurrentHashMap<>();
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    public List<PageLayout> getPageLayouts() {
+    public ImmutableList<PageLayout> getPageLayouts() {
         lock.readLock().lock();
         try {
-            return new ArrayList<>(pageLayouts.values());
+            return ImmutableList.copyOf(pageLayouts.values());
         } finally {
             lock.readLock().unlock();
         }
@@ -104,15 +103,23 @@ public class PageLayoutRepository implements PageLayoutRegistryRepository {
     @Override
     public void unregisterPageLayouts(String contextPath) {
         for (PageLayout pageLayout : getPageLayouts()) {
-            if (pageLayout.getPageLayoutName().getContextWithSlash().equals(contextPath)) {
-                lock.writeLock().lock();
-                try {
-                    pageLayouts.remove(pageLayout.getPageLayoutName());
-                } finally {
-                    lock.writeLock().unlock();
-                }
-                log.info("Page layout removed: {}", pageLayout);
+            if (isFromContext(pageLayout, contextPath)) {
+                unregisterPageLayout(pageLayout);
             }
         }
+    }
+
+    private boolean isFromContext(PageLayout pageLayout, String contextPath) {
+        return pageLayout.getPageLayoutName().getContextWithSlash().equals(contextPath);
+    }
+
+    private void unregisterPageLayout(PageLayout pageLayout) {
+        lock.writeLock().lock();
+        try {
+            pageLayouts.remove(pageLayout.getPageLayoutName());
+        } finally {
+            lock.writeLock().unlock();
+        }
+        log.info("Page layout removed: {}", pageLayout);
     }
 }
