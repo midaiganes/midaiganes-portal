@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import ee.midaiganes.fn.Optionals;
 import ee.midaiganes.services.rowmapper.LongRowMapper;
 import ee.midaiganes.util.StringUtil;
 
@@ -57,14 +58,7 @@ public class WebContentRepository {
                 List<WebContent> wcs = jdbcTemplate.query(
                         "SELECT id, layoutSetId, title, content, createDate FROM WebContent WHERE id in (" + StringUtil.repeat("?", ",", keysArray.length) + ")", keysArray,
                         webContentRowMapper);
-                return Maps.uniqueIndex(Lists.transform(wcs, new Function<WebContent, Optional<WebContent>>() {
-                    @Override
-                    @Nullable
-                    public Optional<WebContent> apply(@Nullable WebContent input) {
-                        return Optional.of(input);
-                    }
-
-                }), new Function<Optional<WebContent>, Long>() {
+                return Maps.uniqueIndex(Lists.transform(wcs, Optionals.of()), new Function<Optional<WebContent>, Long>() {
                     @Override
                     @Nullable
                     public Long apply(@Nullable Optional<WebContent> input) {
@@ -77,14 +71,7 @@ public class WebContentRepository {
             @Override
             public ImmutableList<WebContent> load(Long layoutSetId) throws Exception {
                 List<Long> list = jdbcTemplate.query("SELECT id FROM WebContent WHERE layoutSetId = ?", new LongRowMapper(), layoutSetId);
-                return ImmutableList.copyOf(Collections2.transform(webContentCache.getAll(list).values(), new Function<Optional<WebContent>, WebContent>() {
-                    @Override
-                    @Nullable
-                    public WebContent apply(@Nullable Optional<WebContent> input) {
-                        return input.get();
-                    }
-
-                }));
+                return ImmutableList.copyOf(Collections2.transform(webContentCache.getAll(list).values(), Optionals.get()));
             }
 
         });
@@ -94,7 +81,7 @@ public class WebContentRepository {
         return webContentCache.getUnchecked(Long.valueOf(id)).orNull();
     }
 
-    public List<WebContent> getWebContents(long layoutSetId) {
+    public ImmutableList<WebContent> getWebContents(long layoutSetId) {
         return cache.getUnchecked(Long.valueOf(layoutSetId));
     }
 
