@@ -2,17 +2,15 @@ package ee.midaiganes.services;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.management.MBeanServer;
 import javax.portlet.Portlet;
 import javax.portlet.PortletConfig;
 import javax.portlet.PortletException;
@@ -25,6 +23,7 @@ import javax.xml.bind.JAXBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Module;
@@ -60,17 +59,19 @@ public class PortletRepository implements PortletRegistryRepository {
     private final PortletPreferencesRepository portletPreferencesRepository;
 
     private final PortletInstanceRepository portletInstanceRepository;
+    private final MBeanServer mBeanServer;
 
     @Inject
-    public PortletRepository(PortletPreferencesRepository portletPreferencesRepository, PortletInstanceRepository portletInstanceRepository) {
+    public PortletRepository(PortletPreferencesRepository portletPreferencesRepository, PortletInstanceRepository portletInstanceRepository, MBeanServer mBeanServer) {
         this.portletPreferencesRepository = portletPreferencesRepository;
         this.portletInstanceRepository = portletInstanceRepository;
+        this.mBeanServer = mBeanServer;
     }
 
-    public List<PortletName> getPortletNames() {
+    public ImmutableList<PortletName> getPortletNames() {
         readLock.lock();
         try {
-            return new ArrayList<>(portlets.keySet());
+            return ImmutableList.copyOf(portlets.keySet());
         } finally {
             readLock.unlock();
         }
@@ -171,9 +172,9 @@ public class PortletRepository implements PortletRegistryRepository {
 
     private MidaiganesPortlet getMidaiganesPortlet(Portlet portlet, Class<?> obj, PortletName portletName) {
         if (ResourceServingPortlet.class.isAssignableFrom(obj)) {
-            return new MidaiganesResourcePortlet(castToResourceServingPortlet(portlet), portletName);
+            return new MidaiganesResourcePortlet(castToResourceServingPortlet(portlet), portletName, mBeanServer);
         }
-        return new MidaiganesPortlet(portlet, portletName);
+        return new MidaiganesPortlet(portlet, portletName, mBeanServer);
     }
 
     private static class PortletModule extends AbstractModule {
@@ -243,24 +244,24 @@ public class PortletRepository implements PortletRegistryRepository {
         return new PortletConfigImpl(servletContext, portletType.getPortletName().getValue(), getInitParameters(portletType), getSupportedLocales(portletType));
     }
 
-    private List<PortletInitParameter> getInitParameters(PortletType portletType) {
-        CopyOnWriteArrayList<PortletInitParameter> initParameters = new CopyOnWriteArrayList<>();
+    private ImmutableList<PortletInitParameter> getInitParameters(PortletType portletType) {
+        ImmutableList.Builder<PortletInitParameter> initParameters = ImmutableList.builder();
         for (InitParamType initParam : portletType.getInitParam()) {
-            CopyOnWriteArrayList<Description> descriptions = new CopyOnWriteArrayList<>();
+            ImmutableList.Builder<Description> descriptions = ImmutableList.builder();
             for (DescriptionType description : initParam.getDescription()) {
                 descriptions.add(new Description(description.getLang(), description.getValue()));
             }
-            initParameters.add(new PortletInitParameter(initParam.getId(), initParam.getName().getValue(), initParam.getValue().getValue(), descriptions));
+            initParameters.add(new PortletInitParameter(initParam.getId(), initParam.getName().getValue(), initParam.getValue().getValue(), descriptions.build()));
         }
-        return initParameters;
+        return initParameters.build();
     }
 
-    private List<Locale> getSupportedLocales(PortletType portletType) {
-        List<Locale> supportedLocales = new ArrayList<>(portletType.getSupportedLocale().size());
+    private ImmutableList<Locale> getSupportedLocales(PortletType portletType) {
+        ImmutableList.Builder<Locale> builder = ImmutableList.builder();
         for (SupportedLocaleType supportedLocaleType : portletType.getSupportedLocale()) {
-            supportedLocales.add(new Locale(supportedLocaleType.getValue()));
+            builder.add(new Locale(supportedLocaleType.getValue()));
         }
-        return supportedLocales;
+        return builder.build();
     }
 
     private String getContextPathName(ServletContext servletContext) {
