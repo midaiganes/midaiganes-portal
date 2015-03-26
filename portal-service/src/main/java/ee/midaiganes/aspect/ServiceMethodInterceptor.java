@@ -19,8 +19,7 @@ public class ServiceMethodInterceptor implements MethodInterceptor {
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
-        String method = invocation.getMethod().getDeclaringClass().getAnnotation(Service.class).service().getSimpleName() + '.' + invocation.getMethod().getName()
-                + " took ";
+        String method = invocation.getMethod().getDeclaringClass().getAnnotation(Service.class).service().getSimpleName() + '.' + invocation.getMethod().getName() + " took ";
         StringBuilder sb = new StringBuilder(256);
         toJson(sb, invocation.getArguments()[0]);
 
@@ -42,21 +41,28 @@ public class ServiceMethodInterceptor implements MethodInterceptor {
 
     private void toJson(StringBuilder sb, Object o) {
         if (o instanceof Throwable) {
-            Throwable t = (Throwable) o;
-            sb.append(t.getClass()).append(": ").append(t.getMessage());
-            StackTraceElement[] stes = t.getStackTrace();
-            if (stes != null) {
-                int i = 0;
-                for (; i < 5 && i < stes.length; i++) {
-                    sb.append("\n\t").append(stes[i].toString());
-                }
-                if (i == 5 && stes.length > 5) {
-                    sb.append("\n\t...");
-                }
-            }
+            appendThrowable((Throwable) o, sb);
         } else {
             sb.append(o.getClass().getSimpleName()).append(" ");
             gson.toJson(o, sb);
+        }
+    }
+
+    private void appendThrowable(Throwable t, StringBuilder sb) {
+        sb.append(t.getClass()).append(": ").append(t.getMessage());
+        StackTraceElement[] stes = t.getStackTrace();
+        if (stes != null) {
+            appendStackTraceElements(stes, sb);
+        }
+    }
+
+    private void appendStackTraceElements(StackTraceElement[] stes, StringBuilder sb) {
+        int i = 0;
+        for (; i < 5 && i < stes.length; i++) {
+            sb.append("\n\t").append(stes[i].toString());
+        }
+        if (i == 5 && stes.length > 5) {
+            sb.append("\n\t...");
         }
     }
 }
