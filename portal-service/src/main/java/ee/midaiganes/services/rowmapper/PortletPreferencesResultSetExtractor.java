@@ -14,20 +14,27 @@ public class PortletPreferencesResultSetExtractor implements ResultSetExtractor<
     public ImmutableMap<String, String[]> extractData(ResultSet rs) throws SQLException {
         Map<String, String[]> map = new HashMap<>();
         while (rs.next()) {
-            String name = rs.getString(1);
-            String value = rs.getString(2);
-            String[] values = map.get(name);
-            if (values == null) {
-                values = new String[] { value };
-            } else {
-                String[] nv = new String[values.length + 1];
-                System.arraycopy(values, 0, nv, 0, values.length);
-                nv[nv.length - 1] = value;
-                values = nv;
-            }
-            map.put(name, values);
+            mapRow(rs, map);
         }
         return ImmutableMap.copyOf(map);
     }
 
+    private void mapRow(ResultSet rs, Map<String, String[]> map) throws SQLException {
+        String name = rs.getString(1);
+        String value = rs.getString(2);
+        addValueToMap(name, value, map);
+    }
+
+    private void addValueToMap(String name, String value, Map<String, String[]> map) {
+        String[] values = map.get(name);
+        if (values == null) {
+            values = new String[] { value };
+        } else {
+            String[] nv = new String[values.length + 1];
+            System.arraycopy(values, 0, nv, 0, values.length);
+            nv[nv.length - 1] = value;
+            values = nv;
+        }
+        map.put(name, values);
+    }
 }
