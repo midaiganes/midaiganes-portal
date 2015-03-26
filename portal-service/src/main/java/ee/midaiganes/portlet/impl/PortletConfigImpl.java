@@ -20,17 +20,20 @@ import javax.xml.namespace.QName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableList;
+
 import ee.midaiganes.portlet.PortletInitParameter;
 
 public class PortletConfigImpl implements PortletConfig {
     private static final Logger log = LoggerFactory.getLogger(PortletConfigImpl.class);
     private final String portletName;
-    private final List<PortletInitParameter> initParameters;
-    private final List<Locale> supportedLocales;
+    private final ImmutableList<PortletInitParameter> initParameters;
+    private final ImmutableList<Locale> supportedLocales;
     private final ResourceBundle resourceBundle;
     private final PortletContext portletContext;
 
-    public PortletConfigImpl(ServletContext servletContext, String portletName, List<PortletInitParameter> initParameters, List<Locale> supportedLocales) throws IOException {
+    public PortletConfigImpl(ServletContext servletContext, String portletName, ImmutableList<PortletInitParameter> initParameters, ImmutableList<Locale> supportedLocales)
+            throws IOException {
         this.portletName = portletName;
         this.initParameters = initParameters;
         this.supportedLocales = supportedLocales;
@@ -62,9 +65,11 @@ public class PortletConfigImpl implements PortletConfig {
 
     @Override
     public String getInitParameter(String name) {
-        for (PortletInitParameter initParam : initParameters) {
-            if (name != null && name.equals(initParam.getName())) {
-                return initParam.getValue();
+        if (name != null) {
+            for (PortletInitParameter initParam : initParameters) {
+                if (name.equals(initParam.getName())) {
+                    return initParam.getValue();
+                }
             }
         }
         return null;
