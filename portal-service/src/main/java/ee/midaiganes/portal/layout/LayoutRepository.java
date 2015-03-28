@@ -101,7 +101,7 @@ public class LayoutRepository {
     }
 
     @Nonnull
-    public List<LayoutTitle> getLayoutTitles(long layoutId) {
+    public ImmutableList<LayoutTitle> getLayoutTitles(long layoutId) {
         return this.layoutTitleCache.getUnchecked(Long.valueOf(layoutId));
     }
 
@@ -110,11 +110,11 @@ public class LayoutRepository {
         return this.layoutCache.getUnchecked(Long.valueOf(layoutId));
     }
 
-    public List<Layout> getLayouts(long layoutSetId) {
+    public ImmutableList<Layout> getLayouts(long layoutSetId) {
         return this.layoutSetLayouts.getUnchecked(Long.valueOf(layoutSetId));
     }
 
-    public List<Layout> getChildLayouts(long layoutSetId, Long parentId) {
+    public ImmutableList<Layout> getChildLayouts(long layoutSetId, Long parentId) {
         List<Layout> layouts = new ArrayList<>();
         for (Layout layout : this.layoutSetLayouts.getUnchecked(Long.valueOf(layoutSetId))) {
             Long layoutParentId = layout.getParentId();
@@ -132,7 +132,7 @@ public class LayoutRepository {
                 return Long.compare(o1.getNr(), o2.getNr());
             }
         });
-        return layouts;
+        return ImmutableList.copyOf(layouts);
     }
 
     @Nullable
