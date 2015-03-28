@@ -12,7 +12,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -21,6 +20,7 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.Longs;
 
+import ee.midaiganes.fn.Optionals;
 import ee.midaiganes.portal.theme.ThemeName;
 
 public class LayoutSetRepository {
@@ -35,61 +35,81 @@ public class LayoutSetRepository {
     @Inject
     public LayoutSetRepository(LayoutSetDao layoutSetDao) {
         this.layoutSetDao = layoutSetDao;
-        this.virtualHostLayoutSetCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new CacheLoader<String, Optional<LayoutSet>>() {
-            @Override
-            public Optional<LayoutSet> load(String virtualHost) throws Exception {
-                LayoutSet layoutSet = layoutSetDao.getLayoutSet(virtualHost);
-                Optional<LayoutSet> ols = Optional.fromNullable(layoutSet);
-                if (layoutSet != null) {
-                    idLayoutSetCache.put(Long.valueOf(layoutSet.getId()), ols);
-                }
-                return ols;
-            }
-        });
-
-        this.idLayoutSetCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new CacheLoader<Long, Optional<LayoutSet>>() {
-            @Override
-            public Optional<LayoutSet> load(Long id) {
-                LayoutSet layoutSet = layoutSetDao.getLayoutSet(id.longValue());
-                Optional<LayoutSet> ols = Optional.fromNullable(layoutSet);
-                if (layoutSet != null) {
-                    virtualHostLayoutSetCache.put(layoutSet.getVirtualHost(), ols);
-                }
-                return ols;
-            }
-
-            @Override
-            public Map<Long, Optional<LayoutSet>> loadAll(Iterable<? extends Long> keys) {
-                List<LayoutSet> layoutSets = layoutSetDao.getLayoutSets(ImmutableList.<Long> copyOf(keys));
-                Map<Long, Optional<LayoutSet>> result = new HashMap<>(layoutSets.size());
-                for (LayoutSet ls : layoutSets) {
-                    Optional<LayoutSet> ols = Optional.of(ls);
-                    virtualHostLayoutSetCache.put(ls.getVirtualHost(), ols);
-                    result.put(Long.valueOf(ls.getId()), ols);
-                }
-                return result;
-            }
-        });
+        this.virtualHostLayoutSetCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new LoadLayoutSetByVirtualHostCacheLoader(this));
+        this.idLayoutSetCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new LoadLayoutSetByIdCacheLoader(this));
         this.allLayoutSetsCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).initialCapacity(1).maximumSize(1)
-                .build(new CacheLoader<Boolean, ImmutableList<Long>>() {
-                    @Override
-                    public ImmutableList<Long> load(Boolean key) throws Exception {
-                        return ImmutableList.copyOf(Longs.asList(layoutSetDao.getLayoutSetIds().toArray()));
-                    }
-
-                });
+                .build(new LoadLayoutSetIdsCacheLoader(layoutSetDao));
     }
 
-    public List<LayoutSet> getLayoutSets() {
+    private static final class LoadLayoutSetByVirtualHostCacheLoader extends CacheLoader<String, Optional<LayoutSet>> {
+        private final LayoutSetRepository layoutSetRepository;
+
+        private LoadLayoutSetByVirtualHostCacheLoader(LayoutSetRepository layoutSetRepository) {
+            this.layoutSetRepository = layoutSetRepository;
+        }
+
+        @Override
+        public Optional<LayoutSet> load(String virtualHost) throws Exception {
+            LayoutSet layoutSet = layoutSetRepository.layoutSetDao.getLayoutSet(virtualHost);
+            Optional<LayoutSet> ols = Optional.fromNullable(layoutSet);
+            if (layoutSet != null) {
+                layoutSetRepository.idLayoutSetCache.put(Long.valueOf(layoutSet.getId()), ols);
+            }
+            return ols;
+        }
+    }
+
+    private static final class LoadLayoutSetByIdCacheLoader extends CacheLoader<Long, Optional<LayoutSet>> {
+        private final LayoutSetRepository layoutSetRepository;
+
+        private LoadLayoutSetByIdCacheLoader(LayoutSetRepository layoutSetRepository) {
+            this.layoutSetRepository = layoutSetRepository;
+        }
+
+        @Override
+        public Optional<LayoutSet> load(Long id) {
+            LayoutSet layoutSet = layoutSetRepository.layoutSetDao.getLayoutSet(id.longValue());
+            Optional<LayoutSet> ols = Optional.fromNullable(layoutSet);
+            if (layoutSet != null) {
+                layoutSetRepository.virtualHostLayoutSetCache.put(layoutSet.getVirtualHost(), ols);
+            }
+            return ols;
+        }
+
+        @Override
+        public Map<Long, Optional<LayoutSet>> loadAll(Iterable<? extends Long> keys) {
+            List<LayoutSet> layoutSets = layoutSetRepository.layoutSetDao.getLayoutSets(ImmutableList.<Long> copyOf(keys));
+            Map<Long, Optional<LayoutSet>> result = new HashMap<>(layoutSets.size());
+            for (LayoutSet ls : layoutSets) {
+                addLayoutIntoVirtualHostCacheAndResult(ls, result);
+            }
+            return result;
+        }
+
+        private void addLayoutIntoVirtualHostCacheAndResult(LayoutSet ls, Map<Long, Optional<LayoutSet>> result) {
+            Optional<LayoutSet> ols = Optional.of(ls);
+            layoutSetRepository.virtualHostLayoutSetCache.put(ls.getVirtualHost(), ols);
+            result.put(Long.valueOf(ls.getId()), ols);
+        }
+    }
+
+    private static final class LoadLayoutSetIdsCacheLoader extends CacheLoader<Boolean, ImmutableList<Long>> {
+        private final LayoutSetDao layoutSetDao;
+
+        private LoadLayoutSetIdsCacheLoader(LayoutSetDao layoutSetDao) {
+            this.layoutSetDao = layoutSetDao;
+        }
+
+        @Override
+        public ImmutableList<Long> load(Boolean key) throws Exception {
+            return ImmutableList.copyOf(Longs.asList(layoutSetDao.getLayoutSetIds().toArray()));
+        }
+    }
+
+    public ImmutableList<LayoutSet> getLayoutSets() {
         ImmutableList<Long> ids = allLayoutSetsCache.getUnchecked(Boolean.TRUE);
         try {
-            return ImmutableList.copyOf(Collections2.transform(idLayoutSetCache.getAll(ids).values(), new Function<Optional<LayoutSet>, LayoutSet>() {
-                @Override
-                @Nullable
-                public LayoutSet apply(@Nullable Optional<LayoutSet> input) {
-                    return input.get();
-                }
-            }));
+            return ImmutableList.copyOf(Collections2.transform(idLayoutSetCache.getAll(ids).values(), Optionals.get()));
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
         }
