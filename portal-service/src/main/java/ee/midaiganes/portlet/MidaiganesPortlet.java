@@ -23,8 +23,6 @@ import javax.portlet.ResourceServingPortlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ee.midaiganes.beans.Utils;
-
 public class MidaiganesPortlet implements MidaiganesPortletMBean, Portlet {
     private static final Logger log = LoggerFactory.getLogger(MidaiganesPortlet.class);
     private final Portlet portlet;
@@ -37,12 +35,14 @@ public class MidaiganesPortlet implements MidaiganesPortletMBean, Portlet {
     private boolean destroyed = false;
     private final ObjectName objectName;
     private final Object lock = new Object();
+    private final MBeanServer mBeanServer;
 
-    public MidaiganesPortlet(Portlet portlet, PortletName portletName) {
+    public MidaiganesPortlet(Portlet portlet, PortletName portletName, MBeanServer mBeanServer) {
         this.portlet = portlet;
+        this.mBeanServer = mBeanServer;
         try {
             objectName = new ObjectName("ee.midaiganes:type=Portlet,name=" + portletName.getFullName());
-            Utils.getInstance().getInstance(MBeanServer.class).registerMBean(this, objectName);
+            mBeanServer.registerMBean(this, objectName);
         } catch (InstanceAlreadyExistsException | MBeanRegistrationException | NotCompliantMBeanException | MalformedObjectNameException e) {
             throw new RuntimeException(e);
         }
@@ -78,7 +78,7 @@ public class MidaiganesPortlet implements MidaiganesPortletMBean, Portlet {
 
     private void unregisterMBean() {
         try {
-            Utils.getInstance().getInstance(MBeanServer.class).unregisterMBean(objectName);
+            mBeanServer.unregisterMBean(objectName);
         } catch (Throwable e) {
             log.error(e.getMessage(), e);
         }
