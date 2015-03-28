@@ -1,12 +1,11 @@
 package ee.midaiganes.portlet;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import javax.portlet.PortletConfig;
 import javax.portlet.PortletMode;
 import javax.portlet.WindowState;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 import ee.midaiganes.generated.xml.portlet.PortletModeType;
 import ee.midaiganes.generated.xml.portlet.PortletType;
@@ -18,8 +17,8 @@ import ee.midaiganes.util.WindowStateUtil;
 public class PortletAndConfiguration {
     private final MidaiganesPortlet midaiganesPortlet;
     private final PortletConfig portletConfig;
-    private final List<WindowState> supportedWindowStates;
-    private final List<PortletMode> supportedPortletModes;
+    private final ImmutableList<WindowState> supportedWindowStates;
+    private final ImmutableList<PortletMode> supportedPortletModes;
 
     public PortletAndConfiguration(MidaiganesPortlet portlet, PortletConfig portletConfig, PortletType portletType) {
         this.midaiganesPortlet = portlet;
@@ -36,38 +35,39 @@ public class PortletAndConfiguration {
         return portletConfig;
     }
 
-    public List<WindowState> getSupportedWindowStates() {
+    public ImmutableList<WindowState> getSupportedWindowStates() {
         return supportedWindowStates;
     }
 
-    public List<PortletMode> getSupportedPortletModes() {
+    public ImmutableList<PortletMode> getSupportedPortletModes() {
         return supportedPortletModes;
     }
 
-    private List<PortletMode> getSupportedPortletModes(PortletType portletType) {
-        List<PortletMode> portletModes = new ArrayList<>();
+    private ImmutableList<PortletMode> getSupportedPortletModes(PortletType portletType) {
+        ImmutableSet.Builder<PortletMode> portletModes = ImmutableSet.builder();
+
         for (SupportsType supports : portletType.getSupports()) {
             for (PortletModeType pmt : supports.getPortletMode()) {
                 PortletMode pm = PortletModeUtil.getPortletMode(pmt.getValue());
-                if (pm != null && !portletModes.contains(pm)) {
+                if (pm != null) {
                     portletModes.add(pm);
                 }
             }
         }
-        return Collections.unmodifiableList(new ArrayList<>(portletModes));
+        return portletModes.build().asList();
     }
 
-    private List<WindowState> getSupportedWindowStates(PortletType portletType) {
-        List<WindowState> windowStates = new ArrayList<>();
+    private ImmutableList<WindowState> getSupportedWindowStates(PortletType portletType) {
+        ImmutableSet.Builder<WindowState> windowStates = ImmutableSet.builder();
         for (SupportsType supports : portletType.getSupports()) {
             for (WindowStateType wst : supports.getWindowState()) {
                 WindowState ws = WindowStateUtil.getWindowState(wst.getValue());
-                if (ws != null && !windowStates.contains(ws)) {
+                if (ws != null) {
                     windowStates.add(ws);
                 }
             }
         }
-        return Collections.unmodifiableList(new ArrayList<>(windowStates));
+        return windowStates.build().asList();
     }
 
     @Override
