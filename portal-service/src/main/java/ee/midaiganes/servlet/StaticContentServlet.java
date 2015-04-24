@@ -3,7 +3,6 @@ package ee.midaiganes.servlet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
@@ -19,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.io.ByteStreams;
 
 import ee.midaiganes.portal.theme.Theme;
@@ -96,7 +96,7 @@ public class StaticContentServlet extends HttpServlet {
     }
 
     private Map<String, Theme> getStaticContents(ServletContext ctx, Theme theme, String resourcePath) {
-        List<String> list = servletContextResourceRepository.getContextResourcePaths(ctx, resourcePath);
+        ImmutableList<String> list = servletContextResourceRepository.getContextResourcePaths(ctx, resourcePath);
         // ctx.getResourcePaths(theme.getThemePath() + StringPool.SLASH +
         // theme.getJavascriptPath());
         Map<String, Theme> files = new HashMap<>();

@@ -1,7 +1,5 @@
 package ee.midaiganes.servlet;
 
-import java.util.List;
-
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -9,6 +7,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ImmutableList;
 
 import ee.midaiganes.beans.Utils;
 import ee.midaiganes.portal.theme.Theme;
@@ -37,7 +37,7 @@ public class ThemeServlet extends HttpServlet {
         }
     }
 
-    private void setThemeVariables(HttpServletRequest request, List<ThemeVariablesService.ThemeVariable> variables) {
+    private void setThemeVariables(HttpServletRequest request, ImmutableList<ThemeVariablesService.ThemeVariable> variables) {
         for (ThemeVariablesService.ThemeVariable tv : variables) {
             request.setAttribute(tv.getName(), tv.getValue());
         }

@@ -1,5 +1,7 @@
 package ee.midaiganes.aspect;
 
+import java.lang.reflect.Method;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
@@ -19,7 +21,7 @@ public class ServiceMethodInterceptor implements MethodInterceptor {
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
-        String method = invocation.getMethod().getDeclaringClass().getAnnotation(Service.class).service().getSimpleName() + '.' + invocation.getMethod().getName() + " took ";
+        String method = getServiceAndMethodPart(invocation);
         StringBuilder sb = new StringBuilder(256);
         toJson(sb, invocation.getArguments()[0]);
 
@@ -39,13 +41,33 @@ public class ServiceMethodInterceptor implements MethodInterceptor {
         }
     }
 
+    private String getServiceAndMethodPart(MethodInvocation invocation) {
+        return getServiceAndMethodPartFromMethod(invocation.getMethod());
+    }
+
+    private String getServiceAndMethodPartFromMethod(Method method) {
+        return getServiceSimpleName(method) + '.' + method.getName() + " took ";
+    }
+
+    private String getServiceSimpleName(Method method) {
+        return method.getDeclaringClass().getAnnotation(Service.class).service().getSimpleName();
+    }
+
     private void toJson(StringBuilder sb, Object o) {
         if (o instanceof Throwable) {
             appendThrowable((Throwable) o, sb);
         } else {
-            sb.append(o.getClass().getSimpleName()).append(" ");
-            gson.toJson(o, sb);
+            appendRegularObject(sb, o);
         }
+    }
+
+    private void appendRegularObject(StringBuilder sb, Object o) {
+        sb.append(getObjectClassSimpleName(o)).append(" ");
+        gson.toJson(o, sb);
+    }
+
+    private String getObjectClassSimpleName(Object o) {
+        return o.getClass().getSimpleName();
     }
 
     private void appendThrowable(Throwable t, StringBuilder sb) {

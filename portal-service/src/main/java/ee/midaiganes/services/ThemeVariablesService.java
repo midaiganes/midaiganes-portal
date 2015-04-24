@@ -9,6 +9,7 @@ import javax.portlet.WindowStateException;
 import javax.servlet.http.HttpServletRequest;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 
 import ee.midaiganes.model.NavItem;
 import ee.midaiganes.model.PageDisplay;
@@ -44,9 +45,9 @@ public class ThemeVariablesService {
         this.permissionService = permissionService;
     }
 
-    public List<ThemeVariable> getThemeVariables(HttpServletRequest request) {
+    public ImmutableList<ThemeVariable> getThemeVariables(HttpServletRequest request) {
         PageDisplay pageDisplay = RequestUtil.getPageDisplay(request);
-        List<ThemeVariable> variables = new ArrayList<>();
+        ImmutableList.Builder<ThemeVariable> variables = ImmutableList.builder();
         variables.add(new ThemeVariable(LOG_IN_URL, getLogInUrl()));
         variables.add(new ThemeVariable(NAV_ITEMS, getNavItems(pageDisplay)));
         variables.add(new ThemeVariable(PAGE_DISPLAY, pageDisplay));
@@ -61,19 +62,19 @@ public class ThemeVariablesService {
             //
             long userId = pageDisplay.getUser().getId();
 
-                variables.add(new ThemeVariable("addPagePermission", Boolean.valueOf(permissionService.hasUserPermission(userId, pageDisplay.getLayoutSet().getResource(),
-                        pageDisplay.getLayoutSet().getId(), "EDIT"))));
-                variables.add(new ThemeVariable("changePageLayoutPermission", Boolean.valueOf(permissionService.hasUserPermission(userId, pageDisplay.getLayout().getResource(),
-                        pageDisplay.getLayout().getId(), "EDIT"))));
-                variables.add(new ThemeVariable("addRemovePortletPermission", Boolean.valueOf(permissionService.hasUserPermission(userId, pageDisplay.getLayout().getResource(),
-                        pageDisplay.getLayout().getId(), "ADD_PORTLET"))));
-                variables.add(new ThemeVariable("changePagePermissionsPermission", Boolean.valueOf(permissionService.hasUserPermission(userId, pageDisplay.getLayout()
-                        .getResource(), pageDisplay.getLayout().getId(), "PERMISSIONS"))));
-            
-        } catch (WindowStateException|ResourceNotFoundException | ResourceActionNotFoundException e) {
+            variables.add(new ThemeVariable("addPagePermission", Boolean.valueOf(permissionService.hasUserPermission(userId, pageDisplay.getLayoutSet().getResource(), pageDisplay
+                    .getLayoutSet().getId(), "EDIT"))));
+            variables.add(new ThemeVariable("changePageLayoutPermission", Boolean.valueOf(permissionService.hasUserPermission(userId, pageDisplay.getLayout().getResource(),
+                    pageDisplay.getLayout().getId(), "EDIT"))));
+            variables.add(new ThemeVariable("addRemovePortletPermission", Boolean.valueOf(permissionService.hasUserPermission(userId, pageDisplay.getLayout().getResource(),
+                    pageDisplay.getLayout().getId(), "ADD_PORTLET"))));
+            variables.add(new ThemeVariable("changePagePermissionsPermission", Boolean.valueOf(permissionService.hasUserPermission(userId, pageDisplay.getLayout().getResource(),
+                    pageDisplay.getLayout().getId(), "PERMISSIONS"))));
+
+        } catch (WindowStateException | ResourceNotFoundException | ResourceActionNotFoundException e) {
             throw new RuntimeException(e);
         }
-        return variables;
+        return variables.build();
     }
 
     private List<NavItem> getNavItems(PageDisplay pageDisplay) {

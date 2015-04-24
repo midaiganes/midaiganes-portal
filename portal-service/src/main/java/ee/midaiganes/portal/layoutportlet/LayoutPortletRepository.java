@@ -1,9 +1,5 @@
 package ee.midaiganes.portal.layoutportlet;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
@@ -15,6 +11,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Ordering;
 
 import ee.midaiganes.portal.portletinstance.PortletInstanceRepository;
 import ee.midaiganes.portlet.PortletName;
@@ -30,16 +27,9 @@ public class LayoutPortletRepository {
         this.portletInstanceRepository = portletInstanceRepository;
         this.cache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new CacheLoader<Long, ImmutableList<LayoutPortlet>>() {
             @Override
-            public ImmutableList<LayoutPortlet> load(Long layoutId) throws Exception {
-                List<LayoutPortlet> layoutPortlets = layoutPortletDao.loadLayoutPortlets(layoutId.longValue());
-                Collections.sort(layoutPortlets, new Comparator<LayoutPortlet>() {
-                    @Override
-                    public int compare(LayoutPortlet l1, LayoutPortlet l2) {
-                        int i = Long.compare(l1.getRowId(), l2.getRowId());
-                        return i == 0 ? Long.compare(l1.getBoxIndex(), l2.getBoxIndex()) : i;
-                    }
-                });
-                return ImmutableList.copyOf(layoutPortlets);
+            public ImmutableList<LayoutPortlet> load(Long layoutId) {
+                return new OrderingLayoutPortletByRowId().compound(new OrderingLayoutPortletByBoxIndex()).immutableSortedCopy(
+                        layoutPortletDao.loadLayoutPortlets(layoutId.longValue()));
             }
         });
     }
@@ -56,20 +46,33 @@ public class LayoutPortletRepository {
         cache.invalidateAll();
     }
 
-    public List<LayoutPortlet> getLayoutPortlets(long layoutId, long rowId) {
-        List<LayoutPortlet> portlets = new ArrayList<>();
+    public ImmutableList<LayoutPortlet> getLayoutPortlets(long layoutId, long rowId) {
+        return new OrderingLayoutPortletByBoxIndex().immutableSortedCopy(getUnsortedLayoutPortlets(layoutId, rowId));
+    }
+
+    private static final class OrderingLayoutPortletByRowId extends Ordering<LayoutPortlet> {
+
+        @Override
+        public int compare(@Nullable LayoutPortlet left, @Nullable LayoutPortlet right) {
+            return Long.compare(left.getRowId(), right.getRowId());
+        }
+    }
+
+    private static final class OrderingLayoutPortletByBoxIndex extends Ordering<LayoutPortlet> {
+        @Override
+        public int compare(@Nullable LayoutPortlet left, @Nullable LayoutPortlet right) {
+            return Long.compare(left.getBoxIndex(), right.getBoxIndex());
+        }
+    }
+
+    private ImmutableList<LayoutPortlet> getUnsortedLayoutPortlets(long layoutId, long rowId) {
+        ImmutableList.Builder<LayoutPortlet> portlets = ImmutableList.builder();
         for (LayoutPortlet layoutPortlet : cache.getUnchecked(Long.valueOf(layoutId))) {
             if (layoutPortlet.getRowId() == rowId) {
                 portlets.add(layoutPortlet);
             }
         }
-        Collections.sort(portlets, new Comparator<LayoutPortlet>() {
-            @Override
-            public int compare(LayoutPortlet l1, LayoutPortlet l2) {
-                return Long.compare(l1.getBoxIndex(), l2.getBoxIndex());
-            }
-        });
-        return portlets;
+        return portlets.build();
     }
 
     // TODO layout/portletWindowId is not unique

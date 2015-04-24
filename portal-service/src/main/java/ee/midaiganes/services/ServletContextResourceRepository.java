@@ -1,6 +1,5 @@
 package ee.midaiganes.services;
 
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -8,6 +7,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import javax.servlet.ServletContext;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * TODO deprecated?
@@ -38,14 +39,14 @@ public class ServletContextResourceRepository {
         }
     }
 
-    public List<String> getContextResourcePaths(ServletContext ctx, String path) {
+    public ImmutableList<String> getContextResourcePaths(ServletContext ctx, String path) {
         readLock.lock();
         try {
             resourcePaths.putIfAbsent(ctx.getContextPath(), new ConcurrentHashMap<String, CopyOnWriteArrayList<String>>());
             ConcurrentHashMap<String, CopyOnWriteArrayList<String>> resources = resourcePaths.get(ctx.getContextPath());
             CopyOnWriteArrayList<String> list = resources.get(path);
             if (list != null) {
-                return list;
+                return ImmutableList.copyOf(list);
             }
         } finally {
             readLock.unlock();
@@ -53,7 +54,7 @@ public class ServletContextResourceRepository {
         return getOrCreateContextResourcePaths(ctx, path);
     }
 
-    private List<String> getOrCreateContextResourcePaths(ServletContext ctx, String path) {
+    private ImmutableList<String> getOrCreateContextResourcePaths(ServletContext ctx, String path) {
         writeLock.lock();
         try {
             resourcePaths.putIfAbsent(ctx.getContextPath(), new ConcurrentHashMap<String, CopyOnWriteArrayList<String>>());
@@ -66,7 +67,7 @@ public class ServletContextResourceRepository {
                     previous.addAll(list);
                 }
             }
-            return list;
+            return ImmutableList.copyOf(list);
         } finally {
             writeLock.unlock();
         }
