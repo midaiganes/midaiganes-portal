@@ -50,14 +50,18 @@ public class LayoutSetController extends BasePortlet {
     private void editLayoutSetView(String id, RenderRequest request, RenderResponse response) throws PortletException, IOException {
         try {
             LayoutSet layoutSet = layoutSetRepository.getLayoutSet(Long.parseLong(id));
-            LayoutSetModel layoutSetModel = new LayoutSetModel();
-            ThemeName themeName = layoutSet.getThemeName();
-            layoutSetModel.setFullThemeName(themeName != null ? themeName.getFullName() : null);
-            layoutSetModel.setHost(layoutSet.getVirtualHost());
-            layoutSetModel.setId(Long.toString(layoutSet.getId()));
-            request.setAttribute("editLayoutSetModel", layoutSetModel);
-            request.setAttribute("themes", themeRepository.getThemes());
-            super.include("layout-set/edit-layout-set", request, response);
+            if (layoutSet != null) {
+                LayoutSetModel layoutSetModel = new LayoutSetModel();
+                ThemeName themeName = layoutSet.getThemeName();
+                layoutSetModel.setFullThemeName(themeName != null ? themeName.getFullName() : null);
+                layoutSetModel.setHost(layoutSet.getVirtualHost());
+                layoutSetModel.setId(Long.toString(layoutSet.getId()));
+                request.setAttribute("editLayoutSetModel", layoutSetModel);
+                request.setAttribute("themes", themeRepository.getThemes());
+                super.include("layout-set/edit-layout-set", request, response);
+            } else {
+                throw new PortletException("Layout not found with id '" + id + "'!");
+            }
         } catch (NumberFormatException e) {
             log.debug(e.getMessage(), e);
             addLayoutSetView(request, response);
