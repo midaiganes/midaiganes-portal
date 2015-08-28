@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 public class Optionals {
 
@@ -12,6 +13,7 @@ public class Optionals {
             @Override
             @Nullable
             public T apply(@Nullable Optional<T> input) {
+                Preconditions.checkNotNull(input);
                 return input.get();
             }
         };
@@ -22,6 +24,7 @@ public class Optionals {
             @Override
             @Nullable
             public Optional<T> apply(@Nullable T input) {
+                Preconditions.checkNotNull(input);
                 return Optional.of(input);
             }
         };
