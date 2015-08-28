@@ -18,6 +18,7 @@ public class UiTestUtil {
 
     @Nonnull
     public static WebDriver getDriver() {
+        @SuppressWarnings("deprecation")
         HtmlUnitDriver driver = new HtmlUnitDriver(BrowserVersion.FIREFOX_17);
         driver.setJavascriptEnabled(true);
         driver.manage().timeouts().implicitlyWait(TIMEOUT, TimeUnit.SECONDS);
