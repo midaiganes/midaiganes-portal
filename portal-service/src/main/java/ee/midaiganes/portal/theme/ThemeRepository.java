@@ -17,6 +17,7 @@ import javax.xml.bind.JAXBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
@@ -74,6 +75,7 @@ public class ThemeRepository implements ThemeRegistryRepository {
     }
 
     @Override
+    @Transactional
     public void registerThemes(String contextPath, InputStream themeXmlInputStream) {
         try {
             MidaiganesTheme theme = XmlUtil.unmarshalWithoutJAXBElement(MidaiganesTheme.class, themeXmlInputStream);
