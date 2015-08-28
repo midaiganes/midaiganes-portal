@@ -32,14 +32,16 @@ public class UserRepository {
         this.cache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new CacheLoader<Long, User>() {
             @Override
             public User load(Long key) {
-                return userDao.getUser(key.longValue());
+                User user = userDao.getUser(key.longValue());
+                return Preconditions.checkNotNull(user);
             }
         });
         usernamePasswordCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).removalListener(new RemovalListener<UsernamePasswordCacheKey, Optional<User>>() {
             @Override
             public void onRemoval(RemovalNotification<UsernamePasswordCacheKey, Optional<User>> notification) {
                 if (RemovalCause.EXPLICIT == notification.getCause()) {
-                    User user = notification.getValue().orNull();
+                    Optional<User> value = notification.getValue();
+                    User user = value != null ? value.orNull() : null;
                     if (user != null) {
                         cache.invalidate(Long.valueOf(user.getId()));
                     }
