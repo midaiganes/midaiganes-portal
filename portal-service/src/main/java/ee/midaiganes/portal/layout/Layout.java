@@ -1,11 +1,11 @@
 package ee.midaiganes.portal.layout;
 
 import java.io.Serializable;
-import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
 import ee.midaiganes.model.PortalResource;
@@ -38,7 +38,7 @@ public class Layout implements Serializable, PortalResource {
     }
 
     public Layout(long id, long layoutSetId, String friendlyUrl, ThemeName themeName, String pageLayoutId, long nr, Long parentId, long defaultLayoutTitleLanguageId,
-            @Nonnull List<LayoutTitle> layoutTitles) {
+            @Nonnull ImmutableList<LayoutTitle> layoutTitles) {
         this.id = id;
         this.layoutSetId = layoutSetId;
         this.friendlyUrl = friendlyUrl;
@@ -47,10 +47,10 @@ public class Layout implements Serializable, PortalResource {
         this.nr = nr;
         this.parentId = parentId;
         this.defaultLayoutTitleLanguageId = defaultLayoutTitleLanguageId;
-        this.layoutTitles = ImmutableList.copyOf(layoutTitles);
+        this.layoutTitles = Preconditions.checkNotNull(layoutTitles);
     }
 
-    public Layout withLayoutTitles(@Nonnull List<LayoutTitle> layoutTitles) {
+    public Layout withLayoutTitles(@Nonnull ImmutableList<LayoutTitle> layoutTitles) {
         return new Layout(id, layoutSetId, friendlyUrl, themeName, pageLayoutId, nr, parentId, defaultLayoutTitleLanguageId, layoutTitles);
     }
 
@@ -102,7 +102,6 @@ public class Layout implements Serializable, PortalResource {
 
     @Nullable
     public LayoutTitle getLayoutTitle(long languageId) {
-
         for (LayoutTitle layoutTitle : layoutTitles) {
             if (layoutTitle.getLanguageId() == languageId) {
                 return layoutTitle;
