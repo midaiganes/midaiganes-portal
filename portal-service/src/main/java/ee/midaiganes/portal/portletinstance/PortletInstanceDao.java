@@ -13,15 +13,12 @@ import org.springframework.jdbc.support.KeyHolder;
 
 import ee.midaiganes.portlet.PortletName;
 import ee.midaiganes.services.rowmapper.LongResultSetExtractor;
-import ee.midaiganes.util.CollectionUtil;
 import ee.midaiganes.util.StringPool;
 
 public class PortletInstanceDao {
     private static final String DELETE_PORTLET_INSTANCE = "DELETE FROM PortletInstance WHERE windowID = ?";
-    private static final String GET_PORTLET_INSTANCE = "SELECT id, portletContext, portletName, windowID FROM PortletInstance WHERE id = ?";
     private static final String GET_PORTLET_INSTANCE_ID = "SELECT id FROM PortletInstance WHERE portletContext = ? and portletName = ? and windowID = ?";
     private static final String GET_DEFAULT_PORTLET_INSTANCES = "SELECT id, portletContext, portletName FROM PortletInstance WHERE windowID = ?";
-    private static final PortletInstanceRowMapper rowMapper = new PortletInstanceRowMapper();
     private static final LongResultSetExtractor longResultSetExtractor = new LongResultSetExtractor();
     private final JdbcTemplate jdbcTemplate;
 
@@ -34,7 +31,7 @@ public class PortletInstanceDao {
         jdbcTemplate.update(DELETE_PORTLET_INSTANCE, windowID);
     }
 
-    public long addPortletInstance(final PortletName portletName, final String windowID) {
+    public long addPortletInstance(PortletName portletName, String windowID) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(new AddPortletPreparedStatementCreator(portletName, windowID), keyHolder);
         return keyHolder.getKey().longValue();
@@ -53,9 +50,5 @@ public class PortletInstanceDao {
 
     public Long loadPortletInstanceId(PortletName portletName, String windowID) {
         return jdbcTemplate.query(GET_PORTLET_INSTANCE_ID, longResultSetExtractor, portletName.getContext(), portletName.getName(), windowID);
-    }
-
-    public PortletInstance loadPortletInstance(long id) {
-        return CollectionUtil.getFirstElement(jdbcTemplate.query(GET_PORTLET_INSTANCE, rowMapper, Long.valueOf(id)));
     }
 }

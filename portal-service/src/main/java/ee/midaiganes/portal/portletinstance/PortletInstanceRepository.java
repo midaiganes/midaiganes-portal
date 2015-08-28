@@ -31,23 +31,6 @@ public class PortletInstanceRepository {
         this.cache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).<String, Optional<PortletInstance>> build();
     }
 
-    public PortletInstance getPortletInstance(long id) {
-        String cacheKey = Long.toString(id);
-
-        Optional<PortletInstance> el = cache.getIfPresent(cacheKey);
-        if (el != null) {
-            return el.orNull();
-        }
-
-        PortletInstance instance = null;
-        try {
-            instance = portletInstanceDao.loadPortletInstance(id);
-        } finally {
-            cache.put(cacheKey, Optional.fromNullable(instance));
-        }
-        return instance;
-    }
-
     public void addDefaultPortletInstance(PortletName portletName) {
         try {
             // TODO fix duplicatekeyexception @ transactional
@@ -87,7 +70,7 @@ public class PortletInstanceRepository {
         return addPortletInstance(portletName, generateWindowID());
     }
 
-    public long addPortletInstance(final PortletName portletName, final String windowID) {
+    public long addPortletInstance(PortletName portletName, String windowID) {
         try {
             return portletInstanceDao.addPortletInstance(portletName, windowID);
         } finally {
