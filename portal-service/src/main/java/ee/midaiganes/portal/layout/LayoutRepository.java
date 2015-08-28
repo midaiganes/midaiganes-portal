@@ -1,8 +1,5 @@
 package ee.midaiganes.portal.layout;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,11 +14,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Ordering;
 import com.google.common.primitives.Longs;
 
 import ee.midaiganes.portal.pagelayout.PageLayoutName;
@@ -38,9 +42,11 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 public class LayoutRepository {
     private static final Logger log = LoggerFactory.getLogger(LayoutRepository.class);
     private static final Pattern FRIENDLY_URL_PATTERN;
+
     static {
         FRIENDLY_URL_PATTERN = Pattern.compile("^\\/[a-zA-Z0-9_\\-]*$");
     }
+
     private final LayoutDao layoutDao;
     private final ThemeRepository themeRepository;
     private final PageLayoutRepository pageLayoutRepository;
@@ -55,49 +61,89 @@ public class LayoutRepository {
         this.themeRepository = themeRepository;
         this.pageLayoutRepository = pageLayoutRepository;
 
-        this.layoutTitleCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new CacheLoader<Long, ImmutableList<LayoutTitle>>() {
-            @Override
-            public ImmutableList<LayoutTitle> load(Long layoutId) {
-                return ImmutableList.copyOf(layoutDao.loadLayoutTitles(layoutId.longValue()));
+        this.layoutTitleCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new LayoutTitleCacheLoader(layoutDao));
+        this.layoutCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new LayoutCacheLoader(layoutDao, this.layoutTitleCache));
+        this.layoutSetLayouts = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new LayoutSetLayoutsCacheLoader(layoutDao, this.layoutCache));
+    }
+
+    private static final class LayoutSetLayoutsCacheLoader extends CacheLoader<Long, ImmutableList<Layout>> {
+        private final LayoutDao layoutDao;
+        private final LoadingCache<Long, Layout> layoutCache;
+
+        private LayoutSetLayoutsCacheLoader(LayoutDao layoutDao, LoadingCache<Long, Layout> layoutCache) {
+            this.layoutDao = layoutDao;
+            this.layoutCache = layoutCache;
+        }
+
+        @Override
+        public ImmutableList<Layout> load(@Nonnull Long key) throws Exception {
+            long[] layoutIds = layoutDao.loadLayoutIds(key.longValue()).toArray();
+            return ImmutableList.copyOf(layoutCache.getAll(Longs.asList(layoutIds)).values());
+        }
+    }
+
+    private static final class LayoutCacheLoader extends CacheLoader<Long, Layout> {
+        private final LayoutDao layoutDao;
+        private final LoadingCache<Long, ImmutableList<LayoutTitle>> layoutTitleCache;
+
+        private LayoutCacheLoader(LayoutDao layoutDao, LoadingCache<Long, ImmutableList<LayoutTitle>> layoutTitleCache) {
+            this.layoutDao = layoutDao;
+            this.layoutTitleCache = layoutTitleCache;
+        }
+
+        @Override
+        public Layout load(Long layoutId) throws Exception {
+            Layout layout = layoutDao.loadLayout(layoutId.longValue());
+            return layout.withLayoutTitles(layoutTitleCache.getUnchecked(layoutId));
+        }
+
+        @Override
+        public Map<Long, Layout> loadAll(Iterable<? extends Long> layoutIds) throws Exception {
+            List<Layout> layouts = layoutDao.loadLayouts(ImmutableList.copyOf(layoutIds));
+            ImmutableMap<Long, ImmutableList<LayoutTitle>> titlesMap = layoutTitleCache.getAll(layoutIds);
+            Map<Long, Layout> result = new HashMap<>(layouts.size());
+            for (Layout l : layouts) {
+                result.put(Long.valueOf(l.getId()), l.withLayoutTitles(titlesMap.get(Long.valueOf(l.getId()))));
+            }
+            return result;
+        }
+    }
+
+    private static final class LayoutTitleCacheLoader extends CacheLoader<Long, ImmutableList<LayoutTitle>> {
+        private final LayoutDao layoutDao;
+
+        private LayoutTitleCacheLoader(LayoutDao layoutDao) {
+            this.layoutDao = layoutDao;
+        }
+
+        @Override
+        public ImmutableList<LayoutTitle> load(Long layoutId) {
+            return ImmutableList.copyOf(layoutDao.loadLayoutTitles(layoutId.longValue()));
+        }
+
+        @Override
+        public Map<Long, ImmutableList<LayoutTitle>> loadAll(Iterable<? extends Long> layoutIds) {
+            ImmutableSet<Long> lids = ImmutableSet.copyOf(layoutIds);
+            return Maps.toMap(lids, new ValueFunction(layoutDao.loadLayoutTitles(lids)));
+        }
+
+        private static final class ValueFunction implements Function<Long, ImmutableList<LayoutTitle>> {
+            private final TLongObjectHashMap<List<LayoutTitle>> map;
+
+            private ValueFunction(TLongObjectHashMap<List<LayoutTitle>> map) {
+                this.map = map;
             }
 
             @Override
-            public Map<Long, ImmutableList<LayoutTitle>> loadAll(Iterable<? extends Long> layoutIds) throws Exception {
-                TLongObjectHashMap<List<LayoutTitle>> map = layoutDao.loadLayoutTitles(ImmutableList.copyOf(layoutIds));
-                Map<Long, ImmutableList<LayoutTitle>> result = new HashMap<>();
-                for (Long layoutId : layoutIds) {
-                    List<LayoutTitle> titles = map.get(layoutId.longValue());
-                    result.put(layoutId, titles == null ? ImmutableList.of() : ImmutableList.copyOf(titles));
-                }
-                return result;
-            }
-        });
-        this.layoutCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new CacheLoader<Long, Layout>() {
-            @Override
-            public Layout load(Long layoutId) throws Exception {
-                Layout layout = layoutDao.loadLayout(layoutId.longValue());
-                return layout.withLayoutTitles(layoutTitleCache.getUnchecked(layoutId));
+            public ImmutableList<LayoutTitle> apply(Long layoutId) {
+                Preconditions.checkNotNull(layoutId);
+                return apply(map.get(layoutId.longValue()));
             }
 
-            @Override
-            public Map<Long, Layout> loadAll(Iterable<? extends Long> layoutIds) throws Exception {
-                List<Layout> layouts = layoutDao.loadLayouts(ImmutableList.copyOf(layoutIds));
-                ImmutableMap<Long, ImmutableList<LayoutTitle>> titlesMap = layoutTitleCache.getAll(layoutIds);
-                Map<Long, Layout> result = new HashMap<>(layouts.size());
-                for (Layout l : layouts) {
-                    result.put(Long.valueOf(l.getId()), l.withLayoutTitles(titlesMap.get(Long.valueOf(l.getId()))));
-                }
-                return result;
+            private ImmutableList<LayoutTitle> apply(List<LayoutTitle> titles) {
+                return titles == null ? ImmutableList.of() : ImmutableList.copyOf(titles);
             }
-        });
-
-        this.layoutSetLayouts = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new CacheLoader<Long, ImmutableList<Layout>>() {
-            @Override
-            public ImmutableList<Layout> load(Long key) throws Exception {
-                long[] layoutIds = layoutDao.loadLayoutIds(key.longValue()).toArray();
-                return ImmutableList.copyOf(layoutCache.getAll(Longs.asList(layoutIds)).values());
-            }
-        });
+        }
     }
 
     @Nonnull
@@ -115,24 +161,32 @@ public class LayoutRepository {
     }
 
     public ImmutableList<Layout> getChildLayouts(long layoutSetId, Long parentId) {
-        List<Layout> layouts = new ArrayList<>();
-        for (Layout layout : this.layoutSetLayouts.getUnchecked(Long.valueOf(layoutSetId))) {
-            Long layoutParentId = layout.getParentId();
-            if (parentId == null) {
-                if (layoutParentId == null) {
-                    layouts.add(layout);
-                }
-            } else if (layoutParentId != null && parentId.longValue() == layoutParentId.longValue()) {
-                layouts.add(layout);
-            }
+        ImmutableList<Layout> layoutSetLayouts = this.layoutSetLayouts.getUnchecked(Long.valueOf(layoutSetId));
+        return new LayoutComparator().immutableSortedCopy(Iterables.filter(layoutSetLayouts, new IsChildLayoutPredicate(parentId)));
+    }
+
+    private static final class IsChildLayoutPredicate implements Predicate<Layout> {
+        private final Long parentId;
+
+        private IsChildLayoutPredicate(Long parentId) {
+            this.parentId = parentId;
         }
-        Collections.sort(layouts, new Comparator<Layout>() {
-            @Override
-            public int compare(Layout o1, Layout o2) {
-                return Long.compare(o1.getNr(), o2.getNr());
-            }
-        });
-        return ImmutableList.copyOf(layouts);
+
+        @Override
+        public boolean apply(Layout layout) {
+            Preconditions.checkNotNull(layout);
+            Long layoutParentId = layout.getParentId();
+            return parentId == null ? layoutParentId == null : parentId.equals(layoutParentId);
+        }
+    }
+
+    private static final class LayoutComparator extends Ordering<Layout> {
+        @Override
+        public int compare(Layout o1, Layout o2) {
+            Preconditions.checkNotNull(o1);
+            Preconditions.checkNotNull(o2);
+            return Long.compare(o1.getNr(), o2.getNr());
+        }
     }
 
     @Nullable
@@ -154,8 +208,8 @@ public class LayoutRepository {
         return layoutId;
     }
 
-    public void updateLayout(String friendlyUrl, PageLayoutName pageLayoutName, Long parentId, long defaultLayoutTitleLanguageId, long id) throws IllegalFriendlyUrlException,
-            IllegalPageLayoutException {
+    public void updateLayout(String friendlyUrl, PageLayoutName pageLayoutName, Long parentId, long defaultLayoutTitleLanguageId, long id)
+            throws IllegalFriendlyUrlException, IllegalPageLayoutException {
         validateLayoutData(friendlyUrl, pageLayoutName);
         layoutDao.updateLayout(friendlyUrl, pageLayoutName, parentId, defaultLayoutTitleLanguageId, id);
         this.layoutSetLayouts.invalidateAll();
@@ -207,17 +261,13 @@ public class LayoutRepository {
     @Transactional
     public void deleteLayout(long layoutId) {
         Layout layout = getLayout(layoutId);
-        if (layout != null) {
-            int deleted = layoutDao.deleteLayout(layoutId);
-            int updated = layoutDao.moveLayoutsUp(layout.getLayoutSetId(), layout.getParentId(), layout.getNr());
-            log.debug("Deleted {} and updated {} layout(s)", Integer.valueOf(deleted), Integer.valueOf(updated));
+        int deleted = layoutDao.deleteLayout(layoutId);
+        int updated = layoutDao.moveLayoutsUp(layout.getLayoutSetId(), layout.getParentId(), layout.getNr());
+        log.debug("Deleted {} and updated {} layout(s)", Integer.valueOf(deleted), Integer.valueOf(updated));
 
-            this.layoutSetLayouts.invalidateAll();
-            this.layoutCache.invalidateAll();
-            this.layoutTitleCache.invalidate(Long.valueOf(layoutId));
-        } else {
-            throw new IllegalArgumentException("Layout not found with id " + layoutId);
-        }
+        this.layoutSetLayouts.invalidateAll();
+        this.layoutCache.invalidateAll();
+        this.layoutTitleCache.invalidate(Long.valueOf(layoutId));
     }
 
     @Transactional
