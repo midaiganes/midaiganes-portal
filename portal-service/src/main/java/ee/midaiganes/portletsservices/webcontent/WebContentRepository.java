@@ -21,6 +21,7 @@ import org.springframework.jdbc.support.KeyHolder;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -62,6 +63,7 @@ public class WebContentRepository {
                     @Override
                     @Nullable
                     public Long apply(@Nullable Optional<WebContent> input) {
+                        Preconditions.checkNotNull(input);
                         return Long.valueOf(input.get().getId());
                     }
                 });
