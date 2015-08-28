@@ -3,8 +3,8 @@ package ee.midaiganes.portal.pagelayout;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 
 import javax.annotation.Nullable;
 import javax.xml.bind.JAXBException;
@@ -23,14 +23,15 @@ import ee.midaiganes.util.XmlUtil;
 public class PageLayoutRepository implements PageLayoutRegistryRepository {
     private static final Logger log = LoggerFactory.getLogger(PageLayoutRepository.class);
     private final ConcurrentHashMap<PageLayoutName, PageLayout> pageLayouts = new ConcurrentHashMap<>();
-    private final ReadWriteLock lock = new ReentrantReadWriteLock();
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    private final ReadLock readLock = lock.readLock();
 
     public ImmutableList<PageLayout> getPageLayouts() {
-        lock.readLock().lock();
+        readLock.lock();
         try {
             return ImmutableList.copyOf(pageLayouts.values());
         } finally {
-            lock.readLock().unlock();
+            readLock.unlock();
         }
     }
 
@@ -41,14 +42,14 @@ public class PageLayoutRepository implements PageLayoutRegistryRepository {
 
     @Nullable
     public PageLayout getPageLayout(PageLayoutName pageLayoutName) {
-        lock.readLock().lock();
+        readLock.lock();
         try {
             PageLayout pl = pageLayouts.get(pageLayoutName);
             if (pl != null) {
                 return pl;
             }
         } finally {
-            lock.readLock().unlock();
+            readLock.unlock();
         }
         if (log.isWarnEnabled()) {
             log.warn("no pageLayout with name '" + pageLayoutName + "'; All pageLayouts = " + getPageLayouts());
@@ -57,7 +58,7 @@ public class PageLayoutRepository implements PageLayoutRegistryRepository {
     }
 
     public PageLayout getDefaultPageLayout() {
-        lock.readLock().lock();
+        readLock.lock();
         try {
             Enumeration<PageLayout> e = this.pageLayouts.elements();
             if (e.hasMoreElements()) {
@@ -65,7 +66,7 @@ public class PageLayoutRepository implements PageLayoutRegistryRepository {
             }
             throw new IllegalStateException("no page layouts found");
         } finally {
-            lock.readLock().unlock();
+            readLock.unlock();
         }
     }
 
