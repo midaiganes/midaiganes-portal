@@ -41,12 +41,20 @@ public class PermissionRepository {
         this.groupRepository = groupRepository;
         this.permissionDao = permissionDao;
         this.resourceActionPermissionRepository = resourceActionPermissionRepository;
-        this.cache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new CacheLoader<CacheKey, Optional<Long>>() {
-            @Override
-            public Optional<Long> load(CacheKey key) throws Exception {
-                return Optional.fromNullable(permissionDao.loadPermissions(key.resource1, key.resource1PrimKey, key.resource2, key.resource2PrimKey));
-            }
-        });
+        this.cache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new PermissionCacheLoader(this.permissionDao));
+    }
+
+    private static final class PermissionCacheLoader extends CacheLoader<CacheKey, Optional<Long>> {
+        private final PermissionDao permissionDao;
+
+        private PermissionCacheLoader(PermissionDao permissionDao) {
+            this.permissionDao = permissionDao;
+        }
+
+        @Override
+        public Optional<Long> load(CacheKey key) {
+            return Optional.fromNullable(permissionDao.loadPermissions(key.resource1, key.resource1PrimKey, key.resource2, key.resource2PrimKey));
+        }
     }
 
     private static final class CacheKey {
@@ -69,11 +77,11 @@ public class PermissionRepository {
 
         @Override
         public boolean equals(Object o) {
-            if (o instanceof CacheKey) {
-                CacheKey c = (CacheKey) o;
-                return resource1 == c.resource1 && resource1PrimKey == c.resource1PrimKey && resource2 == c.resource2 && resource2PrimKey == c.resource2PrimKey;
-            }
-            return false;
+            return (o instanceof CacheKey) && equals((CacheKey) o);
+        }
+
+        private boolean equals(CacheKey c) {
+            return resource1 == c.resource1 && resource1PrimKey == c.resource1PrimKey && resource2 == c.resource2 && resource2PrimKey == c.resource2PrimKey;
         }
     }
 
