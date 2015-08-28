@@ -22,6 +22,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 
 public class LayoutDao {
     private final JdbcTemplate jdbcTemplate;
@@ -50,7 +51,7 @@ public class LayoutDao {
         return Preconditions.checkNotNull(list);
     }
 
-    public TLongObjectHashMap<List<LayoutTitle>> loadLayoutTitles(List<Long> layoutIds) {
+    public TLongObjectHashMap<List<LayoutTitle>> loadLayoutTitles(ImmutableSet<Long> layoutIds) {
         return jdbcTemplate.query(QRY_GET_LAYOUT_TITLES_BY_LAYOUTIDS + "(" + StringUtil.repeat("?", ",", layoutIds.size()) + ")", layoutIds.toArray(),
                 new ResultSetExtractor<TLongObjectHashMap<List<LayoutTitle>>>() {
                     @Override
