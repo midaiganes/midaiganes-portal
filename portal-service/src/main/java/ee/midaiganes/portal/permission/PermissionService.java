@@ -40,6 +40,12 @@ public class PermissionService {
     }
 
     @Transactional
+    public boolean hasUserPermission(long userId, @Nonnull String resource, long resourcePrimKey, ResourceAction action) throws ResourceNotFoundException,
+            ResourceActionNotFoundException {
+        return permissionRepository.hasUserPermission(userId, resourceRepository.getResourceId(resource), resourcePrimKey, action.getAction());
+    }
+
+    @Transactional
     public boolean hasUserPermission(long userId, @Nonnull String resource, long resourcePrimKey, String action) throws ResourceNotFoundException, ResourceActionNotFoundException {
         return permissionRepository.hasUserPermission(userId, resourceRepository.getResourceId(resource), resourcePrimKey, action);
     }
