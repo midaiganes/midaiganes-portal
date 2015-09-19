@@ -3,10 +3,10 @@ package ee.midaiganes.services.portal;
 import java.util.Locale;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.annotation.Transactional;
 
 import ee.midaiganes.aspect.Service;
 import ee.midaiganes.portal.layout.Layout;

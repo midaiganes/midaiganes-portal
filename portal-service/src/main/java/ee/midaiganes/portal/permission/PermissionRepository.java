@@ -5,8 +5,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-
-import org.springframework.transaction.annotation.Transactional;
+import javax.transaction.Transactional;
 
 import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;

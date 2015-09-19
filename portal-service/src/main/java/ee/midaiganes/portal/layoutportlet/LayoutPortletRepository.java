@@ -4,8 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-
-import org.springframework.transaction.annotation.Transactional;
+import javax.transaction.Transactional;
 
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
@@ -29,8 +28,8 @@ public class LayoutPortletRepository {
         this.cache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new CacheLoader<Long, ImmutableList<LayoutPortlet>>() {
             @Override
             public ImmutableList<LayoutPortlet> load(Long layoutId) {
-                return new OrderingLayoutPortletByRowId().compound(new OrderingLayoutPortletByBoxIndex())
-                        .immutableSortedCopy(layoutPortletDao.loadLayoutPortlets(layoutId.longValue()));
+                return new OrderingLayoutPortletByRowId().compound(new OrderingLayoutPortletByBoxIndex()).immutableSortedCopy(
+                        layoutPortletDao.loadLayoutPortlets(layoutId.longValue()));
             }
         });
     }
@@ -87,8 +86,8 @@ public class LayoutPortletRepository {
         for (LayoutPortlet layoutPortlet : cache.getUnchecked(Long.valueOf(layoutId))) {
             if (layoutPortlet.getPortletInstance().getPortletNamespace().getWindowID().equals(portletWindowID)) {
                 if (lp != null) {
-                    throw new IllegalStateException(
-                            "Found multiple LayoutPortlets in layout(" + layoutId + ") with windowId(" + portletWindowID + "): " + lp + " and " + layoutPortlet);
+                    throw new IllegalStateException("Found multiple LayoutPortlets in layout(" + layoutId + ") with windowId(" + portletWindowID + "): " + lp + " and "
+                            + layoutPortlet);
                 }
                 lp = layoutPortlet;
             }

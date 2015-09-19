@@ -5,8 +5,7 @@ import javax.portlet.PortletURL;
 import javax.portlet.WindowStateException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.transaction.annotation.Transactional;
+import javax.transaction.Transactional;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;

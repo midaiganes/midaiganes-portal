@@ -9,10 +9,10 @@ import java.util.regex.Pattern;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
@@ -208,8 +208,8 @@ public class LayoutRepository {
         return layoutId;
     }
 
-    public void updateLayout(String friendlyUrl, PageLayoutName pageLayoutName, Long parentId, long defaultLayoutTitleLanguageId, long id)
-            throws IllegalFriendlyUrlException, IllegalPageLayoutException {
+    public void updateLayout(String friendlyUrl, PageLayoutName pageLayoutName, Long parentId, long defaultLayoutTitleLanguageId, long id) throws IllegalFriendlyUrlException,
+            IllegalPageLayoutException {
         validateLayoutData(friendlyUrl, pageLayoutName);
         layoutDao.updateLayout(friendlyUrl, pageLayoutName, parentId, defaultLayoutTitleLanguageId, id);
         this.layoutSetLayouts.invalidateAll();

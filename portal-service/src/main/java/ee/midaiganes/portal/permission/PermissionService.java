@@ -2,8 +2,7 @@ package ee.midaiganes.portal.permission;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
-
-import org.springframework.transaction.annotation.Transactional;
+import javax.transaction.Transactional;
 
 import ee.midaiganes.model.PortalResource;
 import ee.midaiganes.services.exceptions.ResourceActionNotFoundException;
