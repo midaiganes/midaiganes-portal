@@ -30,7 +30,7 @@ public class ThemeServlet extends HttpServlet {
     protected void service(HttpServletRequest request, HttpServletResponse response) {
         try {
             Theme theme = (Theme) request.getAttribute(THEME);
-            setThemeVariables(request, themeVariablesService.getThemeVariables(request));
+            setThemeVariables(request, themeVariablesService.getThemeVariables(request, response));
             request.getRequestDispatcher(theme.getPortalNormalPath()).include(request, response);
         } catch (Exception e) {
             log.error(e.getMessage(), e);

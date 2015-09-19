@@ -29,7 +29,7 @@ public abstract class PortalPortletURLTag extends PortletURLTag {
 
     @Override
     protected PortletURL getPortletURL() {
-        return new PortletURLImpl(getHttpServletRequest(), StringPool.DEFAULT_PORTLET_WINDOWID, WindowStateUtil.getPortalSupportedWindowStates(),
+        return new PortletURLImpl(getHttpServletRequest(), getHttpServletResponse(), StringPool.DEFAULT_PORTLET_WINDOWID, WindowStateUtil.getPortalSupportedWindowStates(),
                 PortletModeUtil.getPortalSupportedPortletModes(), getPortletLifecycle(), getPortletName());
     }
 

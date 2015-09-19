@@ -7,6 +7,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.portlet.WindowStateException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
@@ -45,18 +46,18 @@ public class ThemeVariablesService {
         this.permissionService = permissionService;
     }
 
-    public ImmutableList<ThemeVariable> getThemeVariables(HttpServletRequest request) {
+    public ImmutableList<ThemeVariable> getThemeVariables(HttpServletRequest request, HttpServletResponse response) {
         PageDisplay pageDisplay = RequestUtil.getPageDisplay(request);
         ImmutableList.Builder<ThemeVariable> variables = ImmutableList.builder();
         variables.add(new ThemeVariable(LOG_IN_URL, getLogInUrl()));
         variables.add(new ThemeVariable(NAV_ITEMS, getNavItems(pageDisplay)));
         variables.add(new ThemeVariable(PAGE_DISPLAY, pageDisplay));
         try {
-            variables.add(new ThemeVariable(ADD_LAYOUT_URL, portletUrlFactor.makeRenderURL(request, MidaiganesPortlets.LAYOUT_PORTLET.getPortletName(),
+            variables.add(new ThemeVariable(ADD_LAYOUT_URL, portletUrlFactor.makeRenderURL(request, response, MidaiganesPortlets.LAYOUT_PORTLET.getPortletName(),
                     MidaiganesWindowState.EXCLUSIVE)));
-            variables.add(new ThemeVariable(ADD_REMOVE_PORTLET_URL, portletUrlFactor.makeRenderURL(request, MidaiganesPortlets.ADD_REMOVE_PORTLET.getPortletName(),
+            variables.add(new ThemeVariable(ADD_REMOVE_PORTLET_URL, portletUrlFactor.makeRenderURL(request, response, MidaiganesPortlets.ADD_REMOVE_PORTLET.getPortletName(),
                     MidaiganesWindowState.EXCLUSIVE)));
-            variables.add(new ThemeVariable(CHANGE_PAGE_LAYOUT_URL, portletUrlFactor.makeRenderURL(request, MidaiganesPortlets.CHANGE_PAGE_LAYOUT.getPortletName(),
+            variables.add(new ThemeVariable(CHANGE_PAGE_LAYOUT_URL, portletUrlFactor.makeRenderURL(request, response, MidaiganesPortlets.CHANGE_PAGE_LAYOUT.getPortletName(),
                     MidaiganesWindowState.EXCLUSIVE)));
 
             //

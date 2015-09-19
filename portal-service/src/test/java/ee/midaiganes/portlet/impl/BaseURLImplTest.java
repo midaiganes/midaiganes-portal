@@ -5,6 +5,7 @@ import java.io.StringWriter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -15,7 +16,7 @@ public class BaseURLImplTest {
 
     @BeforeMethod
     public void beforeMethod() {
-        baseURL = new BaseURLImpl("localhost", 80, "/", false);
+        baseURL = new BaseURLImpl("localhost", 80, "/", false, new MockHttpServletResponse());
     }
 
     @Test

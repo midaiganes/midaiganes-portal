@@ -6,17 +6,17 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import javax.portlet.BaseURL;
-import javax.portlet.PortletRequest;
 import javax.portlet.PortletSecurityException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.google.common.base.Preconditions;
 
 import ee.midaiganes.util.StringEscapeUtil;
-import ee.midaiganes.util.StringPool;
 
 public class BaseURLImpl implements BaseURL {
     private static final String HTTPS = "https://";
     private static final String HTTP = "http://";
-    private static final String PORT_8080 = ":8080";
 
     private static final class ParametersMap extends TreeMap<String, String[]> {
         private static final long serialVersionUID = 1L;
@@ -34,40 +34,19 @@ public class BaseURLImpl implements BaseURL {
     private final String host;
     private final int port;
     private final String path;
+    private final HttpServletResponse response;
     private boolean secure;
 
-    public BaseURLImpl(String host, int port, String path, boolean secure) {
-        this.host = host;
+    public BaseURLImpl(String host, int port, String path, boolean secure, HttpServletResponse response) {
+        this.host = Preconditions.checkNotNull(host);
         this.port = port;
-        this.path = path;
+        this.path = Preconditions.checkNotNull(path);
         this.secure = secure;
+        this.response = Preconditions.checkNotNull(response);
     }
 
-    public BaseURLImpl(PortletRequest request) {
-        this(request, StringPool.SLASH);
-    }
-
-    public BaseURLImpl(PortletRequest request, String path) {
-        this(request.getServerName(), request.getServerPort(), path, request.isSecure());
-    }
-
-    public BaseURLImpl(HttpServletRequest request) {
-        this(request.getServerName(), request.getServerPort(), request.getRequestURI(), request.isSecure());
-    }
-
-    private void appendHostAndPath(Appendable sb) throws IOException {
-        sb.append(secure ? HTTPS : HTTP).append(host);
-        if (secure || port != 80) {
-            switch (port) {
-                case 8080:
-                    sb.append(PORT_8080);
-                    break;
-                default:
-                    sb.append(':');
-                    sb.append(Integer.toString(port));
-            }
-        }
-        sb.append(path);
+    public BaseURLImpl(HttpServletRequest request, HttpServletResponse response) {
+        this(request.getServerName(), request.getServerPort(), request.getRequestURI(), request.isSecure(), response);
     }
 
     @Override
@@ -115,7 +94,7 @@ public class BaseURLImpl implements BaseURL {
 
     @Override
     public void write(Writer out, boolean escapeXML) throws IOException {
-        createURL(out, escapeXML);
+        out.append(createURL(escapeXML));
     }
 
     @Override
@@ -133,36 +112,41 @@ public class BaseURLImpl implements BaseURL {
     @Override
     public String toString() {
         try {
-            return createURL(new StringBuilder(256), false).toString();
+            return createURL(false);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private <A extends Appendable> A createURL(A w, boolean escapeXml) throws IOException {
+    private String createURL(boolean escapeXml) throws IOException {
+        StringBuilder w = new StringBuilder(256);
         appendHostAndPath(w);
         w.append('?');
         boolean addAnd = false;
         for (Map.Entry<String, String[]> entry : this.parameters.entrySet()) {
             for (String val : entry.getValue()) {
                 if (addAnd) {
-                    if (escapeXml) {
-                        StringEscapeUtil.escapeXml(w, "&");
-                    } else {
-                        w.append('&');
-                    }
+                    w.append('&');
                 } else {
                     addAnd = true;
                 }
-                if (escapeXml) {
-                    StringEscapeUtil.escapeXml(w, entry.getKey()).append('=');
-                    StringEscapeUtil.escapeXml(w, val);
-                } else {
-                    w.append(entry.getKey()).append('=').append(val);
-                }
+                w.append(entry.getKey()).append('=').append(val);
             }
         }
-        return w;
+        String url = w.toString();
+        if (escapeXml) {
+            url = StringEscapeUtil.escapeXml(new StringBuilder(url.length() + (this.parameters.size() * 5)), url).toString();
+        }
+        return response.encodeURL(url);
+    }
+
+    private void appendHostAndPath(Appendable sb) throws IOException {
+        sb.append(secure ? HTTPS : HTTP).append(host);
+        if ((secure && port != 443) || (!secure && port != 80)) {
+            sb.append(':');
+            sb.append(Integer.toString(port));
+        }
+        sb.append(path);
     }
 
     protected String[] getParameter(String name) {

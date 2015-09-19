@@ -5,6 +5,7 @@ import javax.portlet.PortletURL;
 import javax.portlet.WindowState;
 import javax.portlet.WindowStateException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import ee.midaiganes.portlet.PortletAndConfiguration;
 import ee.midaiganes.portlet.PortletLifecycle;
@@ -20,20 +21,20 @@ public class PortletURLFactory {
         this.portletRepository = portletRepository;
     }
 
-    public PortletURL makeRenderURL(HttpServletRequest request, PortletName portletName) {
+    public PortletURL makeRenderURL(HttpServletRequest request, HttpServletResponse response, PortletName portletName) {
         PortletAndConfiguration portletAndConfiguration = portletRepository.getPortlet(portletName);
-        return new PortletURLImpl(request, StringPool.DEFAULT_PORTLET_WINDOWID, portletAndConfiguration.getSupportedWindowStates(),
+        return new PortletURLImpl(request, response, StringPool.DEFAULT_PORTLET_WINDOWID, portletAndConfiguration.getSupportedWindowStates(),
                 portletAndConfiguration.getSupportedPortletModes(), PortletLifecycle.RENDER, portletName);
     }
 
-    public PortletURL makeActionURL(HttpServletRequest request, PortletName portletName) {
+    public PortletURL makeActionURL(HttpServletRequest request, HttpServletResponse response, PortletName portletName) {
         PortletAndConfiguration portletAndConfiguration = portletRepository.getPortlet(portletName);
-        return new PortletURLImpl(request, StringPool.DEFAULT_PORTLET_WINDOWID, portletAndConfiguration.getSupportedWindowStates(),
+        return new PortletURLImpl(request, response, StringPool.DEFAULT_PORTLET_WINDOWID, portletAndConfiguration.getSupportedWindowStates(),
                 portletAndConfiguration.getSupportedPortletModes(), PortletLifecycle.ACTION, portletName);
     }
 
-    public PortletURL makeRenderURL(HttpServletRequest request, PortletName portletName, WindowState windowState) throws WindowStateException {
-        PortletURL url = makeRenderURL(request, portletName);
+    public PortletURL makeRenderURL(HttpServletRequest request, HttpServletResponse response, PortletName portletName, WindowState windowState) throws WindowStateException {
+        PortletURL url = makeRenderURL(request, response, portletName);
         url.setWindowState(windowState);
         return url;
     }
