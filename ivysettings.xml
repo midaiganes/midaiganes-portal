@@ -7,13 +7,14 @@
 	<property name="ivy.local.default.ivy.pattern"      value="[organisation]/[module]/[revision]/[type]s/[artifact].[ext]" override="false"/>
 	<property name="ivy.local.default.artifact.pattern" value="[organisation]/[module]/[revision]/[type]s/[artifact].[ext]" override="false"/>
 
-	<property name="jetty.version" value="9.3.0.M1" override="true"/>
-	<property name="spring.version" value="4.1.5.RELEASE" override="true"/>
+	<property name="jetty.version" value="9.3.3.v20150827" override="true"/>
+	<property name="spring.version" value="4.2.1.RELEASE" override="true"/>
 	<property name="jsp-api.version" value="2.2" />
 	<property name="el-api.version" value="${jsp-api.version}" />
 	<property name="jstl.version" value="1.2" />
-	<property name="slf4j.version" value="1.7.10" />
+	<property name="slf4j.version" value="1.7.12" />
 	<property name="guava.version" value="18.0"/>
+	<property name="taglibs-standard-impl.version" value="1.2.5" />
 	<properties file="${ivy.settings.dir}/conf/portal.properties" />
 	
 	<settings defaultResolver="default" />
