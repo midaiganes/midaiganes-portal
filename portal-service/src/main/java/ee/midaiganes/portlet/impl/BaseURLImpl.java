@@ -2,8 +2,8 @@ package ee.midaiganes.portlet.impl;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.portlet.BaseURL;
 import javax.portlet.PortletRequest;
@@ -18,11 +18,11 @@ public class BaseURLImpl implements BaseURL {
     private static final String HTTP = "http://";
     private static final String PORT_8080 = ":8080";
 
-    private static final class ParametersMap extends HashMap<String, String[]> {
+    private static final class ParametersMap extends TreeMap<String, String[]> {
         private static final long serialVersionUID = 1L;
 
         private Map<String, String[]> cloneParameters() {
-            Map<String, String[]> clone = new HashMap<>();
+            Map<String, String[]> clone = new TreeMap<>();
             for (Map.Entry<String, String[]> entry : this.entrySet()) {
                 clone.put(entry.getKey(), entry.getValue().clone());
             }
