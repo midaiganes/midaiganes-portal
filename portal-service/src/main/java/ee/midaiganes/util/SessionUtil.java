@@ -44,7 +44,7 @@ public class SessionUtil {
 
     public static <T extends Serializable> T getAttribute(HttpSession session, String name) {
         if (session == null) {
-            return null;
+            return (T) null;
         }
         @SuppressWarnings("unchecked")
         T attribute = (T) session.getAttribute(name);
