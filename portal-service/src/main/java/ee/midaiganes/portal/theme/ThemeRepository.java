@@ -1,10 +1,6 @@
 package ee.midaiganes.portal.theme;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -20,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
 import ee.midaiganes.generated.xml.theme.MidaiganesTheme;
@@ -29,7 +26,7 @@ import ee.midaiganes.util.XmlUtil;
 
 public class ThemeRepository implements ThemeRegistryRepository {
     private static final Logger log = LoggerFactory.getLogger(ThemeRepository.class);
-    private final Map<ThemeName, Theme> themes = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<ThemeName, Theme> themes = new ConcurrentHashMap<>();
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
     private final JdbcTemplate jdbcTemplate;
@@ -48,10 +45,10 @@ public class ThemeRepository implements ThemeRegistryRepository {
         }
     }
 
-    public List<Theme> getThemes() {
+    public ImmutableList<Theme> getThemes() {
         lock.readLock().lock();
         try {
-            return new ArrayList<>(themes.values());
+            return ImmutableList.copyOf(themes.values());
         } finally {
             lock.readLock().unlock();
         }
@@ -61,9 +58,7 @@ public class ThemeRepository implements ThemeRegistryRepository {
     public Theme getDefaultTheme() {
         lock.readLock().lock();
         try {
-            Collection<Theme> values = themes.values();
-            Preconditions.checkNotNull(values);
-            return Iterables.getFirst(values, null);
+            return Iterables.getFirst(Preconditions.checkNotNull(themes.values()), null);
         } finally {
             lock.readLock().unlock();
         }
