@@ -4,13 +4,13 @@ import javax.portlet.PortletConfig;
 import javax.portlet.PortletMode;
 import javax.portlet.WindowState;
 
+import com.google.common.base.Function;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 
-import ee.midaiganes.generated.xml.portlet.PortletModeType;
 import ee.midaiganes.generated.xml.portlet.PortletType;
 import ee.midaiganes.generated.xml.portlet.SupportsType;
-import ee.midaiganes.generated.xml.portlet.WindowStateType;
 import ee.midaiganes.util.PortletModeUtil;
 import ee.midaiganes.util.WindowStateUtil;
 
@@ -44,30 +44,19 @@ public class PortletAndConfiguration {
     }
 
     private ImmutableList<PortletMode> getSupportedPortletModes(PortletType portletType) {
-        ImmutableSet.Builder<PortletMode> portletModes = ImmutableSet.builder();
-
-        for (SupportsType supports : portletType.getSupports()) {
-            for (PortletModeType pmt : supports.getPortletMode()) {
-                PortletMode pm = PortletModeUtil.getPortletMode(pmt.getValue());
-                if (pm != null) {
-                    portletModes.add(pm);
-                }
-            }
-        }
-        return portletModes.build().asList();
+        return getList(portletType, s -> s.getPortletMode(), pm -> PortletModeUtil.getPortletMode(pm.getValue()));
     }
 
     private ImmutableList<WindowState> getSupportedWindowStates(PortletType portletType) {
-        ImmutableSet.Builder<WindowState> windowStates = ImmutableSet.builder();
-        for (SupportsType supports : portletType.getSupports()) {
-            for (WindowStateType wst : supports.getWindowState()) {
-                WindowState ws = WindowStateUtil.getWindowState(wst.getValue());
-                if (ws != null) {
-                    windowStates.add(ws);
-                }
-            }
-        }
-        return windowStates.build().asList();
+        return getList(portletType, s -> s.getWindowState(), ws -> WindowStateUtil.getWindowState(ws.getValue()));
+    }
+
+    private <A, B> ImmutableList<B> getList(PortletType pt, Function<SupportsType, Iterable<A>> f1, Function<A, B> f2) {
+        return ImmutableList.copyOf(Iterables.filter(Iterables.transform(getConcated(pt, f1), f2), Predicates.notNull()));
+    }
+
+    private <A> Iterable<A> getConcated(PortletType portletType, Function<SupportsType, Iterable<A>> f) {
+        return Iterables.concat(Iterables.transform(portletType.getSupports(), f));
     }
 
     @Override
