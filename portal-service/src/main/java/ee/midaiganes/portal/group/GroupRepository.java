@@ -20,19 +20,34 @@ public class GroupRepository {
     public GroupRepository(GroupDao groupDao) {
         this.groupDao = groupDao;
 
-        this.userGroupsCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new CacheLoader<Long, long[]>() {
-            @Override
-            public long[] load(Long userId) {
-                return groupDao.loadUserGroupIds(userId.longValue()).toArray();
-            }
-        });
-        this.allGroupsCache = CacheBuilder.newBuilder().concurrencyLevel(1).maximumSize(1).expireAfterAccess(1, TimeUnit.HOURS)
-                .build(new CacheLoader<Boolean, ImmutableList<Group>>() {
-                    @Override
-                    public ImmutableList<Group> load(Boolean key) throws Exception {
-                        return ImmutableList.copyOf(groupDao.loadGroups());
-                    }
-                });
+        this.userGroupsCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new UserGroupIdsCacheLoader(groupDao));
+        this.allGroupsCache = CacheBuilder.newBuilder().concurrencyLevel(1).maximumSize(1).expireAfterAccess(1, TimeUnit.HOURS).build(new AllGroupsCacheLoader(groupDao));
+    }
+
+    private static class UserGroupIdsCacheLoader extends CacheLoader<Long, long[]> {
+        private final GroupDao groupDao;
+
+        public UserGroupIdsCacheLoader(GroupDao groupDao) {
+            this.groupDao = groupDao;
+        }
+
+        @Override
+        public long[] load(Long userId) {
+            return groupDao.loadUserGroupIds(userId.longValue()).toArray();
+        }
+    }
+
+    private static class AllGroupsCacheLoader extends CacheLoader<Boolean, ImmutableList<Group>> {
+        private final GroupDao groupDao;
+
+        public AllGroupsCacheLoader(GroupDao groupDao) {
+            this.groupDao = groupDao;
+        }
+
+        @Override
+        public ImmutableList<Group> load(Boolean key) throws Exception {
+            return ImmutableList.copyOf(groupDao.loadGroups());
+        }
     }
 
     public ImmutableList<Group> getGroups() {
