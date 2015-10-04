@@ -29,34 +29,61 @@ public class UserRepository {
     public UserRepository(UserDao userDao, PasswordEncryptor encryptor) {
         this.encryptor = encryptor;
         this.userDao = userDao;
-        this.cache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new CacheLoader<Long, User>() {
-            @Override
-            public User load(Long key) {
-                User user = userDao.getUser(key.longValue());
-                return Preconditions.checkNotNull(user);
+        this.cache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new UserByUserIdCacheLoader(userDao));
+        this.usernamePasswordCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).removalListener(new UsernamePasswordCacheRemovalListener(cache))
+                .build(new UsernamePasswordCacheLoader(userDao, cache));
+    }
+
+    private static class UsernamePasswordCacheLoader extends CacheLoader<UsernamePasswordCacheKey, Optional<User>> {
+        private final UserDao userDao;
+        private final LoadingCache<Long, User> cache;
+
+        public UsernamePasswordCacheLoader(UserDao userDao, LoadingCache<Long, User> cache) {
+            this.userDao = userDao;
+            this.cache = cache;
+        }
+
+        @Override
+        public Optional<User> load(UsernamePasswordCacheKey key) throws Exception {
+            User user = userDao.getUser(key.username, key.password);
+            if (user != null) {
+                cache.put(Long.valueOf(user.getId()), user);
             }
-        });
-        usernamePasswordCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).removalListener(new RemovalListener<UsernamePasswordCacheKey, Optional<User>>() {
-            @Override
-            public void onRemoval(RemovalNotification<UsernamePasswordCacheKey, Optional<User>> notification) {
-                if (RemovalCause.EXPLICIT == notification.getCause()) {
-                    Optional<User> value = notification.getValue();
-                    User user = value != null ? value.orNull() : null;
-                    if (user != null) {
-                        cache.invalidate(Long.valueOf(user.getId()));
-                    }
-                }
-            }
-        }).build(new CacheLoader<UsernamePasswordCacheKey, Optional<User>>() {
-            @Override
-            public Optional<User> load(UsernamePasswordCacheKey key) throws Exception {
-                User user = userDao.getUser(key.username, key.password);
+            return Optional.fromNullable(user);
+        }
+    }
+
+    private static class UsernamePasswordCacheRemovalListener implements RemovalListener<UsernamePasswordCacheKey, Optional<User>> {
+        private final LoadingCache<Long, User> cache;
+
+        public UsernamePasswordCacheRemovalListener(LoadingCache<Long, User> cache) {
+            this.cache = cache;
+        }
+
+        @Override
+        public void onRemoval(RemovalNotification<UsernamePasswordCacheKey, Optional<User>> notification) {
+            if (RemovalCause.EXPLICIT == notification.getCause()) {
+                Optional<User> value = notification.getValue();
+                User user = value != null ? value.orNull() : null;
                 if (user != null) {
-                    cache.put(Long.valueOf(user.getId()), user);
+                    cache.invalidate(Long.valueOf(user.getId()));
                 }
-                return Optional.fromNullable(user);
             }
-        });
+        }
+    }
+
+    private static class UserByUserIdCacheLoader extends CacheLoader<Long, User> {
+        private final UserDao userDao;
+
+        public UserByUserIdCacheLoader(UserDao userDao) {
+            this.userDao = userDao;
+        }
+
+        @Override
+        public User load(Long key) {
+            User user = userDao.getUser(key.longValue());
+            return Preconditions.checkNotNull(user);
+        }
     }
 
     private static final class UsernamePasswordCacheKey {
