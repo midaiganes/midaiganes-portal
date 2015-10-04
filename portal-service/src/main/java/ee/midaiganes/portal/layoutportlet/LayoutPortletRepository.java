@@ -1,5 +1,6 @@
 package ee.midaiganes.portal.layoutportlet;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
@@ -11,6 +12,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Ordering;
 
 import ee.midaiganes.portal.portletinstance.PortletInstanceRepository;
@@ -25,13 +27,24 @@ public class LayoutPortletRepository {
     public LayoutPortletRepository(LayoutPortletDao layoutPortletDao, PortletInstanceRepository portletInstanceRepository) {
         this.layoutPortletDao = layoutPortletDao;
         this.portletInstanceRepository = portletInstanceRepository;
-        this.cache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new CacheLoader<Long, ImmutableList<LayoutPortlet>>() {
-            @Override
-            public ImmutableList<LayoutPortlet> load(Long layoutId) {
-                return new OrderingLayoutPortletByRowId().compound(new OrderingLayoutPortletByBoxIndex()).immutableSortedCopy(
-                        layoutPortletDao.loadLayoutPortlets(layoutId.longValue()));
-            }
-        });
+        this.cache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new LayoutPortletsCacheLoader(layoutPortletDao));
+    }
+
+    private static class LayoutPortletsCacheLoader extends CacheLoader<Long, ImmutableList<LayoutPortlet>> {
+        private final LayoutPortletDao layoutPortletDao;
+
+        public LayoutPortletsCacheLoader(LayoutPortletDao layoutPortletDao) {
+            this.layoutPortletDao = layoutPortletDao;
+        }
+
+        @Override
+        public ImmutableList<LayoutPortlet> load(Long layoutId) {
+            return sort(layoutPortletDao.loadLayoutPortlets(layoutId.longValue()));
+        }
+
+        private ImmutableList<LayoutPortlet> sort(List<LayoutPortlet> list) {
+            return new OrderingLayoutPortletByRowId().compound(new OrderingLayoutPortletByBoxIndex()).immutableSortedCopy(list);
+        }
     }
 
     @Transactional
@@ -69,14 +82,8 @@ public class LayoutPortletRepository {
         }
     }
 
-    private ImmutableList<LayoutPortlet> getUnsortedLayoutPortlets(long layoutId, long rowId) {
-        ImmutableList.Builder<LayoutPortlet> portlets = ImmutableList.builder();
-        for (LayoutPortlet layoutPortlet : cache.getUnchecked(Long.valueOf(layoutId))) {
-            if (layoutPortlet.getRowId() == rowId) {
-                portlets.add(layoutPortlet);
-            }
-        }
-        return portlets.build();
+    private Iterable<LayoutPortlet> getUnsortedLayoutPortlets(long layoutId, long rowId) {
+        return Iterables.filter(cache.getUnchecked(Long.valueOf(layoutId)), (LayoutPortlet l) -> l.getRowId() == rowId);
     }
 
     // TODO layout/portletWindowId is not unique
