@@ -17,12 +17,20 @@ public class ResourceRepository {
 
     @Inject
     public ResourceRepository(ResourceDao resourceDao) {
-        this.cache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new CacheLoader<String, Optional<Long>>() {
-            @Override
-            public Optional<Long> load(String resource) throws Exception {
-                return Optional.fromNullable(resourceDao.loadResourceId(resource));
-            }
-        });
+        this.cache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build(new ResourceCacheLoader(resourceDao));
+    }
+
+    private static class ResourceCacheLoader extends CacheLoader<String, Optional<Long>> {
+        private final ResourceDao resourceDao;
+
+        public ResourceCacheLoader(ResourceDao resourceDao) {
+            this.resourceDao = resourceDao;
+        }
+
+        @Override
+        public Optional<Long> load(String resource) throws Exception {
+            return Optional.fromNullable(resourceDao.loadResourceId(resource));
+        }
     }
 
     public long getResourceId(@Nonnull String resource) throws ResourceNotFoundException {
