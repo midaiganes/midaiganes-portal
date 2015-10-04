@@ -1,13 +1,10 @@
 package ee.midaiganes.portal.portletinstance;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
@@ -38,14 +35,7 @@ public class PortletInstanceDao {
     }
 
     public List<PortletInstance> getDefaultPortletInstances() {
-        return jdbcTemplate.query(GET_DEFAULT_PORTLET_INSTANCES, new RowMapper<PortletInstance>() {
-            @Override
-            public PortletInstance mapRow(ResultSet rs, int rowNum) throws SQLException {
-                long id = rs.getLong(1);
-                PortletNamespace namespace = new PortletNamespace(new PortletName(rs.getString(2), rs.getString(3)), StringPool.DEFAULT_PORTLET_WINDOWID);
-                return new PortletInstance(id, namespace);
-            }
-        }, StringPool.DEFAULT_PORTLET_WINDOWID);
+        return jdbcTemplate.query(GET_DEFAULT_PORTLET_INSTANCES, new DefaultPortletInstanceRowMapper(), StringPool.DEFAULT_PORTLET_WINDOWID);
     }
 
     public Long loadPortletInstanceId(PortletName portletName, String windowID) {
