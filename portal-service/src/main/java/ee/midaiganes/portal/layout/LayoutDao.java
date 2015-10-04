@@ -53,22 +53,34 @@ public class LayoutDao {
 
     public TLongObjectHashMap<List<LayoutTitle>> loadLayoutTitles(ImmutableSet<Long> layoutIds) {
         return jdbcTemplate.query(QRY_GET_LAYOUT_TITLES_BY_LAYOUTIDS + "(" + StringUtil.repeat("?", ",", layoutIds.size()) + ")", layoutIds.toArray(),
-                new ResultSetExtractor<TLongObjectHashMap<List<LayoutTitle>>>() {
-                    @Override
-                    public TLongObjectHashMap<List<LayoutTitle>> extractData(ResultSet rs) throws SQLException, DataAccessException {
-                        TLongObjectHashMap<List<LayoutTitle>> map = new TLongObjectHashMap<>(layoutIds.size());
-                        while (rs.next()) {
-                            LayoutTitle title = layoutTitleRowMapper.mapRow(rs, 0);
-                            List<LayoutTitle> titles = map.get(title.getLayoutId());
-                            if (titles == null) {
-                                titles = new ArrayList<>();
-                                map.put(title.getLayoutId(), titles);
-                            }
-                            titles.add(title);
-                        }
-                        return map;
-                    }
-                });
+                new LoadLayoutTitlesResultSetExtractor(layoutIds.size()));
+    }
+
+    private static class LoadLayoutTitlesResultSetExtractor implements ResultSetExtractor<TLongObjectHashMap<List<LayoutTitle>>> {
+        private final int resultSize;
+
+        public LoadLayoutTitlesResultSetExtractor(int resultSize) {
+            this.resultSize = resultSize;
+        }
+
+        @Override
+        public TLongObjectHashMap<List<LayoutTitle>> extractData(ResultSet rs) throws SQLException, DataAccessException {
+            TLongObjectHashMap<List<LayoutTitle>> map = new TLongObjectHashMap<>(resultSize);
+            while (rs.next()) {
+                mapRow(map, rs);
+            }
+            return map;
+        }
+
+        private void mapRow(TLongObjectHashMap<List<LayoutTitle>> map, ResultSet rs) throws SQLException {
+            LayoutTitle title = layoutTitleRowMapper.mapRow(rs, 0);
+            List<LayoutTitle> titles = map.get(title.getLayoutId());
+            if (titles == null) {
+                titles = new ArrayList<>();
+                map.put(title.getLayoutId(), titles);
+            }
+            titles.add(title);
+        }
     }
 
     public Layout loadLayout(long layoutId) {
