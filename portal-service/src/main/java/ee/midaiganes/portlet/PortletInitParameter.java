@@ -1,7 +1,6 @@
 package ee.midaiganes.portlet;
 
 import java.io.Serializable;
-import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
@@ -31,7 +30,7 @@ public class PortletInitParameter implements Serializable {
         return value;
     }
 
-    public List<Description> getDescription() {
+    public ImmutableList<Description> getDescription() {
         return description;
     }
 
